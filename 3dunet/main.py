@@ -5,42 +5,49 @@ import yaml
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torchvision import transforms
 
 # ProteinLigandDataset ve Transform'ları import et
 from dataset import ProteinLigandDataset
+from losses import BCEDiceLoss
 from model import UNet3D  # Modeli import et
-from transforms import RandomFlipAndRotate3D, Standardize, BCEDiceLoss
+from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 
 # PyYAML ile YAML dosyasını oku
-with open("config.yml", "r") as file:
+with open("config/config.yml", "r") as file:
     config = yaml.safe_load(file)
 
 data_directory = config["data_directory"]
+cache_directory = config["cache_directory"]
 train_proteins = config["datasets"]["train"]
 validation_proteins = config["datasets"]["validation"]
 test_proteins = config["datasets"]["test"]
 
 # Veri setlerini oluştur
 train_dataset = ProteinLigandDataset(
-    root_dir=data_directory, protein_names=train_proteins, transform=transforms.Compose([RandomFlipAndRotate3D(), Standardize()])
+    root_dir=data_directory, cache_dir=cache_directory,
+    protein_names=train_proteins,
+    transform=CustomCompose([RandomFlip(), RandomRotate3D(), Standardize()])
 )
 validation_dataset = ProteinLigandDataset(
-    root_dir=data_directory, protein_names=validation_proteins, transform=transforms.Compose([Standardize()])
+    root_dir=data_directory, cache_dir=cache_directory,
+    protein_names=validation_proteins,
+    transform=CustomCompose([Standardize()])
 )
 test_dataset = ProteinLigandDataset(
-    root_dir=data_directory, protein_names=test_proteins, transform=transforms.Compose([Standardize()])
+    root_dir=data_directory, cache_dir=cache_directory,
+    protein_names=test_proteins,
+    transform=CustomCompose([Standardize()])
 )
 
 # DataLoader'ları oluştur
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-validation_loader = DataLoader(validation_dataset, batch_size=4, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0)
+validation_loader = DataLoader(validation_dataset, batch_size=4, shuffle=False, num_workers=0)
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=0)
 
 # Model, kayıp fonksiyonu, optimizer ve scheduler tanımlamaları
 device = torch.device("mps" if torch.backends.mps.is_built() else "cuda" if torch.cuda.is_available() else "cpu")
 model = UNet3D().to(device)
-criterion = BCEDiceLoss()
+criterion = BCEDiceLoss(1., 1.)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.2, patience=15)
 
@@ -71,6 +78,7 @@ for epoch in range(num_epochs):
         all_targets.extend(targets.flatten())
         all_predictions.extend(output_preds.flatten())
 
+        res = np.argmax(targets)
         # Benzersiz değerleri kontrol et
         unique_targets = np.unique(all_targets)
         unique_predictions = np.unique(all_predictions)
