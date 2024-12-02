@@ -5,6 +5,7 @@ import yaml
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from torchinfo import summary
 
 # ProteinLigandDataset ve Transform'ları import et
 from dataset import ProteinLigandDataset
@@ -47,6 +48,7 @@ test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=
 # Model, kayıp fonksiyonu, optimizer ve scheduler tanımlamaları
 device = torch.device("mps" if torch.backends.mps.is_built() else "cuda" if torch.cuda.is_available() else "cpu")
 model = UNet3D().to(device)
+summary(model)
 criterion = BCEDiceLoss(1., 1.)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.2, patience=15)
@@ -73,7 +75,7 @@ for epoch in range(num_epochs):
 
         # F1 skorunu hesapla
         output_probs = torch.sigmoid(output).detach().cpu().numpy()
-        output_preds = (output_probs > 0.5).astype(np.uint8)
+        output_preds = (output_probs > 0.3).astype(np.uint8)
         targets = ligand.cpu().numpy().astype(np.uint8)
         all_targets.extend(targets.flatten())
         all_predictions.extend(output_preds.flatten())

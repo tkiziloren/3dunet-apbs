@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Tuple, List
 
 import h5py
 import numpy as np
@@ -10,6 +11,7 @@ from torch.utils.data import Dataset
 
 # Logging yapılandırması
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 VDW_RADII = {
     'H': 1.2,  # Hidrojen
     'C': 1.7,  # Karbon
@@ -67,36 +69,55 @@ class ProteinLigandDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
+    def read_h5_file(self, h5_filepath):
+        with h5py.File(h5_filepath, 'r') as h5_file:
+            protein_grid = h5_file["protein"][:]
+            pocket_label = h5_file["pocket"][:]
+            coords_array = h5_file["coords"][:]
+            elements_array = h5_file["elements"][:]
+
+        # Veri doğrulama
+        assert protein_grid.shape == (161, 161, 161), f"Unexpected protein grid shape: {protein_grid.shape}"
+        assert pocket_label.shape == (161, 161, 161), f"Unexpected pocket label shape: {pocket_label.shape}"
+        assert coords_array.shape[1] == 3, f"Unexpected coords shape: {coords_array.shape}"
+
+        # Coord ve elementleri birleştir
+        coords = [
+            (coord, element.decode('utf-8') if isinstance(element, bytes) else element)
+            for coord, element in zip(coords_array, elements_array)
+        ]
+
+        # Tensor'lara dönüştür
+        protein_grid = torch.tensor(protein_grid, dtype=torch.float32)
+        pocket_label = torch.tensor(pocket_label, dtype=torch.float32)
+        return protein_grid, pocket_label, coords
+
     def __getitem__(self, idx):
         protein_name, h5_filepath = self.samples[idx]
-
-        # Eğer h5 dosyası yoksa dosyayı oluştur ve protein ile pocket verilerini kaydet
         if not os.path.exists(h5_filepath):
             logging.info(f"H5 file for {protein_name} not found. Creating new file.")
             protein_path = os.path.join(self.root_dir, protein_name, f"{protein_name}_protein.pdb")
             pocket_path = os.path.join(self.root_dir, protein_name, f"{protein_name}_pocket.pdb")
 
-            protein_grid = self.pdb_to_grid(protein_path).astype(np.float32)
-            pocket_label = self.pdb_to_grid(pocket_path).astype(np.float32)
+            protein_grid, coords = self.pdb_to_grid(protein_path)
+            pocket_label, _ = self.pdb_to_grid(pocket_path)
 
-            # H5 dosyasını oluştur ve veriyi kaydet
+            coords_array = np.array([coord.tolist() for coord, _ in coords], dtype=np.float32)
+            elements_array = np.array([element for _, element in coords], dtype=h5py.string_dtype(encoding='utf-8'))
+
             with h5py.File(h5_filepath, 'w') as h5_file:
-                h5_file.create_dataset("protein", data=protein_grid)
-                h5_file.create_dataset("pocket", data=pocket_label)
+                h5_file.create_dataset("protein", data=protein_grid.astype(np.float32), dtype=np.float32)
+                h5_file.create_dataset("pocket", data=pocket_label.astype(np.float32), dtype=np.float32)
+                h5_file.create_dataset("coords", data=coords_array, dtype=np.float32)
+                h5_file.create_dataset("elements", data=elements_array)
         else:
-            # H5 dosyasını açarak protein ve pocket grid verilerini oku
-            with h5py.File(h5_filepath, "r") as h5_file:
-                protein_grid = torch.tensor(h5_file["protein"][:], dtype=torch.float32)
-                pocket_label = torch.tensor(h5_file["pocket"][:], dtype=torch.float32)
+            protein_grid, pocket_label, coords = self.read_h5_file(h5_filepath)
 
-        # Shape bilgisi al
-        shape_info = self.generate_shape_info(protein_grid)
+        shape_info = self.generate_shape_info(protein_grid, coords)
 
-        # Dönüşüm varsa, protein grid'i ve pocket label'a aynı anda uygula
         if self.transform:
             protein_grid, pocket_label = self.transform(protein_grid, pocket_label)
 
-        # Protein input'u oluştur (protein grid ve shape bilgisi)
         protein_input = torch.stack([protein_grid, shape_info], dim=0)
 
         return protein_input, pocket_label
@@ -104,47 +125,41 @@ class ProteinLigandDataset(Dataset):
     def pdb_to_grid(self, pdb_path):
         parser = PDBParser(QUIET=True)
         structure = parser.get_structure('', pdb_path)
-        coords = [atom.get_coord() for atom in structure.get_atoms() if atom.element != 'H']
+        coords = [(np.array(atom.get_coord()), atom.element) for atom in structure.get_atoms() if atom.element != 'H']
 
-        # 3D grid oluştur ve başlangıçta tüm voxelleri 0 olarak ayarla
         grid = np.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=np.uint8)
         center = np.array([self.grid_size // 2] * 3)
 
-        # Atom koordinatlarını grid üzerine yerleştir
-        for coord in coords:
+        for coord, element in coords:
             grid_coord = np.floor(center + np.array(coord) / self.voxel_size).astype(int)
             if (grid_coord >= 0).all() and (grid_coord < self.grid_size).all():
                 grid[tuple(grid_coord)] = 1
 
-        return grid
+        return grid, coords
 
-    def generate_shape_info(protein_grid, coords, grid_size=161, voxel_size=1.0):
-        """
-        Proteinin atom büyüklüğüne dayalı iskelet yapısını çıkarır.
+    def generate_shape_info(self, protein_grid, coords: List[Tuple[np.ndarray, str]]):
+        if isinstance(protein_grid, torch.Tensor):
+            protein_grid = protein_grid.numpy()
 
-        Args:
-            protein_grid (np.ndarray): Proteinin yoğunluk haritasını temsil eden 3D grid.
-            coords (list): Her bir atomun koordinatı ve elementi (atom büyüklüğü).
-
-        Returns:
-            shape_info (np.ndarray): İskelet yapıyı temsil eden 3D grid.
-        """
         shape_info = np.zeros_like(protein_grid, dtype=np.float32)
-        center = np.array([grid_size // 2] * 3)
+        center = np.array([self.grid_size // 2] * 3)
 
         for coord, element in coords:
-            # Atomun vdW yarıçapını belirle
-            radius = VDW_RADII.get(element, 1.5)  # Bilinmeyen elementler için varsayılan yarıçap
-            radius_in_voxels = int(np.ceil(radius / voxel_size))
+            radius = VDW_RADII.get(element, 1.5)
+            radius_in_voxels = int(np.ceil(radius / self.voxel_size))
 
-            # Atomun merkezini grid üzerinde hesapla
-            grid_coord = np.floor(center + np.array(coord) / voxel_size).astype(int)
+            x, y, z = np.ogrid[-radius_in_voxels:radius_in_voxels + 1,
+                      -radius_in_voxels:radius_in_voxels + 1,
+                      -radius_in_voxels:radius_in_voxels + 1]
+            mask = x ** 2 + y ** 2 + z ** 2 <= radius_in_voxels ** 2
 
-            # Atom etrafında vdW yarıçapına göre voxelleri işaretle
-            for x in range(-radius_in_voxels, radius_in_voxels + 1):
-                for y in range(-radius_in_voxels, radius_in_voxels + 1):
-                    for z in range(-radius_in_voxels, radius_in_voxels + 1):
-                        if np.linalg.norm([x, y, z]) <= radius_in_voxels:
-                            neighbor = grid_coord + np.array([x, y, z])
-                            if (neighbor >= 0).all() and (neighbor < grid_size).all():
-                                shape_info[tuple(neighbor)] = 1.0
+            grid_coord = np.floor(center + np.array(coord) / self.voxel_size).astype(int)
+
+            for dx, dy, dz in zip(*np.where(mask)):
+                neighbor = grid_coord + np.array([dx - radius_in_voxels,
+                                                  dy - radius_in_voxels,
+                                                  dz - radius_in_voxels])
+                if (neighbor >= 0).all() and (neighbor < self.grid_size).all():
+                    shape_info[tuple(neighbor)] = 1.0
+
+        return torch.tensor(shape_info, dtype=torch.float32)
