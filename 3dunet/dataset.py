@@ -1,13 +1,14 @@
 import logging
 import os
 from typing import Tuple, List
-
+import prody as pr
 import h5py
 import numpy as np
 import torch
 import yaml
 from Bio.PDB import PDBParser
 from torch.utils.data import Dataset
+from potsim2 import PotGrid
 
 # Logging yapılandırması
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,6 +39,115 @@ def load_config(config_path="config.yaml"):
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
     return config
+
+
+class ProteinLigandDatasetWithH5(Dataset):
+    def __init__(self, h5_dir, protein_names, transform=None, grid_size=161, voxel_size=1.0):
+        self.h5_dir = h5_dir
+        self.protein_names = protein_names
+        self.transform = transform
+        self.grid_size = grid_size
+        self.voxel_size = voxel_size
+        self.samples = self._load_samples()
+        print("Loaded {} samples".format(len(self.samples)))
+        self.cache = {}  # Cache başlangıçta boş
+
+        # Cache'i doldur ve eksik dosyaları oluştur
+        for protein_name, protein_folder in self.samples:
+            h5_filepath = os.path.join(protein_folder, protein_name + '_cache_grids.h5')
+
+            if not os.path.exists(h5_filepath):
+                # Eğer dosya yoksa oluştur
+                self._create_cache(protein_name, protein_folder, h5_filepath)
+
+            # Cache'i yükle
+            with h5py.File(h5_filepath, 'r') as h5_file:
+                self.cache[protein_name] = {
+                    "electro_static_grid": h5_file["electro_static_grid"][:],
+                    "pocket_label": h5_file["pocket_label"][:],
+                    "shape_info": h5_file["shape_info"][:]
+                }
+
+        print("Loaded {} samples to the cache".format(len(self.samples)))
+
+    def _load_samples(self):
+        samples = []
+        for protein_name in self.protein_names:
+            protein_folder = os.path.join(self.h5_dir, protein_name)
+            samples.append((protein_name, protein_folder))
+
+            if not os.path.exists(protein_folder):
+                logging.info(f"H5 file for {protein_name} not found.")
+                raise FileNotFoundError(f"Protein directory {protein_folder} not found.")
+
+            h5_filepath = os.path.join(protein_folder, protein_name + '_cache_grids.h5')
+
+            # Eğer önbellek dosyası yoksa oluştur
+            if not os.path.exists(h5_filepath):
+                self._create_cache(protein_name, protein_folder, h5_filepath)
+
+        return samples
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        protein_name, _ = self.samples[idx]  # Sadece protein adını alıyoruz çünkü cache'i kullanacağız
+
+        # Cache'ten veriyi al
+        cached_data = self.cache[protein_name]
+        electro_static_grid = torch.tensor(cached_data["electro_static_grid"], dtype=torch.float32).clone().detach()
+        pocket_label = torch.tensor(cached_data["pocket_label"], dtype=torch.float32).clone().detach()
+        shape_info = torch.tensor(cached_data["shape_info"], dtype=torch.float32).clone().detach()
+
+        # Eğer transform varsa uygula
+        if self.transform:
+            electro_static_grid, pocket_label = self.transform(electro_static_grid, pocket_label)
+
+        # Model girişini oluştur
+        protein_input = torch.stack([electro_static_grid, shape_info], dim=0)
+
+        return protein_input, pocket_label
+
+    def _create_cache(self, protein_name, protein_dir, h5_filepath):
+        logging.info(f"Creating cache for {protein_name} at {h5_filepath}")
+
+        # Protein ve PotGrid dosyalarını okuyun
+        protein_file_path_prefix = os.path.join(protein_dir, protein_name)
+        protein_file_path = protein_file_path_prefix + '.pdb'
+        structure = pr.parsePDB(protein_file_path)
+
+        potgrid = PotGrid(protein_file_path_prefix + "_selected.pdb", protein_file_path_prefix + "_grid.dx.gz")
+
+        # Electrostatic grid ve pocket label'i okuyun
+        grids_h5_path = os.path.join(protein_dir, protein_name + '_grids.h5')
+        with h5py.File(grids_h5_path, 'r', swmr=True) as grids_h5:
+            electro_static_grid = grids_h5["raw"][:]
+            pocket_label = grids_h5["label"][:]
+
+        # `shape_info` oluştur
+        shape_info = self._get_shape_info(structure, potgrid)
+
+        # H5 dosyasına kaydet
+        with h5py.File(h5_filepath, 'w', swmr=True) as h5_file:
+            h5_file.create_dataset("electro_static_grid", data=electro_static_grid, dtype=np.float32)
+            h5_file.create_dataset("pocket_label", data=pocket_label, dtype=np.float32)
+            h5_file.create_dataset("shape_info", data=shape_info, dtype=np.float32)
+
+        logging.info(f"Cache created for {protein_name}.")
+
+    def _get_shape_info(self, structure, grids):
+        retgrid = np.zeros(shape=grids.grid.shape, dtype=np.float32)
+
+        for i, coord in enumerate(structure.getCoords()):
+            x, y, z = coord
+            binx = int((x - min(grids.edges[0])) / grids.delta[0])
+            biny = int((y - min(grids.edges[1])) / grids.delta[1])
+            binz = int((z - min(grids.edges[2])) / grids.delta[2])
+
+            if binx < grids.grid.shape[0] and biny < grids.grid.shape[1] and binz < grids.grid.shape[2]:
+                retgrid[binx, biny, binz] = 1
+        return retgrid
 
 
 class ProteinLigandDataset(Dataset):
@@ -100,7 +210,6 @@ class ProteinLigandDataset(Dataset):
             pocket_path = os.path.join(self.root_dir, protein_name, f"{protein_name}_pocket.pdb")
 
             protein_grid, coords = self.pdb_to_grid(protein_path)
-            pocket_label, _ = self.pdb_to_grid(pocket_path)
 
             coords_array = np.array([coord.tolist() for coord, _ in coords], dtype=np.float32)
             elements_array = np.array([element for _, element in coords], dtype=h5py.string_dtype(encoding='utf-8'))

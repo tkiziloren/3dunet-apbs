@@ -6,3 +6,4 @@ biopython
 tensorboard
 pyyaml
 h5py
+prody

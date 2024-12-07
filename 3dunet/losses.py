@@ -79,7 +79,7 @@ class DiceLoss(_AbstractDiceLoss):
         return compute_per_channel_dice(input, target, weight=self.weight)
 
 
-class BCEDiceLoss(nn.Module):
+class BCEDiceLoss2(nn.Module):
     def __init__(self, alpha=0.5, smooth=1.0):
         """
         alpha: Dice loss için ağırlıklandırma faktörü, 0 ile 1 arasında.
@@ -112,6 +112,43 @@ class BCEDiceLoss(nn.Module):
         total_loss = bce_loss + self.alpha * dice_loss
         return total_loss
 
+
+class BCEDiceLoss(nn.Module):
+    def __init__(self, alpha=0.5, smooth=1.0, pos_weight=None):
+        """
+        alpha: Dice loss için ağırlıklandırma faktörü, 0 ile 1 arasında.
+        smooth: Dice loss hesabında sıfır bölmeye karşı bir sabit ekleme.
+        pos_weight: BCE kaybı için pozitif sınıf ağırlığı (class imbalance için kullanılır).
+        """
+        super(BCEDiceLoss, self).__init__()
+        self.alpha = alpha
+        self.smooth = smooth
+        self.pos_weight = pos_weight
+
+    def forward(self, inputs, targets):
+        # Giriş ve hedef tensörlerin veri tiplerini float32'ye dönüştür
+        inputs = inputs.to(torch.float32)
+        targets = targets.to(torch.float32)
+
+        # Binary Cross Entropy Loss hesapla
+        bce_loss = nn.functional.binary_cross_entropy_with_logits(
+            inputs, targets, pos_weight=self.pos_weight
+        )
+
+        # Sigmoid dönüşümü uygula
+        inputs = torch.sigmoid(inputs)
+
+        # Flatten the tensors
+        inputs_flat = flatten(inputs)
+        targets_flat = flatten(targets)
+
+        # Dice Loss hesapla
+        intersection = (inputs_flat * targets_flat).sum()
+        dice_loss = 1 - (2. * intersection + self.smooth) / (inputs_flat.sum() + targets_flat.sum() + self.smooth)
+
+        # Toplam kaybı döndür (BCE + alpha * Dice)
+        total_loss = bce_loss + self.alpha * dice_loss
+        return total_loss
 
 
 class BCEDiceLoss1(nn.Module):

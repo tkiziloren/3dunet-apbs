@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -14,7 +15,18 @@ GRID_SIZE = 161
 VOXEL_SIZE = 1.0
 
 
-def load_config(config_path="config.yaml"):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generate cache files for proteins.")
+    parser.add_argument(
+        "--config", type=str, default="./config/config.yml", help="Path to the config file"
+    )
+    parser.add_argument(
+        "--cache", type=str, default=None, help="Path to the cache directory"
+    )
+    return parser.parse_args()
+
+
+def load_config(config_path):
     with open(config_path, 'r') as file:
         return yaml.safe_load(file)
 
@@ -81,9 +93,13 @@ def generate_cache_for_proteins(protein_names, root_dir, cache_dir, max_workers=
 
 
 if __name__ == "__main__":
-    config = load_config("./config/config.yml")
+    args = parse_args()
+    config = load_config(args.config)
+
+    # Cache dizinini komut satırı argümanı üzerinden veya config'ten al
+    cache_dir = args.cache if args.cache else config.get("cache_directory", "./cache")
     data_dir = config.get("data_directory", "./data")
-    cache_dir = config.get("cache_directory", "./cache")
+
     logging.info(f"Data directory: {data_dir}")
     logging.info(f"Cache directory: {cache_dir}")
 
