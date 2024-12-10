@@ -7,3 +7,4 @@ tensorboard
 pyyaml
 h5py
 prody
+potsim==0.3.2

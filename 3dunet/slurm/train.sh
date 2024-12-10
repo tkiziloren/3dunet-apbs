@@ -2,7 +2,7 @@
 #SBATCH --job-name=3d-unet
 #SBATCH --output=logs/%x_%j.log
 #SBATCH --error=logs/%x_%j.err
-#SBATCH --gres=gpu:v100:1
+#SBATCH --gres=gpu:v100:4
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
