@@ -50,25 +50,8 @@ class ProteinLigandDatasetWithH5(Dataset):
         self.voxel_size = voxel_size
         self.samples = self._load_samples()
         print("Loaded {} samples".format(len(self.samples)))
-        self.cache = {}  # Cache başlangıçta boş
 
-        # Cache'i doldur ve eksik dosyaları oluştur
-        for protein_name, protein_folder in self.samples:
-            h5_filepath = os.path.join(protein_folder, protein_name + '_cache_grids.h5')
 
-            if not os.path.exists(h5_filepath):
-                # Eğer dosya yoksa oluştur
-                self._create_cache(protein_name, protein_folder, h5_filepath)
-
-            # Cache'i yükle
-            with h5py.File(h5_filepath, 'r') as h5_file:
-                self.cache[protein_name] = {
-                    "electro_static_grid": h5_file["electro_static_grid"][:],
-                    "pocket_label": h5_file["pocket_label"][:],
-                    "shape_info": h5_file["shape_info"][:]
-                }
-
-        print("Loaded {} samples to the cache".format(len(self.samples)))
 
     def _load_samples(self):
         samples = []
@@ -91,14 +74,31 @@ class ProteinLigandDatasetWithH5(Dataset):
     def __len__(self):
         return len(self.samples)
 
+    def __read_from_cache_file(self, protein_name):
+            protein_folder = os.path.join(self.h5_dir, protein_name)
+            h5_filepath = os.path.join(protein_folder, protein_name + '_cache_grids.h5')
+
+            if not os.path.exists(h5_filepath):
+                # Eğer dosya yoksa oluştur
+                self._create_cache(protein_name, protein_folder, h5_filepath)
+
+            # Cache'i yükle
+            with h5py.File(h5_filepath, 'r') as h5_file:
+                return {
+                    "electro_static_grid": h5_file["electro_static_grid"][:],
+                    "pocket_label": h5_file["pocket_label"][:],
+                    "shape_info": h5_file["shape_info"][:]
+                }
+
     def __getitem__(self, idx):
         protein_name, _ = self.samples[idx]  # Sadece protein adını alıyoruz çünkü cache'i kullanacağız
 
         # Cache'ten veriyi al
-        cached_data = self.cache[protein_name]
-        electro_static_grid = torch.tensor(cached_data["electro_static_grid"], dtype=torch.float32).clone().detach()
-        pocket_label = torch.tensor(cached_data["pocket_label"], dtype=torch.float32).clone().detach()
-        shape_info = torch.tensor(cached_data["shape_info"], dtype=torch.float32).clone().detach()
+        cached_data = self.__read_from_cache_file(protein_name)
+
+        electro_static_grid = torch.tensor(cached_data["electro_static_grid"], dtype=torch.float32)
+        pocket_label = torch.tensor(cached_data["pocket_label"], dtype=torch.float32)
+        shape_info = torch.tensor(cached_data["shape_info"], dtype=torch.float32)
 
         # Eğer transform varsa uygula
         if self.transform:
@@ -216,7 +216,7 @@ class ProteinLigandDataset(Dataset):
 
             with h5py.File(h5_filepath, 'w') as h5_file:
                 h5_file.create_dataset("protein", data=protein_grid.astype(np.float32), dtype=np.float32)
-                h5_file.create_dataset("pocket", data=pocket_label.astype(np.float32), dtype=np.float32)
+                h5_file.create_dataset("pocket", data= pocket_label.astype(np.float32), dtype=np.float32)
                 h5_file.create_dataset("coords", data=coords_array, dtype=np.float32)
                 h5_file.create_dataset("elements", data=elements_array)
         else:
