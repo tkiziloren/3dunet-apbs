@@ -15,12 +15,16 @@ from losses import BCEDiceLoss
 from model import UNet3D
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 
+num_cpus = os.environ.get("SLURM_CPUS_PER_TASK")
+print(f"CPUS_PER_TASK {num_cpus}")
+if not num_cpus:
+    num_cpus = 15
 
 # Argümanları al
 def parse_args():
     parser = argparse.ArgumentParser(description="3D U-Net Training Script")
     parser.add_argument(
-        "--config", type=str, default="config/config.yml", help="Path to the config file"
+        "--config", type=str, default="config/local/config.yml", help="Path to the config file"
     )
     return parser.parse_args()
 
