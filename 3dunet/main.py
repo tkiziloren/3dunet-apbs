@@ -15,9 +15,11 @@ from losses import BCEDiceLoss
 from model import UNet3D
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 
-num_cpus = os.environ.get("SLURM_CPUS_PER_TASK")
-print(f"CPUS_PER_TASK {num_cpus}")
-if not num_cpus:
+num_cpus_str = os.environ.get("SLURM_CPUS_PER_TASK")
+print(f"CPUS_PER_TASK {num_cpus_str}")
+if num_cpus_str is not None:
+    num_cpus = int(num_cpus_str)
+else:
     num_cpus = 15
 
 # Argümanları al
