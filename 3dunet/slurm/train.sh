@@ -2,7 +2,6 @@
 #SBATCH --job-name=pdb-training        # İş ismi
 #SBATCH --output=logs/%x_%j.log        # Çıkış dosyası (logs dizinine kaydeder)
 #SBATCH --error=logs/%x_%j.err         # Hata dosyası
-#SBATCH --partition=gpu                # GPU için uygun partition
 #SBATCH --nodes=1                      # 1 node kullan
 #SBATCH --gres=gpu:4                   # 4 GPU tahsis et
 #SBATCH --ntasks=1                     # Tek görev
@@ -11,6 +10,7 @@
 #SBATCH --time=7-00:00:00
 #SBATCH --mail-type=ALL                # Job bitiş ve hata durumlarında mail gönder
 #SBATCH --mail-user=tevfik             # Mail adresiniz
+#SBATCH --partition=datamover
 
 # Modül yükleme (gerekiyorsa)
 module load python/3.10.10
