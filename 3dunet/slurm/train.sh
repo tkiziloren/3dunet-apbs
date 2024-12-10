@@ -19,4 +19,4 @@ module load python/3.10.10               # Örnek bir Python modülü, cluster'a
 source ~/PHD/3dunet-apbs/venv/bin/activate
 
 # Ana kodu çalıştırma
-python main.py --config config/codon.pdbbind.yml
+python main.py --config config/codon/pdbbind.yml
