@@ -70,9 +70,9 @@ if __name__ == "__main__":
     )
 
     # DataLoader'ları oluştur
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=8)
-    validation_loader = DataLoader(validation_dataset, batch_size=16, shuffle=False, num_workers=8)
-    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=8)
+    validation_loader = DataLoader(validation_dataset, batch_size=4, shuffle=False, num_workers=8)
+    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=8)
 
     # Cihaz seçimi
     device = torch.device("mps" if torch.backends.mps.is_built() else "cuda" if torch.cuda.is_available() else "cpu")
