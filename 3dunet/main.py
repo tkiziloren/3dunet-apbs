@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
             # F1 skorunu hesapla
             output_probs = torch.sigmoid(output).detach().cpu().numpy()
-            output_preds = (output_probs > 0.4).astype(np.uint8)
+            output_preds = (output_probs > 0.5).astype(np.uint8)
             targets = ligand.cpu().numpy().astype(np.uint8)
             all_targets.extend(targets.flatten())
             all_predictions.extend(output_preds.flatten())
