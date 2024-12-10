@@ -13,10 +13,12 @@
 #SBATCH --mail-user=tevfik             # Mail adresiniz
 
 # Modül yükleme (gerekiyorsa)
-module load python/3.10.10               # Örnek bir Python modülü, cluster'a bağlı olarak değişebilir
+module load python/3.10.10
 
 # Sanal ortamı aktif etme
 source ~/PHD/3dunet-apbs/venv/bin/activate
 
-# Ana kodu çalıştırma
+cd ../
+
+export PYTHONUNBUFFERED=1 PYTORCH_ENABLE_MPS_FALLBACK=1
 python main.py --config config/codon/pdbbind.yml
