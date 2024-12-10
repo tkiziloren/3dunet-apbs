@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=3d-unet
-#SBATCH --output=logs/%x_%j.log
-#SBATCH --error=logs/%x_%j.err
+#SBATCH --output=~/PHD/3dunet-apbs/slurm_run_logs/%x_%j.log
+#SBATCH --error=~/PHD/3dunet-apbs/slurm_run_logs/%x_%j.err
 #SBATCH --gres=gpu:v100:4
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
 #SBATCH --time=7-00:00:00
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=all
 #SBATCH --mail-user=tevfik
 
 # Modül yükleme (gerekiyorsa)
