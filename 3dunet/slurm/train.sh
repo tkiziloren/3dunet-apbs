@@ -5,11 +5,10 @@
 #SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --time=7-00:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=tevfik
-#SBATCH --partition=datamover
 
 # Modül yükleme (gerekiyorsa)
 module load python/3.10.10
