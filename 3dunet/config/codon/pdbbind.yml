@@ -1,6 +1,6 @@
 #data_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
-h5_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
+h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 num_epochs: 200
 datasets:
   test:
