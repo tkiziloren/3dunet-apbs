@@ -1,6 +1,7 @@
 data_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/"
 cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
 h5_directory: "/Users/tevfik/Sandbox/DATA/pdbbind-limited/"
+num_epochs: 200
 datasets:
   test:
     - 1a1e

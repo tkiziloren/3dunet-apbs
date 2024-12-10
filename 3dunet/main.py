@@ -33,36 +33,18 @@ def load_config(config_path):
         return yaml.safe_load(file)
 
 
-# Ana kod
 if __name__ == "__main__":
     # Argümanları al ve config'i yükle
     args = parse_args()
     config = load_config(args.config)
 
     # Config'ten değerleri yükle
-    data_directory = config["data_directory"]
-    cache_directory = config["cache_directory"]
+    # data_directory = config["data_directory"]
+    # cache_directory = config["cache_directory"]
     train_proteins = config["datasets"]["train"]
-    validation_proteins = config["datasets"]["validation"]
+    validation_proteins = config["datasets"].get("validation") or config["datasets"].get("val")
     test_proteins = config["datasets"]["test"]
     h5_directory = config["h5_directory"]
-
-    # # Dataset'leri oluştur
-    # train_dataset = ProteinLigandDataset(
-    #     root_dir=data_directory, cache_dir=cache_directory,
-    #     protein_names=train_proteins,
-    #     transform=CustomCompose([RandomFlip(), RandomRotate3D(), Standardize()])
-    # )
-    # validation_dataset = ProteinLigandDataset(
-    #     root_dir=data_directory, cache_dir=cache_directory,
-    #     protein_names=validation_proteins,
-    #     transform=CustomCompose([Standardize()])
-    # )
-    # test_dataset = ProteinLigandDataset(
-    #     root_dir=data_directory, cache_dir=cache_directory,
-    #     protein_names=test_proteins,
-    #     transform=CustomCompose([Standardize()])
-    # )
 
     # Dataset'leri oluştur
     train_dataset = ProteinLigandDatasetWithH5(
@@ -81,15 +63,12 @@ if __name__ == "__main__":
         transform=CustomCompose([Standardize()])
     )
 
-    # CPU çekirdek sayısını belirle
-    cpu_count = os.cpu_count()
-
     # DataLoader'ları oluştur
     train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=os.cpu_count() - 1)
     validation_loader = DataLoader(validation_dataset, batch_size=4, shuffle=False, num_workers=os.cpu_count() - 1)
     test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=os.cpu_count() - 1)
 
-    # Model, kayıp fonksiyonu, optimizer ve scheduler tanımlamaları
+    # Cihaz seçimi
     device = torch.device("mps" if torch.backends.mps.is_built() else "cuda" if torch.cuda.is_available() else "cpu")
     model = UNet3D()
 
@@ -99,9 +78,6 @@ if __name__ == "__main__":
         model = torch.nn.DataParallel(model)
     model.to(device)
 
-    # Model özetini göster
-   # summary(model, input_size=(4, 2, 161, 161, 161))  # Batch size, channels, depth, height, width
-
     pos_weight = torch.tensor([10.0]).to(device)
     criterion = BCEDiceLoss(alpha=0.5, smooth=1.0, pos_weight=pos_weight)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -110,9 +86,13 @@ if __name__ == "__main__":
     # TensorBoard'u başlat
     writer = SummaryWriter("runs/3d_unet_experiment")
 
-    # Eğitim döngüsü
+    # Eğitim parametreleri
     num_epochs = config.get("num_epochs", 100)
     print("Starting training...")
+
+    # En iyi model takibi için değişken
+    best_val_f1 = 0.0
+
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0
@@ -139,7 +119,7 @@ if __name__ == "__main__":
         train_f1 = f1_score(all_targets, all_predictions, average='binary')
         print(f"Training Loss: {total_loss / len(train_loader)}, Training F1 Score: {train_f1:.4f}")
 
-        # Validation modu
+        # Validation
         model.eval()
         validation_loss = 0
         val_targets, val_predictions = [], []
@@ -153,7 +133,6 @@ if __name__ == "__main__":
                 loss = criterion(output, ligand)
                 validation_loss += loss.item()
 
-                # F1 skoru için verileri topla
                 output_probs = torch.sigmoid(output).detach().cpu().numpy()
                 output_preds = (output_probs > 0.4).astype(np.uint8)
                 targets = ligand.cpu().numpy().astype(np.uint8)
@@ -172,7 +151,27 @@ if __name__ == "__main__":
         writer.add_scalar("F1/Train", train_f1, epoch)
         writer.add_scalar("F1/Validation", val_f1, epoch)
 
-        # scheduler.step(total_loss / len(train_loader))
+        best_val_f1 = 0
+        best_train_f1 = 0
+        # En iyi model kontrolü
+        if val_f1 > best_val_f1:
+            best_val_f1 = val_f1
+            # DataParallel ise model.module ile state_dict al
+            best_model_state = model.module.state_dict() if hasattr(model, 'module') else model.state_dict()
+            torch.save(best_model_state, 'best_model_in_terms_of_val_f1.pth')
+            print(f"New best model saved with Validation F1: {best_val_f1:.4f}")
+
+        if train_f1 > best_train_f1:
+            best_train_f1 = train_f1
+            # DataParallel ise model.module ile state_dict al
+            best_model_state = model.module.state_dict() if hasattr(model, 'module') else model.state_dict()
+            torch.save(best_model_state, 'best_model_in_terms_of_train_f1.pth')
+            print(f"New best model saved with Validation F1: {best_val_f1:.4f}")
+
+    # Eğitim tamamlandığında son modeli kaydet
+    last_model_state = model.module.state_dict() if hasattr(model, 'module') else model.state_dict()
+    torch.save(last_model_state, 'last_model.pth')
+    print("Son model kaydedildi: last_model.pth")
 
     # TensorBoard'u kapat
     writer.close()
