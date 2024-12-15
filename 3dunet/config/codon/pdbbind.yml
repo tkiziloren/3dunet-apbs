@@ -19,7 +19,7 @@ training:
     smooth: 1.0
     pos_weight: 10.0
 validation:
-  batch_size: 2
+  batch_size: 1
 datasets:
   test:
     - 3s0e
