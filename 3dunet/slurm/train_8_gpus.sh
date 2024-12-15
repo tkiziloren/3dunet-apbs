@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=3d-unet
-#SBATCH --gres=gpu:v100:1
+#SBATCH --gres=gpu:v100:8
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=128G
 #SBATCH --time=7-00:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=tevfik
