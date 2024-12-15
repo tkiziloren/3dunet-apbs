@@ -4,7 +4,7 @@ name: lr_0001
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 training:
   early_stopping_patience: 10
-  num_epochs: 200
+  num_epochs: 100
   batch_size: 4
   learning_rate: 0.0001
   weight_decay: 0.0001
