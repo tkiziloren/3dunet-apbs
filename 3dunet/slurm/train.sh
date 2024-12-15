@@ -31,4 +31,5 @@ sbatch --job-name=3d-unet \
        --error="${STDERR_LOG}" \
        --wrap="module load python/3.10.10 && \
                source ~/PHD/3dunet-apbs/venv/bin/activate && \
+               cd ~/PHD/3dunet-apbs/3dunet && \
                python main.py --config ${CONFIG_PATH}"
