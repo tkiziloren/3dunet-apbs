@@ -27,9 +27,10 @@ if __name__ == "__main__":
     config = load_config(config_path)
     config_dir, config_file = os.path.split(config_path)
     config_name, _ = os.path.splitext(config_file)  # "codon/pdbbind.yml" -> "pdbbind"
-    base_output_dir = os.path.join("output", os.path.basename(config_dir), config_name)
+    base_output_dir = os.path.join("output", os.path.basename(config_dir))
     log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_output_dir, config_name)
     logger = setup_logger(log_dir)
+    logger.info("Training started!")
 
     # Dataset ve DataLoader
     train_dataset = ProteinLigandDatasetWithH5(
@@ -63,24 +64,30 @@ if __name__ == "__main__":
     threshold = 0.5
     patience = config["training"].get("early_stopping_patience", 10)
 
+    total_batches_train = len(train_loader)
+    total_batches_validation = len(validation_loader)
+    num_epochs = config["training"]["num_epochs"]
     for epoch in range(config["training"]["num_epochs"]):
         model.train()
         train_loss, train_f1_sum, train_precision_sum, train_recall_sum = 0, 0, 0, 0
-        for protein, ligand in train_loader:
+        for batch_idx, (protein, ligand) in enumerate(train_loader, start=1):
             protein, ligand = protein.to(device), ligand.to(device)
             optimizer.zero_grad()
-            output = torch.sigmoid(model(protein).squeeze(1))
+            output = model(protein).squeeze(1)
             loss = criterion(output, ligand)
             loss.backward()
             optimizer.step()
 
             train_loss += loss.item()
-            preds = (output.cpu().numpy() > threshold).astype(np.uint8).flatten()
+
+            probs = torch.sigmoid(output).detach().cpu().numpy()
+            preds = (probs > threshold).astype(np.uint8).flatten()
             targets = ligand.cpu().numpy().flatten()
             f1, precision, recall, _ = calculate_metrics(targets, preds)
             train_f1_sum += f1
             train_precision_sum += precision
             train_recall_sum += recall
+            logger.info(f"Epoch [{epoch + 1}/{num_epochs}], Iteration [{batch_idx}/{total_batches_train}], Loss: {loss.item():.4f}, Batch F1: {f1:.4f}")
 
         train_loss /= len(train_loader)
         train_f1 = train_f1_sum / len(train_loader)
@@ -99,11 +106,12 @@ if __name__ == "__main__":
         all_tp, all_fp, all_tn, all_fn = 0, 0, 0, 0
 
         with torch.no_grad():
-            for protein, ligand in validation_loader:
+            for batch_idx, (protein, ligand) in enumerate(validation_loader, start=1):
                 protein, ligand = protein.to(device), ligand.to(device)
-                output = torch.sigmoid(model(protein).squeeze(1))
+                output = model(protein).squeeze(1)
                 val_loss += criterion(output, ligand).item()
-                preds = (output.cpu().numpy() > threshold).astype(np.uint8).flatten()
+                probs = torch.sigmoid(output).detach().cpu().numpy()
+                preds = (probs > threshold).astype(np.uint8).flatten()
                 targets = ligand.cpu().numpy().flatten()
                 f1, precision, recall, (tp, fp, tn, fn) = calculate_metrics(targets, preds)
                 val_f1_sum += f1
@@ -113,6 +121,7 @@ if __name__ == "__main__":
                 all_fp += fp
                 all_tn += tn
                 all_fn += fn
+                logger.info(f"Validation Iteration {batch_idx}/{total_batches_validation}, Batch F1: {f1:.4f}")
 
         val_loss /= len(validation_loader)
         val_f1 = val_f1_sum / len(validation_loader)

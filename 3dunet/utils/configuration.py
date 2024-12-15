@@ -1,6 +1,4 @@
 import argparse
-import logging
-import os
 
 import yaml
 
@@ -39,26 +37,46 @@ def create_output_dirs(base_dir, config_name):
     return log_dir, weights_dir, tensorboard_dir
 
 
-def setup_logger(log_dir):
+import logging
+import os
+
+
+def setup_logger(log_dir, log_filename="training.log", level=logging.INFO):
     """
-    Logger yapılandırması. Hem dosyaya hem konsola log yazacak şekilde ayarlanır.
+    Konsola ve dosyaya log yazan bir logger ayarlama fonksiyonu.
+
+    Args:
+        log_dir (str): Log dosyasının yazılacağı dizin.
+        log_filename (str): Log dosyasının adı.
+        level (int): Loglama seviyesi (örn: logging.INFO).
+
+    Returns:
+        logging.Logger: Yapılandırılmış logger nesnesi.
     """
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    # Log dizinini oluştur
+    os.makedirs(log_dir, exist_ok=True)
+    log_filepath = os.path.join(log_dir, log_filename)
 
-    # Log dosyasına yazma
-    file_handler = logging.FileHandler(os.path.join(log_dir, "training.log"))
-    file_handler.setLevel(logging.INFO)
-    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(file_formatter)
+    # Kök logger'ı temizle
+    logging.getLogger().handlers.clear()
 
-    # Konsola yazma
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('%(message)s')
-    console_handler.setFormatter(console_formatter)
+    # Logger'ı oluştur
+    logger = logging.getLogger("training_logger")
+    logger.setLevel(level)
 
-    # Handlers ekle
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    if not logger.hasHandlers():
+        # Konsol için handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(level)
+        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(console_formatter)
+        logger.addHandler(console_handler)
+
+        # Dosya için handler
+        file_handler = logging.FileHandler(log_filepath)
+        file_handler.setLevel(level)
+        file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
+
     return logger

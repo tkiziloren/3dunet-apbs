@@ -5,7 +5,7 @@ h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-se
 training:
   early_stopping_patience: 10
   num_epochs: 100
-  batch_size: 4
+  batch_size: 1
   learning_rate: 0.0005
   weight_decay: 0.0001
   optimizer: "adam"
@@ -20,7 +20,7 @@ training:
     smooth: 2.0
     pos_weight: 10.0
 validation:
-  batch_size: 8
+  batch_size: 2
 datasets:
   test:
     - 3s0e
