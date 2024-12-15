@@ -11,14 +11,16 @@
 LOG_PREFIX=${1:-job_output}  # Log dosyası prefix'i
 CONFIG_PATH=${2:-config/config.yml}  # Config dosyası
 
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
-ROOT_DIR=$(readlink -f "$SCRIPT_DIR/..")  # Ana dizin
-echo $ROOT_DIR
-cd "$ROOT_DIR"
 
+cd /homes/tevfik/PHD/3dunet-apbs/3dunet
 LOG_DIR=/homes/tevfik/PHD/3dunet-apbs/slurm_run_logs
 STDOUT_LOG="${LOG_DIR}/${LOG_PREFIX}_${SLURM_JOB_ID}.out"
 STDERR_LOG="${LOG_DIR}/${LOG_PREFIX}_${SLURM_JOB_ID}.err"
+
+echo "Config Path: $CONFIG_PATH"
+echo "Log Prefix: $LOG_PREFIX"
+echo "Stdout Log File: $STDOUT_LOG"
+echo "Stderr Log File: $STDERR_LOG"
 
 module load python/3.10.10
 source ~/PHD/3dunet-apbs/venv/bin/activate
