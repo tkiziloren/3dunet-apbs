@@ -1,7 +1,27 @@
+name: second_config
 data_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/"
 cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
 h5_directory: "/Users/tevfik/Sandbox/DATA/pdbbind-limited/"
-num_epochs: 200
+training:
+  early_stopping_patience: 10
+  num_epochs: 200
+  batch_size: 4
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  optimizer: "adam"
+  scheduler:
+    type: "ReduceLROnPlateau"
+    factor: 0.2
+    patience: 15
+    mode: "min"
+  loss:
+    type: "BCEDiceLoss"
+    alpha: 0.5
+    smooth: 1.0
+    pos_weight: 10.0
+validation:
+  batch_size: 8
+
 datasets:
   test:
     - 1a1e

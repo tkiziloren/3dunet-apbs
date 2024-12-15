@@ -1,12 +1,13 @@
 #data_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
+name: wd_00001
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 training:
   early_stopping_patience: 10
   num_epochs: 200
   batch_size: 4
   learning_rate: 0.0005
-  weight_decay: 0.0001
+  weight_decay: 0.001
   optimizer: "adam"
   scheduler:
     type: "ReduceLROnPlateau"

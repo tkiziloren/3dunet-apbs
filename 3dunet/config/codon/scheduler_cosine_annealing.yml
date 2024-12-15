@@ -1,5 +1,6 @@
 #data_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
+name: scheduler_cosine_annealing
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 training:
   early_stopping_patience: 10
@@ -9,10 +10,9 @@ training:
   weight_decay: 0.0001
   optimizer: "adam"
   scheduler:
-    type: "ReduceLROnPlateau"
-    factor: 0.2
-    patience: 15
-    mode: "min"
+    type: "CosineAnnealingLR"
+    T_max: 10
+    eta_min: 0.00001
   loss:
     type: "BCEDiceLoss"
     alpha: 0.5

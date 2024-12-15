@@ -1,5 +1,6 @@
 #data_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
+name: loss_pos_weight_5
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 training:
   early_stopping_patience: 10
@@ -17,7 +18,7 @@ training:
     type: "BCEDiceLoss"
     alpha: 0.5
     smooth: 1.0
-    pos_weight: 10.0
+    pos_weight: 5.0
 validation:
   batch_size: 8
 datasets:
