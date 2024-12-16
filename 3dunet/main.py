@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import torch
-from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -10,15 +9,9 @@ from dataset import ProteinLigandDatasetWithH5
 from model import UNet3D
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
-from utils.training import get_optimizer, get_scheduler, get_loss_function
+from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
 
 
-def calculate_metrics(targets, preds):
-    f1 = f1_score(targets, preds, average='binary')
-    precision = precision_score(targets, preds, average='binary')
-    recall = recall_score(targets, preds, average='binary')
-    tn, fp, fn, tp = confusion_matrix(targets, preds, labels=[0, 1]).ravel()
-    return f1, precision, recall, (tp, fp, tn, fn)
 
 
 if __name__ == "__main__":
@@ -48,7 +41,7 @@ if __name__ == "__main__":
     validation_loader = DataLoader(validation_dataset, batch_size=config["validation"]["batch_size"], shuffle=False)
 
     # Model, optimizer, scheduler, loss
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     model = UNet3D().to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
@@ -67,23 +60,19 @@ if __name__ == "__main__":
     total_batches_train = len(train_loader)
     total_batches_validation = len(validation_loader)
     num_epochs = config["training"]["num_epochs"]
+    torch_metrics = initialize_metrics(threshold=0.5, device=device)
     for epoch in range(config["training"]["num_epochs"]):
         model.train()
         train_loss, train_f1_sum, train_precision_sum, train_recall_sum = 0, 0, 0, 0
-        for batch_idx, (protein, ligand) in enumerate(train_loader, start=1):
-            protein, ligand = protein.to(device), ligand.to(device)
+        for batch_idx, (protein, pocket_label) in enumerate(train_loader, start=1):
+            protein, pocket_label = protein.to(device), pocket_label.to(device)
             optimizer.zero_grad()
             output = model(protein).squeeze(1)
-            loss = criterion(output, ligand)
+            loss = criterion(output, pocket_label)
             loss.backward()
             optimizer.step()
-
             train_loss += loss.item()
-
-            probs = torch.sigmoid(output).detach().cpu().numpy()
-            preds = (probs > threshold).astype(np.uint8).flatten()
-            targets = ligand.cpu().numpy().flatten()
-            f1, precision, recall, _ = calculate_metrics(targets, preds)
+            f1, precision, recall, _ = calculate_metrics(pocket_label, output, torch_metrics)
             train_f1_sum += f1
             train_precision_sum += precision
             train_recall_sum += recall
@@ -106,14 +95,11 @@ if __name__ == "__main__":
         all_tp, all_fp, all_tn, all_fn = 0, 0, 0, 0
 
         with torch.no_grad():
-            for batch_idx, (protein, ligand) in enumerate(validation_loader, start=1):
-                protein, ligand = protein.to(device), ligand.to(device)
+            for batch_idx, (protein, pocket_label) in enumerate(validation_loader, start=1):
+                protein, pocket_label = protein.to(device), pocket_label.to(device)
                 output = model(protein).squeeze(1)
-                val_loss += criterion(output, ligand).item()
-                probs = torch.sigmoid(output).detach().cpu().numpy()
-                preds = (probs > threshold).astype(np.uint8).flatten()
-                targets = ligand.cpu().numpy().flatten()
-                f1, precision, recall, (tp, fp, tn, fn) = calculate_metrics(targets, preds)
+                val_loss += criterion(output, pocket_label).item()
+                f1, precision, recall, (tp, fp, tn, fn) = calculate_metrics(pocket_label, output, torch_metrics)
                 val_f1_sum += f1
                 val_precision_sum += precision
                 val_recall_sum += recall
