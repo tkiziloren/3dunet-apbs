@@ -33,8 +33,8 @@ if __name__ == "__main__":
         transform=CustomCompose([Standardize()])
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True)
-    validation_loader = DataLoader(validation_dataset, batch_size=config["validation"]["batch_size"], shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True, num_workers=8)
+    validation_loader = DataLoader(validation_dataset, batch_size=config["validation"]["batch_size"], shuffle=False, num_workers=8)
 
     # Model, optimizer, scheduler, loss
     device = get_device()
