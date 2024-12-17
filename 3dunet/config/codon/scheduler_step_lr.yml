@@ -3,7 +3,7 @@
 name: scheduler_step_lr
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 training:
-  early_stopping_patience: 10
+  early_stopping_patience: 20
   num_epochs: 100
   batch_size: 1
   learning_rate: 0.0005

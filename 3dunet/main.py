@@ -1,6 +1,5 @@
 import os
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -10,9 +9,6 @@ from model import UNet3D
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
-
-
-
 
 if __name__ == "__main__":
     args = parse_args()
