@@ -26,13 +26,14 @@ class LabelMaskType(Enum):
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate cache files for proteins.")
     parser.add_argument(
-        "--config", type=str, default="../config/h5_cache_config_pdbbind_limited", help="Path to the config file"
+        "--config", type=str, default="config/caching/h5_cache_config_pdbbind_limited", help="Path to the config file"
     )
     return parser.parse_args()
 
 
 def load_config(config_path):
-    with open(config_path, 'r') as file:
+
+    with open(os.path.abspath(config_path), 'r') as file:
         return yaml.safe_load(file)
 
 

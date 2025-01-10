@@ -12,24 +12,31 @@ from utils.configuration import setup_logger, load_config
 from utils.training import get_device, calculate_metrics, get_loss_function, initialize_metrics
 
 
-def main(config_path):
-    # Load Config and Initialize Logger
+def main(location, config_file_name):
+    # Construct paths
+    config_path = os.path.join("config", location, config_file_name) + ".yml" 
     config = load_config(config_path)
-    config_dir, config_file = os.path.split(config_path)
-    config_name, _ = os.path.splitext(config_file)
-    base_output_dir = os.path.join("output", "test_results", config_name)
+    config_name, _ = os.path.splitext(config_file_name)
+    base_output_dir = os.path.join("output", location, config_name)
     os.makedirs(base_output_dir, exist_ok=True)
 
-    log_dir = os.path.join(base_output_dir, "logs")
+    log_dir = os.path.join(base_output_dir, "log")
     logger = setup_logger(log_dir)
     logger.info("Test process started!")
 
     # Load Model
     device = get_device()
     model = UNet3D().to(device)
-    trained_model_path = os.path.join("output", config_name, "best_model.pth")
-    model.load_state_dict(torch.load(trained_model_path))
+    trained_model_path = os.path.join(base_output_dir, "weights", "best_model.pth")
+    logger.info(f"Loading model from {trained_model_path}")
+    # Load the model state dict
+    state_dict = torch.load(trained_model_path, map_location=torch.device('cpu') if not torch.cuda.is_available() else None)
+    # Remove 'module.' prefix if present
+    if list(state_dict.keys())[0].startswith('module.'):
+        state_dict = {k[len('module.'):]: v for k, v in state_dict.items()}
+    model.load_state_dict(state_dict)
     model.eval()
+    
     logger.info(f"Model loaded from {trained_model_path}")
 
     # Test Dataset and DataLoader
@@ -113,9 +120,10 @@ def main(config_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test a trained UNet3D model.")
-    parser.add_argument("--config", required=True, help="Path to the configuration file.")
+    parser.add_argument("--location", required=True, help="Location of the configuration (e.g., 'codon' or 'local').")
+    parser.add_argument("--config_file_name", required=True, help="Name of the configuration file (e.g., 'lr_001.yml').")
     args = parser.parse_args()
 
-    main(args.config)
+    main(args.location, args.config_file_name)
 
 

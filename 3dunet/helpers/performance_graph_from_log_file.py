@@ -9,8 +9,8 @@ def parse_log_file(log_file_path):
     validation_losses = []
     validation_f1_scores = []
 
-    train_pattern = re.compile(r"Training Loss:\s*([\d\.]+),\s*Training F1 Score:\s*([\d\.]+)")
-    val_pattern = re.compile(r"Validation Loss:\s*([\d\.]+),\s*Validation F1 Score:\s*([\d\.]+)")
+    train_pattern = re.compile(r"Train Loss:\s*([\d\.]+),\s*F1:\s*([\d\.]+)")
+    val_pattern = re.compile(r"Validation Loss:\s*([\d\.]+),\s*F1:\s*([\d\.]+)")
 
     with open(log_file_path, "r") as f:
         lines = f.readlines()
@@ -50,6 +50,13 @@ def plot_metrics(training_losses, training_f1_scores, validation_losses, validat
     plt.legend()
     plt.grid(True)
 
+    # Minimum değerleri yazdırma (grafiğin ortasına)
+    min_train_loss = min(training_losses)
+    min_val_loss = min(validation_losses)
+    plt.text(len(epochs) / 2, (max(training_losses) + min(training_losses)) / 2,
+             f'Min Training Loss: {min_train_loss:.4f}\nMin Validation Loss: {min_val_loss:.4f}',
+             ha='center', va='center', bbox=dict(facecolor='white', alpha=0.5))
+
     # F1 grafiği
     plt.subplot(1, 2, 2)
     plt.plot(epochs, training_f1_scores, label='Training F1', marker='o')
@@ -59,6 +66,13 @@ def plot_metrics(training_losses, training_f1_scores, validation_losses, validat
     plt.ylabel('F1 Score')
     plt.legend()
     plt.grid(True)
+
+    # Maksimum değerleri yazdırma (grafiğin ortasına)
+    max_train_f1 = max(training_f1_scores)
+    max_val_f1 = max(validation_f1_scores)
+    plt.text(len(epochs) / 2, (max(training_f1_scores) + min(training_f1_scores)) / 2,
+             f'Max Training  F1: {max_train_f1:.4f}\nMax Validation F1: {max_val_f1:.4f}',
+             ha='center', va='center', bbox=dict(facecolor='white', alpha=0.5))
 
     plt.tight_layout()
     plt.show()

@@ -1,7 +1,7 @@
 #data_directory: "/hps/nobackup/arl/chembl/lorenzo/deep_apbs/destData/refined-set_filter/"
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
-name: pdbbind_tmp
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
+name: pdbbind_optimized_pos_weight
 training:
   early_stopping_patience: 20
   num_epochs: 150
