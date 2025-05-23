@@ -1,15 +1,120 @@
 import os
 
 import torch
+from monai.networks.nets import UNet, DynUNet, SegResNet, UNETR, SwinUNETR, FlexibleUNet, VNet
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import ProteinLigandDatasetWithH5
-from model import UNet3D
+from models import UNet3D4L, UNet3D5L, UNet3D6L, UNet3D4LA, UNet3D4LC, UNet3D4LAC, ResNet3D4L, ResNet3D5L, ResNet3D6L
+from models.ConvNeXt3D import ConvNeXt3D
+from models.ConvNeXt3DV2 import ConvNeXt3DV2
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
+
 num_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 16))
+base_features = int(os.environ.get("SLURM_BASE_FEATURES", 64))
+
+MODEL_DICT = {
+                "UNet3D4L": UNet3D4L,
+                "UNet3D5L": UNet3D5L,
+                "UNet3D6L": UNet3D6L,
+                "UNet3D4LA": UNet3D4LA,
+                "UNet3D4LC": UNet3D4LC,
+                "UNet3D4LAC": UNet3D4LAC,
+                "ResNet3D4L": ResNet3D4L,
+                "ResNet3D5L": ResNet3D5L,
+                "ResNet3D6L": ResNet3D6L,
+                # MONAI'nin klasik 3D UNet'i
+                "MONAI_UNet3D": lambda in_ch, out_ch, base:
+                    UNet(
+                        dimensions=3,
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        channels=(base, base * 2, base * 4, base * 8, base * 16),
+                        strides=(2, 2, 2, 2),
+                        num_res_units=2,
+                        norm='batch'
+                    ),
+
+                    # MONAI'nin dynamic UNet'i
+                    "MONAI_DynUNet3D": lambda in_ch, out_ch, base:
+                    DynUNet(
+                        spatial_dims=3,
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        kernel_size=[3, 3, 3, 3],
+                        strides=[2, 2, 2, 2],
+                        upsample_kernel_size=[2, 2, 2, 2],
+                        filters=[base, base * 2, base * 4, base * 8, base * 16],
+                        dropout=0.0,
+                        norm_name="INSTANCE"
+                    ),
+
+                    # Backbone'ı seçilebilir UNet
+                    "MONAI_FlexibleUNet3D": lambda in_ch, out_ch, base:
+                    FlexibleUNet(
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        backbone="resnet18",  # ister değiştir, ör: "resnet34"
+                        spatial_dims=3,
+                        base_feature_size=base
+                    ),
+
+                    # Transformer tabanlı UNet (GPU RAM yüksek olmalı!)
+                    "MONAI_UNETR": lambda in_ch, out_ch, base:
+                    UNETR(
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        img_size=(128, 128, 128),
+                        feature_size=base
+                    ),
+
+                    # Swin Transformer tabanlı UNet (daha çok RAM!)
+                    "MONAI_SwinUNETR": lambda in_ch, out_ch, base:
+                    SwinUNETR(
+                        in_chans=in_ch,
+                        out_chans=out_ch,
+                        img_size=(128, 128, 128),
+                        feature_size=base
+                    ),
+
+                    # VNet (segmentasyon için)
+                    "MONAI_VNet3D": lambda in_ch, out_ch, base:
+                    VNet(
+                        spatial_dims=3,
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        dropout_prob=0.0,
+                        act="elu"
+                    ),
+
+                    # ResNet tabanlı segmentasyon modeli
+                    "MONAI_SegResNet3D": lambda in_ch, out_ch, base:
+                    SegResNet(
+                        spatial_dims=3,
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        init_filters=base
+                    ),
+
+                    # Kendi ConvNeXt3D implementasyonun (segmentasyon için)
+                    "ConvNeXt3D": lambda in_ch, out_ch, base:
+                    ConvNeXt3D(
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        dims=[base, base * 2, base * 4, base * 8],
+                        depths=[2, 2, 2, 2]
+                    ),
+                    "ConvNeXt3DV2": lambda in_ch, out_ch, base:
+                    ConvNeXt3DV2(
+                        in_channels=in_ch,
+                        out_channels=out_ch,
+                        base_features=base,
+                        depths=[2, 2, 2, 2]
+                    ),
+                }
 
 if __name__ == "__main__":
     args = parse_args()
@@ -39,7 +144,8 @@ if __name__ == "__main__":
 
     # Model, optimizer, scheduler, loss
     device = get_device()
-    model = UNet3D(in_channels=2, out_channels=1, base_features=64).to(device)
+    ModelClass = MODEL_DICT[args.model]
+    model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
@@ -53,7 +159,7 @@ if __name__ == "__main__":
     best_train_f1 = 0.0
     no_improvement_epochs = 0
     threshold = 0.5
-    patience = config["training"].get("early_stopping_patience", 10)
+    patience = config["training"].get("early_stopping_patience", 50)
 
     total_batches_train = len(train_loader)
     total_batches_validation = len(validation_loader)
@@ -120,14 +226,14 @@ if __name__ == "__main__":
         writer.add_scalar("Recall/Validation", val_recall, epoch)
 
         if train_f1 > best_train_f1:
-            best_val_f1 = train_f1
-            torch.save(model.state_dict(), os.path.join(weights_dir, 'best_model_in_terms_of_training_score.pth'))
-            logger.info(f"New best model saved at epoch {epoch + 1}")
+            best_train_f1 = train_f1
+            torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_best_model_in_terms_of_training_score.pth"))
+            logger.info(f"New best model saved for training score: {best_train_f1} at epoch {epoch + 1}")
         # Early stopping and model saving
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
-            torch.save(model.state_dict(), os.path.join(weights_dir, 'best_model_in_terms_of_validation_score.pth'))
-            logger.info(f"New best model saved at epoch {epoch + 1}")
+            torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_best_model_in_terms_of_validation_score.pth"))
+            logger.info(f"New best model saved for validation: {best_val_f1} score at epoch {epoch + 1}")
             no_improvement_epochs = 0
         else:
             no_improvement_epochs += 1
@@ -137,5 +243,25 @@ if __name__ == "__main__":
         scheduler.step(val_loss)
 
     writer.close()
+
+    # Save the final model
+    torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_final_model.pth"))
+    logger.info("Final model saved.")
+
     logger.info("Training completed.")
+    logger.info("---------------------------------")
+    logger.info("Summary of training:")
+    logger.info("---------------------------------")
+    logger.info("Configuration name: %s", config_name)
+    logger.info("Configuration file: %s", config_path)
+    logger.info("Model: %s", args.model)
+    logger.info("Base features: %d", base_features)
+    logger.info("Number of epochs: %d", num_epochs)
+    logger.info("Batch size: %d", config["training"]["batch_size"])
+    logger.info("Learning rate: %f", config["training"]["learning_rate"])
+    logger.info("Weight decay: %f", config["training"]["weight_decay"])
+    logger.info("Optimizer: %s", config["training"]["optimizer"])
+    logger.info("Scheduler: %s", config["training"].get("scheduler"))
+    logger.info("Loss function: %s", config["training"].get("loss"))
+    logger.info("Early stopping patience: %d", patience)
     logger.info(f"Best validation F1 score: {best_val_f1:.4f}, best training f1 score: {best_train_f1:.4f}")

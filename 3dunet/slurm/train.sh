@@ -1,20 +1,15 @@
 #!/bin/bash
-# Slurm direktiflerini script dışından sağlamak için yorum olarak bırakıyoruz.
-# #SBATCH --job-name=3d-unet
-# #SBATCH --gres=gpu:h200:1
-# #SBATCH --ntasks=1
-# #SBATCH --cpus-per-task=16
-# #SBATCH --mem=64G
-# #SBATCH --time=7-00:00:00
-# #SBATCH --mail-type=ALL
-# #SBATCH --mail-user=tevfik
 
 # Dinamik parametreler
 LOG_PREFIX=${1:-job_output}
 CONFIG_PATH=${2:-config/config.yml}
-GPU_COUNT=${3:-1}
-GPU_TYPE=${4:-h200}           # 4. parametre: GPU tipi (örn: h200, a100, l40s, v100)
-CPUS_PER_TASK=${5:-16}        # 5. parametre: CPU sayısı (default: 16)
+MODEL_CLASS=${3:-UNet3D4L}  # 3. parametre: model sınıfı adı (varsayılan: UNet3D4L)
+GPU_COUNT=${4:-1}
+GPU_TYPE=${5:-h200}       # 5. parametre: GPU tipi (örn: h200, a100, l40s, v100)
+CPUS_PER_TASK=${6:-16}    # 6. parametre: CPU sayısı (default: 16)
+BASE_FEATURES=${7:-64}    # 7. parametre: temel özellik sayısı (varsayılan: 64)
+MEMORY_GB=${8:-128}       # 8. parametre: bellek boyutu (varsayılan: 64GB)
+
 
 LOG_DIR=/homes/tevfik/PHD/3dunet-apbs/slurm_run_logs
 STDOUT_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.out"
@@ -25,7 +20,7 @@ sbatch --job-name=3d-unet \
        --gres=gpu:${GPU_TYPE}:${GPU_COUNT} \
        --ntasks=1 \
        --cpus-per-task=${CPUS_PER_TASK} \
-       --mem=64G \
+       --mem=${MEMORY_GB}G \
        --time=7-00:00:00 \
        --mail-type=ALL \
        --mail-user=tevfik \
