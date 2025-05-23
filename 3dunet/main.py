@@ -130,12 +130,12 @@ if __name__ == "__main__":
     model_class = args.model
     base_features = args.base_features
     num_workers = args.num_workers
+    base_model_output_dir = args.base_model_output_dir
 
     config = load_config(config_path)
     config_dir, config_file = os.path.split(config_path)
     config_name, _ = os.path.splitext(config_file)  # "codon/pdbbind.yml" -> "pdbbind"
-    base_output_dir = os.path.join("output", os.path.basename(config_dir))
-    log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_output_dir, config_name)
+    log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_model_output_dir, config_name)
     logger = setup_logger(log_dir)
     num_epochs = config["training"]["num_epochs"]
 

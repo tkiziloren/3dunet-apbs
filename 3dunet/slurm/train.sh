@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Dinamik parametreler
-LOG_PREFIX=${1:-job_output}
+JOB_NAME=${1:-job_output}
 CONFIG_PATH=${2:-config/config.yml}
 MODEL_CLASS=${3:-UNet3D4L}  # 3. parametre: model sınıfı adı (varsayılan: UNet3D4L)
 GPU_COUNT=${4:-1}
@@ -11,12 +11,16 @@ BASE_FEATURES=${7:-64}    # 7. parametre: temel özellik sayısı (varsayılan: 
 MEMORY_GB=${8:-128}       # 8. parametre: bellek boyutu (varsayılan: 64GB)
 
 
-LOG_DIR=/homes/tevfik/PHD/3dunet-apbs/slurm_run_logs
-STDOUT_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.out"
-STDERR_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.err"
+LOG_DIR="/hps/nobackup/arl/chembl/tevfik/3dunet-apbs/logs/${JOB_NAME}"
+WEIGHTS_DIR="/hps/nobackup/arl/chembl/tevfik/3dunet-apbs/output/${JOB_NAME}"
+STDOUT_LOG="${LOG_DIR}/${JOB_NAME}_%j.out"
+STDERR_LOG="${LOG_DIR}/${JOB_NAME}_%j.err"
+
+mkdir -p ${LOG_DIR}
+mkdir -p ${WEIGHTS_DIR}
 
 # Slurm job’u komut satırı parametreleriyle çalıştır
-sbatch --job-name=${LOG_PREFIX} \
+sbatch --job-name=${JOB_NAME} \
        --gres=gpu:${GPU_TYPE}:${GPU_COUNT} \
        --ntasks=1 \
        --cpus-per-task=${CPUS_PER_TASK} \
@@ -34,6 +38,7 @@ sbatch --job-name=${LOG_PREFIX} \
                 --config ${CONFIG_PATH} \
                 --model ${MODEL_CLASS} \
                 --base_features ${BASE_FEATURES} \
-                --num_workers ${CPUS_PER_TASK}"
+                --num_workers ${CPUS_PER_TASK} \
+                --base_model_output_dir ${WEIGHTS_DIR}"
 
 
