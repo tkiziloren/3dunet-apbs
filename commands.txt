@@ -1,15 +1,9 @@
-    5  sbatch train.sh 2 pdbbind config/codon/pdbbind.yml
-    9  sbatch train.sh 2 pdbbind config/codon/pdbbind.yml
-   37  sbatch train.sh pdbbind config/codon/pdbbind.yml
-   55  sbatch train.sh pdbbind config/codon/pdbbind.yml
-   63  sbatch train.sh pdbbind config/codon/pdbbind.yml
+bash train.sh pdbbind config/codon/pdbbind.yml 1
 
-(base) [tevfik@codon-slurm-login-02 3dunet-apbs]$ cat commands.txt
 cat codon/lr_0001/log/training.log | grep -e "Train Loss" -e "Validation Loss" -e "Confusion" -e "best
 bash train.sh pdbbind config/codon/pdbbind.yml 3
 sacct -j 10117297 --format=JobID,JobName,AllocTRES,NodeList
 scontrol show job 10117297"
-sbatch train.sh pdbbind config/codon/pdbbind.yml
 
 
 (
@@ -52,3 +46,6 @@ codon-gpu-016  48   0         488.3    0.0           48.4         gpu:a100:4(S:0
 codon-gpu-017  48   32        542.0    296.0         434.6        gpu:v100:4(S:0-1)  MIXED
 codon-gpu-018  48   32        542.0    128.0         473.5        gpu:v100:4(S:0-1)  MIXED
 codon-gpu-019  48   24        542.0    96.0          493.2        gpu:v100:4(S:0-1)  MIXED
+
+
+bash train.sh job_h200 config/codon/pdbbind.yml 4 h200 64

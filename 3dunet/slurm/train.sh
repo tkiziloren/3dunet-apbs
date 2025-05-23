@@ -13,6 +13,8 @@
 LOG_PREFIX=${1:-job_output}
 CONFIG_PATH=${2:-config/config.yml}
 GPU_COUNT=${3:-1}
+GPU_TYPE=${4:-h200}           # 4. parametre: GPU tipi (örn: h200, a100, l40s, v100)
+CPUS_PER_TASK=${5:-16}        # 5. parametre: CPU sayısı (default: 16)
 
 LOG_DIR=/homes/tevfik/PHD/3dunet-apbs/slurm_run_logs
 STDOUT_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.out"
@@ -20,9 +22,9 @@ STDERR_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.err"
 
 # Slurm job’u komut satırı parametreleriyle çalıştır
 sbatch --job-name=3d-unet \
-       --gres=gpu:v100:${GPU_COUNT} \
+       --gres=gpu:${GPU_TYPE}:${GPU_COUNT} \
        --ntasks=1 \
-       --cpus-per-task=16 \
+       --cpus-per-task=${CPUS_PER_TASK} \
        --mem=64G \
        --time=7-00:00:00 \
        --mail-type=ALL \
