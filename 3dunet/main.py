@@ -21,8 +21,6 @@ from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
 
-
-
 MODEL_DICT = {
                 "UNet3D4L": UNet3D4L,
                 "UNet3D5L": UNet3D5L,
@@ -139,7 +137,17 @@ if __name__ == "__main__":
     base_output_dir = os.path.join("output", os.path.basename(config_dir))
     log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_output_dir, config_name)
     logger = setup_logger(log_dir)
-    logger.info("Training started!")
+    num_epochs = config["training"]["num_epochs"]
+
+    logger.info("---------------------------------")
+    logger.info("Training is being started!")
+    logger.info("---------------------------------")
+    logger.info("Training parameters:")
+    logger.info("Configuration name: %s", config_name)
+    logger.info("Configuration file: %s", config_path)
+    logger.info("Model: %s", model_class)
+    logger.info("Base features: %d", base_features)
+    logger.info("Number of epochs: %d", num_epochs)
     logger.info("Model class: %s", model_class)
 
     # Dataset ve DataLoader
@@ -178,7 +186,6 @@ if __name__ == "__main__":
 
     total_batches_train = len(train_loader)
     total_batches_validation = len(validation_loader)
-    num_epochs = config["training"]["num_epochs"]
     torch_metrics = initialize_metrics(threshold=0.5, device=device)
     for epoch in range(config["training"]["num_epochs"]):
         model.train()
