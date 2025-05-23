@@ -16,7 +16,7 @@ STDOUT_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.out"
 STDERR_LOG="${LOG_DIR}/${LOG_PREFIX}_%j.err"
 
 # Slurm job’u komut satırı parametreleriyle çalıştır
-sbatch --job-name=3d-unet \
+sbatch --job-name=${LOG_PREFIX} \
        --gres=gpu:${GPU_TYPE}:${GPU_COUNT} \
        --ntasks=1 \
        --cpus-per-task=${CPUS_PER_TASK} \
