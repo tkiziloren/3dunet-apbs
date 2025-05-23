@@ -15,6 +15,7 @@ from utils.training import get_optimizer, get_scheduler, get_loss_function, get_
 
 num_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 16))
 base_features = int(os.environ.get("SLURM_BASE_FEATURES", 64))
+model_class = os.environ.get("SLURM_MODEL_CLASS", "UNet3D4L")
 
 MODEL_DICT = {
                 "UNet3D4L": UNet3D4L,
@@ -144,7 +145,7 @@ if __name__ == "__main__":
 
     # Model, optimizer, scheduler, loss
     device = get_device()
-    ModelClass = MODEL_DICT[args.model]
+    ModelClass = MODEL_DICT[model_class]
     model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
@@ -227,12 +228,12 @@ if __name__ == "__main__":
 
         if train_f1 > best_train_f1:
             best_train_f1 = train_f1
-            torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_best_model_in_terms_of_training_score.pth"))
+            torch.save(model.state_dict(), os.path.join(weights_dir, f"{model_class}_best_model_in_terms_of_training_score.pth"))
             logger.info(f"New best model saved for training score: {best_train_f1} at epoch {epoch + 1}")
         # Early stopping and model saving
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
-            torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_best_model_in_terms_of_validation_score.pth"))
+            torch.save(model.state_dict(), os.path.join(weights_dir, f"{model_class}_best_model_in_terms_of_validation_score.pth"))
             logger.info(f"New best model saved for validation: {best_val_f1} score at epoch {epoch + 1}")
             no_improvement_epochs = 0
         else:
@@ -245,7 +246,7 @@ if __name__ == "__main__":
     writer.close()
 
     # Save the final model
-    torch.save(model.state_dict(), os.path.join(weights_dir, f"{args.model}_final_model.pth"))
+    torch.save(model.state_dict(), os.path.join(weights_dir, f"{model_class}_final_model.pth"))
     logger.info("Final model saved.")
 
     logger.info("Training completed.")
@@ -254,7 +255,7 @@ if __name__ == "__main__":
     logger.info("---------------------------------")
     logger.info("Configuration name: %s", config_name)
     logger.info("Configuration file: %s", config_path)
-    logger.info("Model: %s", args.model)
+    logger.info("Model: %s", model_class)
     logger.info("Base features: %d", base_features)
     logger.info("Number of epochs: %d", num_epochs)
     logger.info("Batch size: %d", config["training"]["batch_size"])
