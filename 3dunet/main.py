@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Model, optimizer, scheduler, loss
     device = get_device()
-    model = UNet3D().to(device)
+    model = UNet3D(in_channels=2, out_channels=1, base_features=64).to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     # Training loop
     best_val_f1 = 0.0
+    best_train_f1 = 0.0
     no_improvement_epochs = 0
     threshold = 0.5
     patience = config["training"].get("early_stopping_patience", 10)
@@ -118,10 +119,14 @@ if __name__ == "__main__":
         writer.add_scalar("Precision/Validation", val_precision, epoch)
         writer.add_scalar("Recall/Validation", val_recall, epoch)
 
+        if train_f1 > best_train_f1:
+            best_val_f1 = train_f1
+            torch.save(model.state_dict(), os.path.join(weights_dir, 'best_model_in_terms_of_training_score.pth'))
+            logger.info(f"New best model saved at epoch {epoch + 1}")
         # Early stopping and model saving
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
-            torch.save(model.state_dict(), os.path.join(weights_dir, 'best_model.pth'))
+            torch.save(model.state_dict(), os.path.join(weights_dir, 'best_model_in_terms_of_validation_score.pth'))
             logger.info(f"New best model saved at epoch {epoch + 1}")
             no_improvement_epochs = 0
         else:
@@ -133,3 +138,4 @@ if __name__ == "__main__":
 
     writer.close()
     logger.info("Training completed.")
+    logger.info(f"Best validation F1 score: {best_val_f1:.4f}, best training f1 score: {best_train_f1:.4f}")
