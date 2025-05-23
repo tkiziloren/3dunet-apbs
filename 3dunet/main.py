@@ -21,9 +21,7 @@ from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
 
-num_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 16))
-base_features = int(os.environ.get("SLURM_BASE_FEATURES", 64))
-model_class = os.environ.get("SLURM_MODEL_CLASS", "UNet3D4L")
+
 
 MODEL_DICT = {
                 "UNet3D4L": UNet3D4L,
@@ -125,9 +123,16 @@ MODEL_DICT = {
                     ),
                 }
 
+
 if __name__ == "__main__":
+
     args = parse_args()
+
     config_path = args.config
+    model_class = args.model
+    base_features = args.base_features
+    num_workers = args.num_workers
+
     config = load_config(config_path)
     config_dir, config_file = os.path.split(config_path)
     config_name, _ = os.path.splitext(config_file)  # "codon/pdbbind.yml" -> "pdbbind"

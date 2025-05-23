@@ -11,6 +11,9 @@ def parse_args():
     parser.add_argument(
         "--config", type=str, default="config/local/config.yml", help="Path to the config file"
     )
+    parser.add_argument("--model", type=str, default="UNet3D4L", help="Model class name")
+    parser.add_argument("--base_features", type=int, default=64, help="Base features")
+    parser.add_argument("--num_workers", type=int, default=16, help="Worker count")
     return parser.parse_args()
 
 

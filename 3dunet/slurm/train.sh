@@ -30,6 +30,10 @@ sbatch --job-name=3d-unet \
                source ~/PHD/3dunet-apbs/venv/bin/activate && \
                cd ~/PHD/3dunet-apbs/3dunet && \
                export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && \
-               python main.py --config ${CONFIG_PATH}"
+               python main.py \
+                --config ${CONFIG_PATH} \
+                --model ${MODEL_CLASS} \
+                --base_features ${BASE_FEATURES} \
+                --num_workers ${CPUS_PER_TASK}"
 
 
