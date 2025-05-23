@@ -4,9 +4,51 @@
    55  sbatch train.sh pdbbind config/codon/pdbbind.yml
    63  sbatch train.sh pdbbind config/codon/pdbbind.yml
 
- (base) [tevfik@codon-slurm-login-02 3dunet-apbs]$ cat commands.txt
+(base) [tevfik@codon-slurm-login-02 3dunet-apbs]$ cat commands.txt
 cat codon/lr_0001/log/training.log | grep -e "Train Loss" -e "Validation Loss" -e "Confusion" -e "best
 bash train.sh pdbbind config/codon/pdbbind.yml 3
 sacct -j 10117297 --format=JobID,JobName,AllocTRES,NodeList
 scontrol show job 10117297"
 sbatch train.sh pdbbind config/codon/pdbbind.yml
+
+
+(
+echo "NodeName    CPU  AllocCPU  RAM(GB)   AllocMem(GB)  FreeMem(GB)   GPU            State"
+scontrol show node | grep -E "NodeName=codon-gpu" -A 20 | awk '
+/NodeName=/ {node=$1; cpu=ram=alloccpu=allocmem=freemem=gres=state=""}
+/NodeName=/ {split($1,a,"="); node=a[2]}
+/CPUTot=/ {for(i=1;i<=NF;i++){if($i ~ /CPUTot=/){split($i,a,"="); cpu=a[2]}}
+           for(i=1;i<=NF;i++){if($i ~ /CPUAlloc=/){split($i,a,"="); alloccpu=a[2]}}}
+/RealMemory=/ {for(i=1;i<=NF;i++){if($i ~ /RealMemory=/){split($i,a,"="); ram=a[2]}}
+               for(i=1;i<=NF;i++){if($i ~ /AllocMem=/){split($i,a,"="); allocmem=a[2]}}
+               for(i=1;i<=NF;i++){if($i ~ /FreeMem=/){split($i,a,"="); freemem=a[2]}}}
+/Gres=/ {for(i=1;i<=NF;i++){if($i ~ /Gres=/){split($i,a,"="); gres=a[2]}}}
+/State=/ {for(i=1;i<=NF;i++){if($i ~ /State=/){split($i,a,"="); state=a[2]}}}
+/Partitions=/ {
+  printf "%s %s %s %.1f %.1f %.1f %s %s\n", node, cpu, alloccpu, ram/1024, allocmem/1024, freemem/1024, gres, state
+}
+'
+) | column -t
+
+--------------------------
+example output:
+--------------------------
+NodeName       CPU  AllocCPU  RAM(GB)  AllocMem(GB)  FreeMem(GB)  GPU                State
+codon-gpu-001  128  0         1484.4   0.0           1280.5       gpu:h200:8(S:0-1)  IDLE
+codon-gpu-002  64   0         1484.4   0.0           1353.4       gpu:l40s:8(S:0-1)  IDLE
+codon-gpu-003  64   8         1103.5   500.0         393.1        gpu:h200:4(S:0-1)  MIXED
+codon-gpu-004  48   0         488.3    0.0           257.2        gpu:a100:4(S:0-1)  IDLE
+codon-gpu-005  48   48        488.3    96.0          17.0         gpu:a100:4(S:0-1)  ALLOCATED
+codon-gpu-006  48   32        488.3    128.0         10.9         gpu:a100:4(S:0-1)  MIXED
+codon-gpu-007  48   0         488.3    0.0           480.8        gpu:a100:4(S:0-1)  IDLE
+codon-gpu-008  48   24        488.3    64.0          294.7        gpu:a100:4(S:0-1)  MIXED
+codon-gpu-009  48   16        488.3    64.0          90.9         gpu:a100:4(S:0-1)  MIXED
+codon-gpu-010  48   16        488.3    64.0          53.3         gpu:a100:4(S:0-1)  MIXED
+codon-gpu-012  48   0         488.3    0.0           53.1         gpu:a100:4(S:0-1)  IDLE
+codon-gpu-013  48   16        488.3    50.0          39.0         gpu:a100:4(S:0-1)  MIXED
+codon-gpu-014  48   16        488.3    50.0          133.4        gpu:a100:4(S:0-1)  MIXED
+codon-gpu-015  48   0         488.3    0.0           97.5         gpu:a100:4(S:0-1)  IDLE
+codon-gpu-016  48   0         488.3    0.0           48.4         gpu:a100:4(S:0-1)  IDLE
+codon-gpu-017  48   32        542.0    296.0         434.6        gpu:v100:4(S:0-1)  MIXED
+codon-gpu-018  48   32        542.0    128.0         473.5        gpu:v100:4(S:0-1)  MIXED
+codon-gpu-019  48   24        542.0    96.0          493.2        gpu:v100:4(S:0-1)  MIXED

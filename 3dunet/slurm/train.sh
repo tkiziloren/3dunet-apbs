@@ -1,7 +1,7 @@
 #!/bin/bash
 # Slurm direktiflerini script dışından sağlamak için yorum olarak bırakıyoruz.
 # #SBATCH --job-name=3d-unet
-# #SBATCH --gres=gpu:v100:1
+# #SBATCH --gres=gpu:h200:1
 # #SBATCH --ntasks=1
 # #SBATCH --cpus-per-task=16
 # #SBATCH --mem=64G
