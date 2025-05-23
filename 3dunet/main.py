@@ -167,7 +167,8 @@ if __name__ == "__main__":
     # Model, optimizer, scheduler, loss
     device = get_device()
     ModelClass = MODEL_DICT[model_class]
-    model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
+    #model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
+    model = ModelClass(2, 1, base_features).to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
