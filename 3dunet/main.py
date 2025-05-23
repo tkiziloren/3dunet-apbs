@@ -127,6 +127,7 @@ if __name__ == "__main__":
     log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_output_dir, config_name)
     logger = setup_logger(log_dir)
     logger.info("Training started!")
+    logger.info("Model class: %s", model_class)
 
     # Dataset ve DataLoader
     train_dataset = ProteinLigandDatasetWithH5(
