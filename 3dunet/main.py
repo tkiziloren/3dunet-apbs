@@ -33,8 +33,8 @@ MODEL_DICT = {
                 "ResNet3D6L": ResNet3D6L,
                 # MONAI'nin klasik 3D UNet'i
                 "MONAI_UNet3D": lambda in_ch, out_ch, base:
-                    UNet(
-                        dimensions=3,
+                UNet(
+                        spatial_dims=3,
                         in_channels=in_ch,
                         out_channels=out_ch,
                         channels=(base, base * 2, base * 4, base * 8, base * 16),
@@ -62,9 +62,8 @@ MODEL_DICT = {
                     FlexibleUNet(
                         in_channels=in_ch,
                         out_channels=out_ch,
-                        backbone="resnet18",  # ister değiştir, ör: "resnet34"
+                        backbone="resnet18",  # eg: "resnet34"
                         spatial_dims=3,
-                        base_feature_size=base
                     ),
 
                     # Transformer tabanlı UNet (GPU RAM yüksek olmalı!)
@@ -109,7 +108,7 @@ MODEL_DICT = {
                     ConvNeXt3D(
                         in_channels=in_ch,
                         out_channels=out_ch,
-                        dims=[base, base * 2, base * 4, base * 8],
+                        base_features=base,
                         depths=[2, 2, 2, 2]
                     ),
                     "ConvNeXt3DV2": lambda in_ch, out_ch, base:
