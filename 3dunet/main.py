@@ -6,7 +6,15 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import ProteinLigandDatasetWithH5
-from models import UNet3D4L, UNet3D5L, UNet3D6L, UNet3D4LA, UNet3D4LC, UNet3D4LAC, ResNet3D4L, ResNet3D5L, ResNet3D6L
+from models.UNet3D4L import UNet3D4L
+from models.UNet3D5L import UNet3D5L
+from models.UNet3D6L import UNet3D6L
+from models.UNet3D4LA import UNet3D4LA
+from models.UNet3D4LC import UNet3D4LC
+from models.UNet3D4LAC import UNet3D4LAC
+from models.ResNet3D4L import ResNet3D4L
+from models.ResNet3D5L import ResNet3D5L
+from models.ResNet3D6L import ResNet3D6L
 from models.ConvNeXt3D import ConvNeXt3D
 from models.ConvNeXt3DV2 import ConvNeXt3DV2
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
