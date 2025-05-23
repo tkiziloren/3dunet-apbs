@@ -53,6 +53,7 @@ class ConvNeXt3DV2(nn.Module):
 
     def forward(self, x):
         # Encoder
+        input_shape = x.shape[2:]
         skips = []
         x = self.stem(x)
         for down, stage in zip(self.downsample_layers, self.stages):
@@ -75,4 +76,5 @@ class ConvNeXt3DV2(nn.Module):
         x = self.up_conv1(x)
 
         x = self.final_conv(x)
+        x = nn.functional.interpolate(x, size=input_shape, mode='trilinear', align_corners=True)
         return x
