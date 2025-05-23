@@ -16,9 +16,6 @@ WEIGHTS_DIR="/hps/nobackup/arl/chembl/tevfik/3dunet-apbs/output/${JOB_NAME}"
 STDOUT_LOG="${LOG_DIR}/${JOB_NAME}_%j.out"
 STDERR_LOG="${LOG_DIR}/${JOB_NAME}_%j.err"
 
-mkdir -p ${LOG_DIR}
-mkdir -p ${WEIGHTS_DIR}
-
 # Slurm job’u komut satırı parametreleriyle çalıştır
 sbatch --job-name=${JOB_NAME} \
        --gres=gpu:${GPU_TYPE}:${GPU_COUNT} \
