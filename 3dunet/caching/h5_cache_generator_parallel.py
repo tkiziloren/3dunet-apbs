@@ -26,7 +26,7 @@ class LabelMaskType(Enum):
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate cache files for proteins.")
     parser.add_argument(
-        "--config", type=str, default="config/caching/h5_cache_config_pdbbind_limited", help="Path to the config file"
+        "--config", type=str, default="h5_cache_config_pdbbind_limited", help="Path to the config file"
     )
     return parser.parse_args()
 
@@ -153,7 +153,8 @@ def generate_labels_h5_from_binding_site_in_parallel(protein_names, root_dir, ca
 
 if __name__ == "__main__":
     args = parse_args()
-    config = load_config(args.config)
+    config_file = "../config/caching/" + args.config + ".yml"
+    config = load_config(config_file)
 
     # Cache dizinini komut satırı argümanı üzerinden veya config'ten al
     cache_dir = config.get("cache_directory", "./cache")

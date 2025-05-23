@@ -34,3 +34,5 @@ sbatch --job-name=3d-unet \
                cd ~/PHD/3dunet-apbs/3dunet && \
                export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && \
                python main.py --config ${CONFIG_PATH}"
+
+

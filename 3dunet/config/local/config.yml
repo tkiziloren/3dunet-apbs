@@ -1,6 +1,6 @@
 name: second_config
-data_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/"
-cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
+data_directory: "/Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set/"
+cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set/cache"
 h5_directory: "/Users/tevfik/Sandbox/DATA/pdbbind-limited/"
 training:
   early_stopping_patience: 10
