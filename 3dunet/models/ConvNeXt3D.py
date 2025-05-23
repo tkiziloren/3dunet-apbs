@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class ConvNeXt3DBlock(nn.Module):
     def __init__(self, dim):
@@ -48,6 +49,7 @@ class ConvNeXt3D(nn.Module):
         self.final_conv = nn.Conv3d(dims[0], out_channels, kernel_size=1)
 
     def forward(self, x):
+        input_shape = x.shape[2:]  # (D, H, W) -> spatial dims
         x = self.stem(x)
         for down, stage in zip(self.downsample_layers, self.stages):
             x = down(x)
@@ -56,4 +58,6 @@ class ConvNeXt3D(nn.Module):
         x = self.up2(x)
         x = self.up1(x)
         x = self.final_conv(x)
+        # Spatial boyutu input ile eşleştir
+        x = F.interpolate(x, size=input_shape, mode='trilinear', align_corners=True)
         return x
