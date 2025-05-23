@@ -9,6 +9,7 @@ from model import UNet3D
 from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
+num_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 16))
 
 if __name__ == "__main__":
     args = parse_args()
@@ -33,8 +34,8 @@ if __name__ == "__main__":
         transform=CustomCompose([Standardize()])
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True, num_workers=os.cpu_count())
-    validation_loader = DataLoader(validation_dataset, batch_size=config["validation"]["batch_size"], shuffle=False, num_workers=os.cpu_count())
+    train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True, num_workers=num_workers)
+    validation_loader = DataLoader(validation_dataset, batch_size=config["validation"]["batch_size"], shuffle=False, num_workers=num_workers)
 
     # Model, optimizer, scheduler, loss
     device = get_device()
