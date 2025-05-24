@@ -65,6 +65,9 @@ bash train.sh UNet3D5L_base_features64 config/codon/pdbbind_optimized_pos_weight
 bash train.sh UNet3D6L_base_features64 config/codon/pdbbind_optimized_pos_weight_1.yml UNet3D6L 1 h200 16 64 128
 bash train.sh UNet3D4LA_base_features64 config/codon/pdbbind_optimized_pos_weight_1.yml UNet3D4LA 1 h200 16 64 128
 bash train.sh UNet3D4LC_base_features64 config/codon/pdbbind_optimized_pos_weight_1.yml UNet3D4LC 1 h200 16 64 128
+
+bash train.sh ConvNeXt3D_base_features64 config/codon/pdbbind_optimized_pos_weight_1.yml ConvNeXt3D 1 h200 16 64 128
+bash train.sh ConvNeXt3DV2_base_features64 config/codon/pdbbind_optimized_pos_weight_1.yml ConvNeXt3DV2 1 h200 16 64 128
 ---------------------------
 tensorboard --logdir_spec "lr_0001/tensorboard:lr_0001,loss_alpha_07/tensorboard:loss_alpha_07,pdbbind_tmp/tensorboard:pdbbind_tmp,pdbbind/tensorboard:pdbbind,loss_pos_weight_5/tensorboard:loss_pos_weight_5,loss_pos_weight_15/tensorboard:loss_pos_weight_15,loss_smooth_2/tensorboard:loss_smooth_2,loss_smooth_05/tensorboard:loss_smooth_05,wd_00001/tensorboard:wd_00001,scheduler_step_lr/tensorboard:scheduler_step_lr,loss_alpha_04/tensorboard:loss_alpha_04,pdbbind_optimized/tensorboard:pdbbind_optimized,pdbbind_optimized_pos_weight_1/tensorboard:pdbbind_optimized_pos_weight_1"
 

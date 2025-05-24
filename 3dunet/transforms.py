@@ -1,3 +1,19 @@
+
+import numpy as np
+import torch
+from scipy.ndimage import rotate
+
+class MonaiWrapper:
+    def __init__(self, monai_transform):
+        self.monai_transform = monai_transform
+
+    def __call__(self, protein, label):
+        # MONAI transformlar çoğunlukla dict ya da tek tensora uygulanır.
+        # Aynı augmentasyonu hem protein hem label'a uygula:
+        data = {"image": protein, "label": label}
+        out = self.monai_transform(data)
+        return out["image"], out["label"]
+
 class CustomCompose:
     def __init__(self, transforms):
         self.transforms = transforms
@@ -8,9 +24,6 @@ class CustomCompose:
         return protein, label
 
 
-import numpy as np
-import torch
-from scipy.ndimage import rotate
 
 
 class RandomRotate3D:

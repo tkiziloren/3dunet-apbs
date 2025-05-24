@@ -2,6 +2,7 @@ import os
 
 import torch
 from monai.networks.nets import UNet, DynUNet, SegResNet, UNETR, SwinUNETR, FlexibleUNet, VNet
+from monai.transforms import Compose, RandRotate90d, RandFlipd, RandGaussianNoised, RandZoomd, RandSpatialCropd, ToTensorD
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -17,9 +18,27 @@ from models.ResNet3D5L import ResNet3D5L
 from models.ResNet3D6L import ResNet3D6L
 from models.ConvNeXt3D import ConvNeXt3D
 from models.ConvNeXt3DV2 import ConvNeXt3DV2
-from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose
+from transforms import RandomFlip, RandomRotate3D, Standardize, CustomCompose, MonaiWrapper
+from monai.transforms import (
+    RandRotate90,
+    RandFlip,
+    RandGaussianNoise,
+    RandZoom,
+    RandSpatialCrop,
+    Compose
+)
 from utils.configuration import setup_logger, parse_args, load_config, create_output_dirs
 from utils.training import get_optimizer, get_scheduler, get_loss_function, get_device, initialize_metrics, calculate_metrics
+
+
+train_transforms = Compose([
+    RandRotate90d(keys=["image", "label"], prob=0.5, spatial_axes=[0, 1, 2]),
+    RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=0),
+    RandGaussianNoised(keys=["image"], prob=0.15, mean=0.0, std=0.01),
+    RandZoomd(keys=["image", "label"], prob=0.2, min_zoom=0.9, max_zoom=1.1),
+    RandSpatialCropd(keys=["image", "label"], roi_size=(128, 128, 128), random_size=False),
+    ToTensorD(keys=["image", "label"])
+])
 
 MODEL_DICT = {
                 "UNet3D4L": UNet3D4L,
@@ -149,11 +168,26 @@ if __name__ == "__main__":
     logger.info("Number of epochs: %d", num_epochs)
     logger.info("Model class: %s", model_class)
 
+    monai_transforms = Compose([
+        RandRotate90d(keys=["image", "label"], prob=0.5, spatial_axes=(0, 1)),
+        RandRotate90d(keys=["image", "label"], prob=0.5, spatial_axes=(1, 2)),
+        RandRotate90d(keys=["image", "label"], prob=0.5, spatial_axes=(0, 2)),
+        RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=0),
+        RandGaussianNoised(keys=["image"], prob=0.1, mean=0.0, std=0.01),
+        RandZoomd(keys=["image", "label"], prob=0.2, min_zoom=0.9, max_zoom=1.1),
+        RandSpatialCropd(keys=["image", "label"], roi_size=(128, 128, 128), random_size=False),
+        ToTensorD(keys=["image", "label"])
+    ])
+
+    transform_default = CustomCompose([RandomFlip(), RandomRotate3D(), Standardize()])
+    transform_monai = CustomCompose([MonaiWrapper(monai_transforms), Standardize()])
+
+    train_transform = transform_monai if config.get("use_monai_transforms", False) else transform_default
     # Dataset ve DataLoader
     train_dataset = ProteinLigandDatasetWithH5(
         h5_dir=config["h5_directory"],
         protein_names=config["datasets"]["train"],
-        transform=CustomCompose([RandomFlip(), RandomRotate3D(), Standardize()])
+        transform=train_transform
     )
     validation_dataset = ProteinLigandDatasetWithH5(
         h5_dir=config["h5_directory"],
