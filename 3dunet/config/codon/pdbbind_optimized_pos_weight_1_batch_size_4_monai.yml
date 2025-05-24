@@ -2,7 +2,7 @@
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 name: pdbbind_optimized_pos_weight
-use_monai : true
+use_monai_transforms : true
 training:
   early_stopping_patience: 40
   num_epochs: 200
