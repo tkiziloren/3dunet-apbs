@@ -2,11 +2,11 @@
 #cache_directory: "/Users/tevfik/Sandbox/github/PHD/data/src_data/pdbbind/refined-set/cache"
 h5_directory: "/hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter"
 name: pdbbind_optimized_pos_weight
-use_monai : true
+use_monai : false
 training:
   early_stopping_patience: 40
   num_epochs: 200
-  batch_size: 8
+  batch_size: 4
   learning_rate: 0.0004
   weight_decay: 0.00001
   optimizer: "adam"
@@ -21,7 +21,7 @@ training:
     smooth: 1.0
     pos_weight: 1.0
 validation:
-  batch_size: 8
+  batch_size: 4
 datasets:
   test:
     - 3s0e
