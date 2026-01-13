@@ -61,7 +61,6 @@ MODEL_DICT = {
                         num_res_units=2,
                         norm='batch'
                     ),
-
                     # MONAI'nin dynamic UNet'i
                     "MONAI_DynUNet3D": lambda in_ch, out_ch, base:
                     DynUNet(
@@ -75,7 +74,6 @@ MODEL_DICT = {
                         dropout=0.0,
                         norm_name="INSTANCE"
                     ),
-
                     # Backbone'ı seçilebilir UNet
                     "MONAI_FlexibleUNet3D": lambda in_ch, out_ch, base:
                     FlexibleUNet(
@@ -85,7 +83,6 @@ MODEL_DICT = {
                         spatial_dims=3,
                     ),
 
-                    # Transformer tabanlı UNet (GPU RAM yüksek olmalı!)
                     "MONAI_UNETR": lambda in_ch, out_ch, base:
                     UNETR(
                         in_channels=in_ch,
@@ -140,6 +137,8 @@ MODEL_DICT = {
                 }
 
 
+
+
 if __name__ == "__main__":
 
     args = parse_args()
@@ -156,6 +155,9 @@ if __name__ == "__main__":
     log_dir, weights_dir, tensorboard_dir = create_output_dirs(base_model_output_dir, config_name)
     logger = setup_logger(log_dir)
     num_epochs = config["training"]["num_epochs"]
+
+    features = config["features"]
+    label_name = config["label"]
 
     logger.info("---------------------------------")
     logger.info("Training is being started!")
@@ -187,12 +189,14 @@ if __name__ == "__main__":
     train_dataset = ProteinLigandDatasetWithH5(
         h5_dir=config["h5_directory"],
         protein_names=config["datasets"]["train"],
-        transform=train_transform
+        transform=train_transform,
+        config_path=config_path
     )
     validation_dataset = ProteinLigandDatasetWithH5(
         h5_dir=config["h5_directory"],
         protein_names=config["datasets"].get("validation"),
-        transform=CustomCompose([Standardize()])
+        transform=CustomCompose([Standardize()]),
+        config_path=config_path
     )
 
     train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True, num_workers=num_workers)
@@ -202,7 +206,7 @@ if __name__ == "__main__":
     device = get_device()
     ModelClass = MODEL_DICT[model_class]
     #model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
-    model = ModelClass(2, 1, base_features).to(device)
+    model = ModelClass(len(features), 1, base_features).to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
@@ -220,7 +224,7 @@ if __name__ == "__main__":
 
     total_batches_train = len(train_loader)
     total_batches_validation = len(validation_loader)
-    torch_metrics = initialize_metrics(threshold=0.5, device=device)
+    torch_metrics = initialize_metrics(threshold=threshold, device=device)
     for epoch in range(config["training"]["num_epochs"]):
         model.train()
         train_loss, train_f1_sum, train_precision_sum, train_recall_sum = 0, 0, 0, 0
@@ -321,3 +325,4 @@ if __name__ == "__main__":
     logger.info("Loss function: %s", config["training"].get("loss"))
     logger.info("Early stopping patience: %d", patience)
     logger.info(f"Best validation F1 score: {best_val_f1:.4f}, best training f1 score: {best_train_f1:.4f}")
+    logger.info("---------------------------------")

@@ -63,7 +63,12 @@ def get_loss_function(loss_config, device):
 
 
 def get_device():
-    return "cuda" if torch.cuda.is_available() else "cpu"
+    if torch.backends.mps.is_available():
+        return "cpu"   # Metal Performance Shaders (Apple GPU)
+    elif torch.cuda.is_available():
+        return "cuda"
+    else:
+        return "cpu"
 
 
 def initialize_metrics(threshold=0.5, device=None):

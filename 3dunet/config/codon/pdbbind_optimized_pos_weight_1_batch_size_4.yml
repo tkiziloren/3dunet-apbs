@@ -19,7 +19,7 @@ training:
     type: "BCEDiceLoss"
     alpha: 0.5
     smooth: 1.0
-    pos_weight: 1.0
+    pos_weight: 1000.0
 validation:
   batch_size: 4
 datasets:

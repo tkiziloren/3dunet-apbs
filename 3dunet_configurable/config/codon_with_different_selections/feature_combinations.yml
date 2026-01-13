@@ -1,0 +1,170 @@
+# Feature Combinations for Experimentation
+# Based on visual analysis and domain knowledge
+# Each combination will be generated for BOTH labels:
+# - binding_site_in_dataset (dataset label)
+# - binding_site_calculated (calculated label)
+
+combinations:
+  # Baseline - sadece electrostatic
+  baseline:
+    features:
+      - electrostatic_grid
+    
+  # Electrostatic + individual atomic features
+  electrostatic_shape:
+    features:
+      - electrostatic_grid
+      - shape
+      
+  electrostatic_nitrogen:
+    features:
+      - electrostatic_grid
+      - atomic_N
+      - shape
+      
+  electrostatic_oxygen:
+    features:
+      - electrostatic_grid
+      - atomic_O
+      - shape
+      
+  electrostatic_carbon:
+    features:
+      - electrostatic_grid
+      - atomic_C
+      - shape
+      
+  electrostatic_phosphorus:
+    features:
+      - electrostatic_grid
+      - atomic_P
+      - shape
+      
+  electrostatic_sulfur:
+    features:
+      - electrostatic_grid
+      - atomic_S
+      - shape
+
+  electrostatic_acceptor:
+    features:
+      - electrostatic_grid
+      - atomic_acceptor
+      - shape
+      
+  electrostatic_hydrophobic:
+    features:
+      - electrostatic_grid
+      - atomic_hydrophobic
+      - shape
+      
+  electrostatic_aromatic:
+    features:
+      - electrostatic_grid
+      - atomic_aromatic
+      - shape
+      
+  electrostatic_halogen:
+    features:
+      - electrostatic_grid
+      - atomic_halogen
+      - shape
+    
+  # Electrostatic + distance features
+  electrostatic_dist_surface:
+    features:
+      - electrostatic_grid
+      - dist_to_surface
+      - shape
+      
+  electrostatic_dist_ligand:
+    features:
+      - electrostatic_grid
+      - dist_to_ligand
+    
+  # Meaningful pairs
+  electrostatic_donor_acceptor:
+    features:
+      - electrostatic_grid
+      - atomic_donor
+      - atomic_acceptor
+      - shape
+      
+  electrostatic_donor:
+    features:
+      - electrostatic_grid
+      - shape
+      - atomic_donor
+    
+      
+  electrostatic_hydrophobic_aromatic:
+    features:
+      - electrostatic_grid
+      - atomic_hydrophobic
+      - atomic_aromatic
+    
+  # Group combinations
+  electrostatic_all_atoms:
+    features:
+      - electrostatic_grid
+      - atomic_N
+      - atomic_O
+      - atomic_C
+      - atomic_P
+      - atomic_S
+      - shape
+      
+  electrostatic_all_chemical:
+    features:
+      - electrostatic_grid
+      - atomic_donor
+      - atomic_acceptor
+      - atomic_hydrophobic
+      - atomic_aromatic
+      - shape
+      
+  electrostatic_all_distances:
+    features:
+      - electrostatic_grid
+      - dist_to_surface
+      - dist_to_ligand
+      - shape
+    
+  # Best combinations
+  electrostatic_chemical:
+    features:
+      - electrostatic_grid
+      - shape
+      - atomic_donor
+      - atomic_acceptor
+      - atomic_hydrophobic
+      
+  electrostatic_shape_distances:
+    features:
+      - electrostatic_grid
+      - shape
+      - dist_to_surface
+      - dist_to_ligand
+      
+  electrostatic_comprehensive:
+    features:
+      - electrostatic_grid
+      - shape
+      - atomic_N
+      - atomic_O
+      - atomic_donor
+      - atomic_acceptor
+      - atomic_hydrophobic
+      - atomic_aromatic
+
+      
+  electrostatic_full_context:
+    features:
+      - electrostatic_grid
+      - shape
+      - atomic_donor
+      - atomic_acceptor
+      - atomic_hydrophobic
+      - atomic_aromatic
+      - dist_to_surface
+      - dist_to_ligand

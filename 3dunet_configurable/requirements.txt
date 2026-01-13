@@ -1,0 +1,12 @@
+torch
+torchvision
+numpy
+scikit-learn
+biopython
+tensorboard
+pyyaml
+h5py
+prody
+potsim==0.3.2
+torchmetrics
+monai

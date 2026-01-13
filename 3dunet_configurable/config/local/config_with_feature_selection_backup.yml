@@ -1,0 +1,126 @@
+
+h5_directory: "/Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set_minimal_cache_only_fits_60_resolution_fix/box72/"
+# h5_directory: "/Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set_minimal_cache_only_fits_60/box72/"
+features:
+  - electrostatic_grid
+  - shape
+label: binding_site_in_dataset
+training:
+  early_stopping_patience: 60
+  num_epochs: 300
+  batch_size: 1
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  optimizer: "adam"
+  scheduler:
+    type: "ReduceLROnPlateau"
+    factor: 0.2
+    patience: 15
+    mode: "min"
+  loss:
+    type: "BCEDiceLoss"
+    alpha: 0.5
+    smooth: 1.0
+    pos_weight: 10000
+validation:
+  batch_size: 1
+datasets:
+  test:
+    - 1a1e
+  train:
+    - 1a4w
+    - 1a9m
+    - 1a28
+    - 1a30
+    - 1a94
+    - 1aaq
+    - 1afl
+    - 1aid
+    - 1ajv
+    - 1ajx
+    - 1avn
+    - 1azm
+    - 1b6j
+    - 1b6k
+    - 1b6l
+    - 1bcu
+    - 1bn1
+    - 3rz0
+    - 3rz1
+    - 3rz5
+    - 3s8l
+    - 3s8n
+    - 3s8o
+    - 3s43
+    - 3s45
+    - 3s54
+    - 3s71
+    - 3s72
+    - 3s73
+    - 3s75
+    - 3s76
+    - 3s77
+    - 3s78
+    - 3sha
+    - 3shc
+    - 3si3
+    - 3si4
+    - 3slz
+    - 3sm2
+    - 3spf
+    - 3st5
+    - 3str
+    - 3su0
+    - 3su1
+    - 966c
+    - 6stl
+    - 6szp
+    - 6u5y
+    - 6u8o
+    - 6ud2
+    - 6udi
+    - 6udt
+    - 6udu
+    - 6udv
+    - 7upj
+    - 184l
+    - 185l
+    - 186l
+    - 187l
+    - 188l
+    - 1bv9
+    - 1bwa
+    - 1bwb
+    - 1c5x
+    - 1c70
+    - 1ceb
+    - 1cgl
+    - 1cnw
+    - 1cnx
+    - 1cny
+    - 1cps
+    - 1d3d
+    - 1d3p
+  validation:
+    - 1bn4
+    - 1bnn
+    - 1bnq
+    - 1bnt
+    - 1bnu
+    - 1bnv
+    - 1bnw
+    - 1bv7
+
+
+
+
+
+
+
+
+
+
+
+
+
+

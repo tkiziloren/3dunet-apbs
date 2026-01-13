@@ -1,0 +1,21 @@
+data_directory: "/Volumes/Data/DiskYedek/DATA/src_data/pdbbind/refined-set"
+cache_directory: "/Volumes/Data/DiskYedek/DATA/caches/base4.5"
+target_h5_cache_directory: "/Volumes/Data/DiskYedek/DATA/target_h5_cache"
+proteins:
+  - 1a1e
+  - 1a4r
+  - 1ado
+  - 1ai7
+  - 1ajp
+  - 1alw
+  - 1b55
+  - 1b57
+  - 1bai
+  - 1bhx
+  - 1bq4
+  - 1bxr
+  - 1c3x
+  - 1c86
+  - 1ceb
+  - 1cnx
+  - 1ctt
