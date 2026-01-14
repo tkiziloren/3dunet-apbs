@@ -10,6 +10,42 @@ from torch.utils.data import Dataset
 # Logging yapılandırması
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Feature normalization ranges
+FEATURE_RANGES = {
+    'electrostatic_grid': (-5.0, 5.0),  # kV
+    'shape': (0.0, 1.0),  # Already normalized
+    'hydrophobicity': (-4.5, 4.5),
+    'dist_to_ligand': (0.0, 80.0),  # Å
+    'dist_to_surface': (0.0, 80.0),  # Å
+    # Atomic features are binary (0 or 1), no normalization needed
+    'atomic_N': (0.0, 1.0),
+    'atomic_O': (0.0, 1.0),
+    'atomic_C': (0.0, 1.0),
+    'atomic_P': (0.0, 1.0),
+    'atomic_S': (0.0, 1.0),
+    'atomic_donor': (0.0, 1.0),
+    'atomic_acceptor': (0.0, 1.0),
+    'atomic_hydrophobic': (0.0, 1.0),
+    'atomic_aromatic': (0.0, 1.0),
+    'atomic_halogen': (0.0, 1.0),
+}
+
+def normalize_feature(feature_array, feature_name):
+    """
+    Normalize feature to [0, 1] range based on known physical ranges
+    """
+    if feature_name not in FEATURE_RANGES:
+        logging.warning(f"No normalization range defined for {feature_name}, returning as-is")
+        return feature_array
+    
+    min_val, max_val = FEATURE_RANGES[feature_name]
+    
+    # Clip to range and normalize
+    feature_clipped = np.clip(feature_array, min_val, max_val)
+    feature_normalized = (feature_clipped - min_val) / (max_val - min_val)
+    
+    return feature_normalized
+
 
 def load_config(config_path="config.yml"):
     with open(config_path, 'r') as file:
@@ -56,7 +92,11 @@ class ProteinLigandDatasetWithH5(Dataset):
                     arr = h5f[feat][:]
                 else:
                     raise KeyError(f"Feature '{feat}' not found in H5 file {h5_filepath}")
+                
+                # ✅ Normalize feature
+                arr = normalize_feature(arr, feat)
                 features.append(arr)
+            
             protein_input = torch.tensor(np.stack(features), dtype=torch.float32)
 
             # Label’ı dinamik oku

@@ -1,0 +1,28 @@
+bash train_new.sh electrostatic_shape_dataset config/codon_with_different_selections/baseline_with_shape_label_calculated_binding_site.yml UNet3D4LA
+bash train_new.sh electrostatic_shape_calculated config/codon_with_different_selections/baseline_with_shape_label_dataset_binding_site.yml UNet3D4LA
+
+### Donor + Acceptor (Hydrogen bonding)
+```bash
+bash train_new.sh donor_acceptor_dataset config/codon_with_different_selections/electrostatic_donor_acceptor_label_dataset_binding_site.yml UNet3D4LA
+# bash train_new.sh donor_acceptor_calculated config/codon_with_different_selections/electrostatic_donor_acceptor_label_calculated_binding_site.yml UNet3D4LA
+```
+
+### All Chemical Features
+```bash
+bash train_new.sh all_chemical_dataset config/codon_with_different_selections/electrostatic_all_chemical_label_dataset_binding_site.yml UNet3D4LA
+# bash train_new.sh all_chemical_calculated config/codon_with_different_selections/electrostatic_all_chemical_label_calculated_binding_site.yml UNet3D4LA
+```
+
+
+### Distances
+```bash
+bash train_new.sh full_context_dataset config/codon_with_different_selections/electrostatic_shape_distances_label_dataset_binding_site.yml UNet3D4LA
+# bash train_new.sh full_context_calculated config/codon_with_different_selections/electrostatic_full_context_label_calculated_binding_site.yml UNet3D4LA
+```
+
+
+### Full Context (Tüm feature'lar)
+```bash
+bash train_new.sh full_context_dataset config/codon_with_different_selections/electrostatic_full_context_label_dataset_binding_site.yml UNet3D4LA
+# bash train_new.sh full_context_calculated config/codon_with_different_selections/electrostatic_full_context_label_calculated_binding_site.yml UNet3D4LA
+```

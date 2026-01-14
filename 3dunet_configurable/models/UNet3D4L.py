@@ -54,13 +54,16 @@ class Decoder(nn.Module):
         return self.conv(x)
 
 class UNet3D4L(nn.Module):
-    def __init__(self, in_channels=2, out_channels=1, base_features=32):
+    def __init__(self, in_channels=2, out_channels=1, base_features=32, dropout=0.5):
         super(UNet3D4L, self).__init__()
         self.enc1 = DoubleConv(in_channels, base_features)
         self.enc2 = Encoder(base_features, base_features * 2)
         self.enc3 = Encoder(base_features * 2, base_features * 4)
         self.enc4 = Encoder(base_features * 4, base_features * 8)
+        
         self.bottleneck = DoubleConv(base_features * 8, base_features * 16)
+        self.dropout = nn.Dropout3d(p=dropout)  # ✅ Configurable dropout
+        
         self.dec1 = Decoder(base_features * 16 + base_features * 8, base_features * 8)
         self.dec2 = Decoder(base_features * 8 + base_features * 4, base_features * 4)
         self.dec3 = Decoder(base_features * 4 + base_features * 2, base_features * 2)
@@ -72,7 +75,10 @@ class UNet3D4L(nn.Module):
         enc2 = self.enc2(enc1)
         enc3 = self.enc3(enc2)
         enc4 = self.enc4(enc3)
+        
         bottleneck = self.bottleneck(enc4)
+        bottleneck = self.dropout(bottleneck)  # ✅ Apply dropout after bottleneck
+        
         dec1 = self.dec1(bottleneck, enc4)
         dec2 = self.dec2(dec1, enc3)
         dec3 = self.dec3(dec2, enc2)

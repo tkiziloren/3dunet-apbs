@@ -7,6 +7,40 @@ from torchmetrics.classification import F1Score, Precision, Recall, ConfusionMat
 from .losses import BCEDiceLoss
 
 
+def calculate_pos_weight_from_loader(train_loader, max_batches=50):
+    """
+    Calculate optimal pos_weight dynamically from training data
+    
+    Args:
+        train_loader: Training data loader
+        max_batches: Maximum number of batches to sample (for speed)
+    
+    Returns:
+        float: Calculated pos_weight (capped at 100)
+    """
+    total_pos = 0
+    total_voxels = 0
+    
+    print("Calculating pos_weight from training data...")
+    for i, (protein, label) in enumerate(train_loader):
+        if i >= max_batches:
+            break
+        total_pos += label.sum().item()
+        total_voxels += label.numel()
+    
+    if total_voxels == 0:
+        return 10.0  # Default fallback
+    
+    ratio = total_pos / total_voxels
+    pos_weight = (1 - ratio) / ratio if ratio > 0 else 10.0
+    pos_weight = min(pos_weight, 100.0)  # Cap at 100
+    
+    print(f"  Positive voxel ratio: {ratio:.6f}")
+    print(f"  Calculated pos_weight: {pos_weight:.1f}")
+    
+    return pos_weight
+
+
 def get_optimizer(optimizer_name, model_parameters, learning_rate, weight_decay):
     """
     Verilen parametrelere göre optimizer oluşturur.
@@ -133,3 +167,100 @@ def calculate_metrics(pocket_label, output, metrics, threshold=0.5):
         predictions_flattened = (probs > threshold).astype(np.uint8).flatten()
         targets_flattened = pocket_label.cpu().numpy().flatten()
         return calculate_metrics_sklearn(targets_flattened, predictions_flattened)
+
+
+def calculate_pocket_dcc(prediction, label, threshold=4.0):
+    """
+    Calculate pocket-level Distance Criterion Center (DCC) - LOCALIZATION metric.
+    
+    DCC_Localization measures the Euclidean distance between:
+    - Center of mass of predicted binding site
+    - Center of mass of true ligand/binding site
+    
+    Args:
+        prediction: Model output (sigmoid applied, thresholded) - binary mask
+        label: Ground truth binding site - binary mask
+        threshold: Distance threshold in Angstroms (default 4.0Å)
+    
+    Returns:
+        float: 1.0 if distance < threshold (success), 0.0 otherwise
+        float: actual distance in voxels (for logging)
+    """
+    # Convert to numpy if tensor
+    if torch.is_tensor(prediction):
+        prediction = prediction.cpu().numpy()
+    if torch.is_tensor(label):
+        label = label.cpu().numpy()
+    
+    # Binary predictions (threshold at 0.5)
+    pred_binary = (prediction > 0.5).astype(bool)
+    label_binary = (label > 0.5).astype(bool)
+    
+    # Calculate center of mass for predicted pocket
+    pred_coords = np.argwhere(pred_binary)
+    if len(pred_coords) == 0:
+        # No prediction - maximum distance
+        return 0.0, float('inf')
+    pred_center = pred_coords.mean(axis=0)
+    
+    # Calculate center of mass for true binding site
+    label_coords = np.argwhere(label_binary)
+    if len(label_coords) == 0:
+        # No true binding site (shouldn't happen)
+        return 0.0, float('inf')
+    label_center = label_coords.mean(axis=0)
+    
+    # Euclidean distance between centers (in voxels)
+    distance = np.linalg.norm(pred_center - label_center)
+    
+    # Success if distance < threshold
+    # Note: threshold is in Angstroms, but distance is in voxels
+    # Assuming 1 voxel ≈ 1 Angstrom (adjust if needed)
+    success = 1.0 if distance < threshold else 0.0
+    
+    return success, distance
+
+
+def calculate_pocket_dcc_coverage(prediction, label):
+    """
+    Calculate DCC Coverage metric: TP / (TP + FN) at voxel level.
+    
+    DCC_Coverage measures how much of the true binding site is covered 
+    by the prediction at the voxel level.
+    
+    Args:
+        prediction: Model output (sigmoid applied, thresholded) - binary mask
+        label: Ground truth binding site - binary mask
+    
+    Returns:
+        float: Coverage ratio [0.0, 1.0] = TP / (TP + FN)
+               1.0 means all true binding sites are correctly predicted
+               0.0 means no true binding sites are predicted
+    """
+    # Convert to numpy if tensor
+    if torch.is_tensor(prediction):
+        prediction = prediction.cpu().numpy()
+    if torch.is_tensor(label):
+        label = label.cpu().numpy()
+    
+    # Binary predictions (threshold at 0.5)
+    pred_binary = (prediction > 0.5).astype(bool)
+    label_binary = (label > 0.5).astype(bool)
+    
+    # If no label binding sites, coverage is undefined (return 0)
+    if label_binary.sum() == 0:
+        return 0.0
+    
+    # Calculate TP: overlap between prediction and label
+    true_positives = np.logical_and(pred_binary, label_binary).sum()
+    
+    # Calculate FN: label sites not predicted
+    false_negatives = np.logical_and(np.logical_not(pred_binary), label_binary).sum()
+    
+    # Coverage = TP / (TP + FN) = correctly predicted binding sites / all binding sites
+    denominator = true_positives + false_negatives
+    if denominator == 0:
+        return 0.0
+    
+    coverage = true_positives / denominator
+    return coverage

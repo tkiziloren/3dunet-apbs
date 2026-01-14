@@ -316,13 +316,35 @@ if __name__ == "__main__":
     device = get_device()
     ModelClass = MODEL_DICT[model_class]
     #model = ModelClass(in_channels=2, out_channels=1, base_features=base_features).to(device)
-    model = ModelClass(len(features), 1, base_features).to(device)
+    
+    # ✅ Get dropout from config (model section)
+    model_dropout = config.get("model", {}).get("dropout", 0.5)  # Default 0.5 if not specified
+    
+    # Check if model accepts dropout parameter
+    import inspect
+    model_params = inspect.signature(ModelClass.__init__).parameters
+    if 'dropout' in model_params:
+        model = ModelClass(len(features), 1, base_features, dropout=model_dropout).to(device)
+    else:
+        model = ModelClass(len(features), 1, base_features).to(device)
+        logger.warning(f"{model_class} does not support dropout parameter, using default")
+    
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
     optimizer = get_optimizer(config["training"]["optimizer"], model.parameters(), config["training"]["learning_rate"], config["training"]["weight_decay"])
     scheduler = get_scheduler(config["training"].get("scheduler"), optimizer)
-    criterion = get_loss_function(config["training"].get("loss"), device)
+    
+    # ✅ Calculate pos_weight dynamically from data
+    from utils.training import calculate_pos_weight_from_loader
+    calculated_pos_weight = calculate_pos_weight_from_loader(train_loader, max_batches=50)
+    
+    # Override config pos_weight with calculated value
+    loss_config = config["training"].get("loss").copy()
+    loss_config["pos_weight"] = calculated_pos_weight
+    criterion = get_loss_function(loss_config, device)
+    logger.info(f"Using dynamically calculated pos_weight: {calculated_pos_weight:.1f}")
+    
     writer = SummaryWriter(tensorboard_dir)
 
     # Training loop
@@ -335,17 +357,32 @@ if __name__ == "__main__":
     total_batches_train = len(train_loader)
     total_batches_validation = len(validation_loader)
     torch_metrics = initialize_metrics(threshold=threshold, device=device)
+    
+    # ✅ Gradient accumulation setup
+    accumulation_steps = config["training"].get("accumulation_steps", 1)
+    logger.info(f"Using gradient accumulation with {accumulation_steps} steps (effective batch size: {config['training']['batch_size'] * accumulation_steps})")
+    
     for epoch in range(config["training"]["num_epochs"]):
         model.train()
         train_loss, train_f1_sum, train_precision_sum, train_recall_sum = 0, 0, 0, 0
+        optimizer.zero_grad()  # ✅ Zero grad once at the start
+        
         for batch_idx, (protein, pocket_label) in enumerate(train_loader, start=1):
             protein, pocket_label = protein.to(device), pocket_label.to(device)
-            optimizer.zero_grad()
+            
             output = model(protein).squeeze(1)
             loss = criterion(output, pocket_label)
+            
+            # ✅ Normalize loss by accumulation steps
+            loss = loss / accumulation_steps
             loss.backward()
-            optimizer.step()
-            train_loss += loss.item()
+            
+            # ✅ Update weights only after accumulation_steps
+            if batch_idx % accumulation_steps == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+            
+            train_loss += loss.item() * accumulation_steps  # Scale back for logging
             f1, precision, recall, _ = calculate_metrics(pocket_label, output, torch_metrics)
             train_f1_sum += f1
             train_precision_sum += precision
@@ -366,6 +403,8 @@ if __name__ == "__main__":
         # Validation
         model.eval()
         val_loss, val_f1_sum, val_precision_sum, val_recall_sum = 0, 0, 0, 0
+        val_dcc_localization_sum = 0  # ✅ DCC_Localization: center-to-center < 4Å
+        val_dcc_coverage_sum = 0  # ✅ DCC_Coverage: TP / (TP + FN)
         all_tp, all_fp, all_tn, all_fn = 0, 0, 0, 0
 
         with torch.no_grad():
@@ -374,6 +413,19 @@ if __name__ == "__main__":
                 output = model(protein).squeeze(1)
                 val_loss += criterion(output, pocket_label).item()
                 f1, precision, recall, (tp, fp, tn, fn) = calculate_metrics(pocket_label, output, torch_metrics)
+                
+                # ✅ Calculate both DCC metrics
+                from utils.training import calculate_pocket_dcc, calculate_pocket_dcc_coverage
+                prediction = torch.sigmoid(output).detach()
+                
+                # DCC_Localization: center-to-center distance < 4Å
+                dcc_localization_success, dcc_distance = calculate_pocket_dcc(prediction, pocket_label)
+                val_dcc_localization_sum += dcc_localization_success
+                
+                # DCC_Coverage: voxel-wise TP / (TP + FN)
+                dcc_coverage = calculate_pocket_dcc_coverage(prediction, pocket_label)
+                val_dcc_coverage_sum += dcc_coverage
+                
                 val_f1_sum += f1
                 val_precision_sum += precision
                 val_recall_sum += recall
@@ -387,13 +439,20 @@ if __name__ == "__main__":
         val_f1 = val_f1_sum / len(validation_loader)
         val_precision = val_precision_sum / len(validation_loader)
         val_recall = val_recall_sum / len(validation_loader)
+        val_dcc_localization = val_dcc_localization_sum / len(validation_loader)  # ✅ Localization success rate
+        val_dcc_coverage = val_dcc_coverage_sum / len(validation_loader)  # ✅ Coverage ratio
 
         logger.info(f"Epoch {epoch + 1} Validation Loss: {val_loss:.4f}, F1: {val_f1:.4f}, Precision: {val_precision:.4f}, Recall: {val_recall:.4f}")
+        logger.info(f"Epoch {epoch + 1} DCC_Localization (Center-to-Center < 4Å): {val_dcc_localization:.4f} ({val_dcc_localization*100:.1f}% success)")  # ✅ Log localization
+        logger.info(f"Epoch {epoch + 1} DCC_Coverage (Voxel TP/(TP+FN)): {val_dcc_coverage:.4f} ({val_dcc_coverage*100:.1f}% coverage)")  # ✅ Log coverage
         logger.info(f"Confusion Matrix - TP: {all_tp}, FP: {all_fp}, TN: {all_tn}, FN: {all_fn}")
         writer.add_scalar("Loss/Validation", val_loss, epoch)
         writer.add_scalar("F1/Validation", val_f1, epoch)
         writer.add_scalar("Precision/Validation", val_precision, epoch)
         writer.add_scalar("Recall/Validation", val_recall, epoch)
+        writer.add_scalar("DCC_Localization/Validation", val_dcc_localization, epoch)  # ✅ Tensorboard DCC_Localization
+        writer.add_scalar("DCC_Coverage/Validation", val_dcc_coverage, epoch)  # ✅ Tensorboard DCC_Coverage
+
 
         if train_f1 > best_train_f1:
             best_train_f1 = train_f1

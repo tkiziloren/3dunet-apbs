@@ -9,13 +9,12 @@ combinations:
   baseline:
     features:
       - electrostatic_grid
-    
-  # Electrostatic + individual atomic features
-  electrostatic_shape:
+  
+  baseline_with_shape:
     features:
       - electrostatic_grid
       - shape
-      
+    
   electrostatic_nitrogen:
     features:
       - electrostatic_grid
@@ -168,3 +167,6 @@ combinations:
       - atomic_aromatic
       - dist_to_surface
       - dist_to_ligand
+
+model:
+  dropout: 0.2

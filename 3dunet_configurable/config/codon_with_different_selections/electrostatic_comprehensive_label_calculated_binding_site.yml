@@ -13,6 +13,7 @@ training:
   early_stopping_patience: 60
   num_epochs: 300
   batch_size: 1
+  accumulation_steps: 8
   learning_rate: 0.001
   weight_decay: 1.0e-05
   optimizer: adam
@@ -25,9 +26,10 @@ training:
     type: BCEDiceLoss
     alpha: 0.5
     smooth: 1.0
-    pos_weight: 10000
+    pos_weight: 10
 validation:
   batch_size: 1
+  accumulation_steps: 8
 datasets:
   test:
   - 1t7d
@@ -824,3 +826,6 @@ datasets:
   - 5m77
   - 5dq8
   - 4sga
+
+model:
+  dropout: 0.2
