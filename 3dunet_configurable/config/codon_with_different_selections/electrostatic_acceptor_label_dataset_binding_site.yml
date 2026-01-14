@@ -1,4 +1,4 @@
-h5_directory: /hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/refined-set_filter
+h5_directory: /hps/nobackup/arl/chembl/tevfik/deep-apbs-data/pdbbind/box161
 features:
   - electrostatic_grid
   - atomic_acceptor
