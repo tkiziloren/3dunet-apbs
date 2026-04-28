@@ -5,7 +5,7 @@
 # - binding_site_calculated (calculated label)
 
 combinations:
-  # Baseline - sadece electrostatic
+  # Baseline - electrostatic
   baseline:
     features:
       - electrostatic_grid

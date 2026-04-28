@@ -112,6 +112,8 @@ dmypy.json
 
 # TensorBoard log files
 runs/
+**/tensorboard/
+events.out.tfevents.*
 
 # Checkpoint files
 checkpoints/
@@ -123,3 +125,6 @@ checkpoints/
 
 # Compiled Python files
 *.pyc
+
+# IDE run configurations generated locally
+run/
