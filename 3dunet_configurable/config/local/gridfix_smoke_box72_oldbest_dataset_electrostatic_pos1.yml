@@ -1,0 +1,95 @@
+name: gridfix_smoke_box72_oldbest_dataset_electrostatic_pos1
+seed: 42
+h5_directory: "/Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set_minimal_cache_gridfix_v1/box72/"
+features:
+  - electrostatic_grid
+label: binding_site_in_dataset
+use_monai_transforms: false
+augmentation:
+  enabled: true
+  flip_axis_prob: 0.5
+  rotate90_prob: 1.0
+  standardize: true
+  standardize_channel_wise: false
+training:
+  early_stopping_patience: 10
+  num_epochs: 20
+  batch_size: 4
+  accumulation_steps: 1
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  optimizer: adam
+  scheduler:
+    type: ReduceLROnPlateau
+    factor: 0.2
+    patience: 8
+    mode: min
+  loss:
+    type: BCEDiceLoss
+    alpha: 0.5
+    smooth: 1.0
+    pos_weight: 1
+    dynamic_pos_weight: false
+validation:
+  batch_size: 4
+  threshold: 0.5
+  threshold_sweep:
+    - 0.05
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.4
+    - 0.5
+    - 0.6
+    - 0.7
+    - 0.8
+    - 0.9
+  paper_metrics:
+    enabled: true
+    dcc_cutoff_angstrom: 4.0
+    dca_cutoff_angstrom: 4.0
+    min_component_voxels: 5
+    selection_metric: dcc_dvo_volume
+    selection_dvo_weight: 5.0
+    selection_max_mean_predicted_positive_voxels: 5000
+    top_k:
+      - 1
+      - 3
+model:
+  dropout: 0.5
+datasets:
+  train:
+    - 10gs
+    - 184l
+    - 185l
+    - 186l
+    - 187l
+    - 188l
+    - 1a1e
+    - 1a28
+    - 1a30
+    - 1a4k
+    - 1a4r
+    - 1a4w
+    - 1a69
+    - 1a94
+    - 1a99
+    - 1a9m
+    - 1a9q
+    - 1aaq
+    - 1ado
+    - 1afl
+    - 1ai4
+    - 1ai5
+    - 1ai7
+  validation:
+    - 1aid
+    - 1ajn
+    - 1ajp
+    - 1ajq
+    - 1ajv
+    - 1ajx
+    - 1atr
+    - 1avn
+  test:
+    - 1aid

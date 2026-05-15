@@ -1,18 +1,18 @@
-
-import numpy as np
 import torch
-from scipy.ndimage import rotate
 
 class MonaiWrapper:
     def __init__(self, monai_transform):
         self.monai_transform = monai_transform
 
     def __call__(self, protein, label):
-        # MONAI transformlar çoğunlukla dict ya da tek tensora uygulanır.
-        # Aynı augmentasyonu hem protein hem label'a uygula:
+        label_had_channel = label.dim() == 4
+        if not label_had_channel:
+            label = label.unsqueeze(0)
+
         data = {"image": protein, "label": label}
         out = self.monai_transform(data)
-        return out["image"], out["label"]
+        out_label = out["label"] if label_had_channel else out["label"].squeeze(0)
+        return out["image"], out_label
 
 class CustomCompose:
     def __init__(self, transforms):
@@ -23,32 +23,23 @@ class CustomCompose:
             protein, label = transform(protein, label)
         return protein, label
 
-
-
-
 class RandomRotate3D:
     def __init__(self, prob=1.0):
         self.prob = prob
 
     def __call__(self, protein, label):
         if torch.rand(1).item() > self.prob:
-            return protein, label  # Olasılığa göre dönüşüm uygulama
+            return protein, label
 
-        # NumPy dizilerine dönüştür
-        protein_np = protein.numpy()
-        label_np = label.numpy()
-
-        # Rastgele açılar ve eksenleri bir kez belirle
-        angles = np.random.uniform(0, 360, size=3)
-        axes = [(0, 1), (1, 2), (0, 2)]
-
-        # Her iki nesneye de aynı açı ve eksenleri kullanarak dönüşüm uygula
-        for axis, angle in zip(axes, angles):
-            protein_np = rotate(protein_np, angle, axes=axis, reshape=False, order=3, mode='constant', cval=0)
-            label_np = rotate(label_np, angle, axes=axis, reshape=False, order=0, mode='constant', cval=0)
-
-        # Dönüştürülmüş dizileri geri Tensor'a çevir
-        return torch.from_numpy(protein_np), torch.from_numpy(label_np)
+        spatial_axis_pairs = [(0, 1), (1, 2), (0, 2)]
+        for label_axes in spatial_axis_pairs:
+            k = int(torch.randint(0, 4, (1,)).item())
+            if k == 0:
+                continue
+            protein_axes = tuple(axis + (protein.dim() - 3) for axis in label_axes)
+            protein = torch.rot90(protein, k=k, dims=protein_axes)
+            label = torch.rot90(label, k=k, dims=label_axes)
+        return protein.contiguous(), label.contiguous()
 
 
 class RandomFlip:
@@ -59,23 +50,13 @@ class RandomFlip:
         self.axis_prob = axis_prob
 
     def __call__(self, protein, label):
-        if torch.rand(1).item() < self.axis_prob:
-            # Her bir tensorun kaç boyutlu olduğunu al
-            p_dim = protein.dim()
-            l_dim = label.dim()
-
-            # Sadece uzaysal boyutları flip'le!
-            # protein: (C, X, Y, Z) -> spatial: 1,2,3 | label: (X, Y, Z) -> spatial: 0,1,2
-            spatial_axes_protein = list(range(p_dim - 3, p_dim))
-            spatial_axes_label = list(range(l_dim))
-
-            # Rastgele bir uzaysal eksen seç
-            axis_p = np.random.choice(spatial_axes_protein)
-            axis_l = np.random.choice(spatial_axes_label)  # İstersen axis_p - (p_dim-3) de diyebilirsin
-
-            protein = torch.flip(protein, dims=[axis_p])
-            label = torch.flip(label, dims=[axis_l])
-        return protein, label
+        for label_axis in range(3):
+            if torch.rand(1).item() >= self.axis_prob:
+                continue
+            protein_axis = label_axis + (protein.dim() - 3)
+            protein = torch.flip(protein, dims=[protein_axis])
+            label = torch.flip(label, dims=[label_axis])
+        return protein.contiguous(), label.contiguous()
 
 
 class Standardize:
@@ -83,10 +64,11 @@ class Standardize:
     Basit bir Z-skoru normalizasyonu uygular.
     """
 
-    def __init__(self, mean: float = 0.0, std: float = 1.0, eps: float = 1e-5):
+    def __init__(self, mean: float = 0.0, std: float = 1.0, eps: float = 1e-5, channel_wise: bool = True):
         self.mean = mean
         self.std = std
         self.eps = eps
+        self.channel_wise = channel_wise
 
     def __call__(self, protein, label):
         """
@@ -98,5 +80,12 @@ class Standardize:
         Returns:
             torch.Tensor: Normalizasyon yapılmış tensor.
         """
-        protein = (protein - protein.mean()) / (protein.std() + 1e-5)
+        if self.channel_wise and protein.dim() >= 4:
+            spatial_dims = tuple(range(protein.dim() - 3, protein.dim()))
+            mean = protein.mean(dim=spatial_dims, keepdim=True)
+            std = protein.std(dim=spatial_dims, keepdim=True)
+            std = torch.where(std < self.eps, torch.ones_like(std), std)
+            protein = (protein - mean) / std
+        else:
+            protein = (protein - protein.mean()) / (protein.std() + self.eps)
         return protein, label

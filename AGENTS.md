@@ -3,10 +3,20 @@
 ## Purpose
 This repository trains and evaluates 3D voxel-based neural networks for protein-ligand binding-site segmentation.
 
+## Communication
+- Answer the user in the language they use. Keep code, identifiers, comments, config keys, logs, and commit-style technical text in English.
+
 ## Active Code Path
 - Treat `3dunet_configurable/` as the active implementation for new work.
 - Treat `3dunet/` as the older parallel implementation unless the user explicitly targets it.
 - Use configs under `3dunet_configurable/config/` to control features, labels, model settings, and train/validation/test splits.
+
+## Project Direction
+- Current priority is to finish the planned experimental work packages and lock defensible thesis results before doing framework/product work.
+- After the experiment results are stable, turn the project into a protein binding-site prediction framework inspired by `pytorch-3dunet`: config-driven training, prediction, evaluation, standardized HDF5/cache format, pretrained checkpoints, and visualization.
+- The thesis does not have to depend on the framework being complete. Treat the framework as a follow-up deliverable and CV-strengthening artifact unless the user explicitly changes priorities.
+- Even before the framework phase, write new scripts and outputs in a framework-compatible style: clear CLI arguments, reproducible configs, stable output folders, machine-readable CSV/JSON summaries, and no hidden local assumptions.
+- Keep the scientific positioning focused on APBS/electrostatics-aware 3D protein binding-site segmentation, standardized DCC/DCA/DVO/Pocket-F1 evaluation, and controlled feature/model ablations.
 
 ## Experiment Discipline
 - Do not commit generated artifacts: TensorBoard event files, model checkpoints, prediction arrays, local run configs, logs, or cache files.

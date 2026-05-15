@@ -1,0 +1,162 @@
+name: box161_compact_pos5_long
+seed: 42
+h5_directory: /Users/tevfik/Sandbox/github/PHD/data/pdbbind/refined-set-only-used-in-codon-tests/box161/
+features:
+- electrostatic_grid
+- shape
+- atomic_donor
+- atomic_acceptor
+- atomic_hydrophobic
+- atomic_aromatic
+label: binding_site_in_dataset
+use_monai_transforms: false
+augmentation:
+  enabled: true
+  flip_axis_prob: 0.5
+  rotate90_prob: 1.0
+  standardize: true
+  standardize_channel_wise: false
+training:
+  early_stopping_patience: 15
+  num_epochs: 60
+  batch_size: 1
+  accumulation_steps: 4
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  optimizer: adam
+  scheduler:
+    type: ReduceLROnPlateau
+    factor: 0.2
+    patience: 8
+    mode: min
+  loss:
+    type: BCEDiceLoss
+    alpha: 0.5
+    smooth: 1.0
+    pos_weight: 5.0
+    dynamic_pos_weight: false
+validation:
+  batch_size: 1
+  threshold: 0.5
+  threshold_sweep:
+  - 0.05
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  - 0.7
+  - 0.8
+  - 0.9
+  paper_metrics:
+    enabled: true
+    dcc_cutoff_angstrom: 4.0
+    dca_cutoff_angstrom: 4.0
+    min_component_voxels: 5
+    selection_metric: dcc_dvo_volume
+    selection_dvo_weight: 5.0
+    selection_max_mean_predicted_positive_voxels: 5000
+    top_k:
+    - 1
+    - 3
+model:
+  dropout: 0.5
+datasets:
+  train:
+  - 5ayt
+  - 1szd
+  - 3upv
+  - 1g85
+  - 5fyx
+  - 4ykk
+  - 1xd0
+  - 2xpk
+  - 3sfg
+  - 3bu1
+  - 3w5n
+  - 4do4
+  - 5mek
+  - 2i80
+  - 5d2r
+  - 4urz
+  - 4wkn
+  - 5lso
+  - 6ckw
+  - 4duh
+  - 4ih3
+  - 6g9i
+  - 5var
+  - 5f8y
+  - 3e12
+  - 1qk3
+  - 3ies
+  - 5n84
+  - 3acx
+  - 3uw5
+  - 5ulp
+  - 5d3x
+  - 3rlr
+  - 6hh3
+  - 4a7i
+  - 5xpi
+  - 1wc1
+  - 3i51
+  - 2v25
+  - 3kjd
+  - 3r88
+  - 2fmb
+  - 5hbn
+  - 4rpo
+  - 4ou3
+  - 1qbq
+  - 3gdt
+  - 5ost
+  - 3v78
+  - 1gyy
+  - 1xff
+  - 3k4q
+  - 5kax
+  - 2rcn
+  - 5i1q
+  - 2w9h
+  - 1lrh
+  - 1m48
+  - 2r58
+  - 3zqe
+  - 6ej2
+  - 1swg
+  - 6eq1
+  - 3tf6
+  - 6hsh
+  - 2qbu
+  - 1b57
+  - 6gzd
+  - 4u0w
+  validation:
+  - 6fs1
+  - 4j22
+  - 6eiz
+  - 2wzf
+  - 5l8y
+  - 5vij
+  - 5f2u
+  - 2zx7
+  - 2yfa
+  - 6cwn
+  - 6hai
+  - 1ie9
+  - 4jpy
+  - 5nwi
+  - 1uj5
+  - 5jhb
+  - 1wht
+  - 2aac
+  - 2ylc
+  - 3arx
+  - 3hcm
+  - 1h2t
+  - 1wuq
+  - 6b5q
+  test:
+  - 6fs1

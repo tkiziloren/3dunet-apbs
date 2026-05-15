@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="720" viewBox="0 0 1320 720">
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#15803d"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 16px Arial, sans-serif; fill: #4b5563; }
+      .section { font: 700 18px Arial, sans-serif; fill: #374151; }
+      .node-title { font: 700 15px Arial, sans-serif; fill: #111827; }
+      .node-meta { font: 12px Arial, sans-serif; fill: #374151; }
+      .node-note { font: 12px Arial, sans-serif; fill: #4b5563; }
+      .legend { font: 13px Arial, sans-serif; fill: #374151; }
+      .note { font: 13px Arial, sans-serif; fill: #374151; }
+    </style>
+  </defs>
+
+  <rect width="1320" height="720" fill="#ffffff"/>
+  <text x="36" y="44" class="title">PUResNetV1Like3D</text>
+  <text x="36" y="72" class="subtitle">PUResNet v1 artık kodlayıcı-çözücü topolojisinin dense PyTorch yaklaşımı</text>
+  <line x1="650" y1="118" x2="650" y2="690" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="310" y="132" text-anchor="middle" class="section">Kodlayıcı</text>
+  <text x="968" y="132" text-anchor="middle" class="section">Çözücü / çıktı</text>
+  <line x1="145" y1="140" x2="145" y2="240" stroke="#1d4ed8" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <text x="145.0" y="182.0" text-anchor="middle" class="legend">girdi</text>
+  <line x1="267" y1="240" x2="300" y2="340" stroke="#b91c1c" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <text x="283.5" y="282.0" text-anchor="middle" class="legend">adım 2</text>
+  <line x1="422" y1="340" x2="455" y2="440" stroke="#b91c1c" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <text x="438.5" y="382.0" text-anchor="middle" class="legend">adım 2</text>
+  <line x1="577" y1="440" x2="610" y2="540" stroke="#b91c1c" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <text x="593.5" y="482.0" text-anchor="middle" class="legend">adım 3</text>
+  <line x1="732" y1="540" x2="765" y2="640" stroke="#b91c1c" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <text x="748.5" y="582.0" text-anchor="middle" class="legend">adım 3</text>
+  <line x1="887" y1="640" x2="910" y2="540" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <text x="898.5" y="582.0" text-anchor="middle" class="legend">üst örnekleme</text>
+  <line x1="1032" y1="540" x2="1040" y2="440" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <text x="1036.0" y="482.0" text-anchor="middle" class="legend">üst örnekleme</text>
+  <line x1="1162" y1="440" x2="1160" y2="340" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <text x="1161.0" y="382.0" text-anchor="middle" class="legend">üst örnekleme</text>
+  <line x1="1221" y1="303" x2="1221" y2="277" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <text x="1221.0" y="282.0" text-anchor="middle" class="legend">üst örnekleme</text>
+  <line x1="1221" y1="203" x2="1260" y2="177" stroke="#1d4ed8" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <text x="1240.5" y="182.0" text-anchor="middle" class="legend">1x1</text>
+  <path d="M 671 503 C 761 496, 881 496, 971 503" fill="none" stroke="#9ca3af" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow-gray)"/>
+  <text x="821.0" y="488" text-anchor="middle" class="legend">atlama</text>
+  <path d="M 516 403 C 606 396, 1011 396, 1101 403" fill="none" stroke="#9ca3af" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow-gray)"/>
+  <text x="808.5" y="388" text-anchor="middle" class="legend">atlama</text>
+  <path d="M 361 303 C 451 296, 1131 296, 1221 303" fill="none" stroke="#9ca3af" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow-gray)"/>
+  <text x="791.0" y="288" text-anchor="middle" class="legend">atlama</text>
+  <path d="M 206 203 C 296 196, 1131 196, 1221 203" fill="none" stroke="#9ca3af" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow-gray)"/>
+  <text x="713.5" y="188" text-anchor="middle" class="legend">atlama</text>
+  <rect x="35" y="103" width="110" height="74" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  <text x="90.0" y="123" text-anchor="middle" class="node-title">Girdi</text>
+  <text x="90.0" y="142" text-anchor="middle" class="node-meta">kanal: 18</text>
+  <text x="90.0" y="159" text-anchor="middle" class="node-meta">grid: 36^3</text>
+  <text x="90.0" y="173" text-anchor="middle" class="node-note">atom öznitelikleri</text>
+  <rect x="145" y="203" width="122" height="74" rx="8" fill="#e8f2ff" stroke="#356fa8" stroke-width="2"/>
+  <text x="206.0" y="223" text-anchor="middle" class="node-title">Aşama2</text>
+  <text x="206.0" y="242" text-anchor="middle" class="node-meta">kanal: f</text>
+  <text x="206.0" y="259" text-anchor="middle" class="node-meta">grid: 36^3</text>
+  <text x="206.0" y="273" text-anchor="middle" class="node-note">3x darboğaz</text>
+  <rect x="300" y="303" width="122" height="74" rx="8" fill="#e8f2ff" stroke="#356fa8" stroke-width="2"/>
+  <text x="361.0" y="323" text-anchor="middle" class="node-title">Aşama4</text>
+  <text x="361.0" y="342" text-anchor="middle" class="node-meta">kanal: 2f</text>
+  <text x="361.0" y="359" text-anchor="middle" class="node-meta">grid: 18^3</text>
+  <text x="361.0" y="373" text-anchor="middle" class="node-note">adım 2</text>
+  <rect x="455" y="403" width="122" height="74" rx="8" fill="#e8f2ff" stroke="#356fa8" stroke-width="2"/>
+  <text x="516.0" y="423" text-anchor="middle" class="node-title">Aşama5</text>
+  <text x="516.0" y="442" text-anchor="middle" class="node-meta">kanal: 4f</text>
+  <text x="516.0" y="459" text-anchor="middle" class="node-meta">grid: 9^3</text>
+  <text x="516.0" y="473" text-anchor="middle" class="node-note">adım 2</text>
+  <rect x="610" y="503" width="122" height="74" rx="8" fill="#e8f2ff" stroke="#356fa8" stroke-width="2"/>
+  <text x="671.0" y="523" text-anchor="middle" class="node-title">Aşama6</text>
+  <text x="671.0" y="542" text-anchor="middle" class="node-meta">kanal: 8f</text>
+  <text x="671.0" y="559" text-anchor="middle" class="node-meta">grid: 3^3</text>
+  <text x="671.0" y="573" text-anchor="middle" class="node-note">adım 3</text>
+  <rect x="765" y="603" width="122" height="74" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+  <text x="826.0" y="623" text-anchor="middle" class="node-title">Aşama7</text>
+  <text x="826.0" y="642" text-anchor="middle" class="node-meta">kanal: 16f</text>
+  <text x="826.0" y="659" text-anchor="middle" class="node-meta">grid: 1^3</text>
+  <text x="826.0" y="673" text-anchor="middle" class="node-note">global darboğaz</text>
+  <rect x="910" y="503" width="122" height="74" rx="8" fill="#e8fff3" stroke="#18875f" stroke-width="2"/>
+  <text x="971.0" y="523" text-anchor="middle" class="node-title">Yükselt8</text>
+  <text x="971.0" y="542" text-anchor="middle" class="node-meta">kanal: 16f</text>
+  <text x="971.0" y="559" text-anchor="middle" class="node-meta">grid: 3^3</text>
+  <text x="971.0" y="573" text-anchor="middle" class="node-note">üst darboğaz</text>
+  <rect x="1040" y="403" width="122" height="74" rx="8" fill="#e8fff3" stroke="#18875f" stroke-width="2"/>
+  <text x="1101.0" y="423" text-anchor="middle" class="node-title">Yükselt9</text>
+  <text x="1101.0" y="442" text-anchor="middle" class="node-meta">kanal: 8f</text>
+  <text x="1101.0" y="459" text-anchor="middle" class="node-meta">grid: 9^3</text>
+  <text x="1101.0" y="473" text-anchor="middle" class="node-note">birl. + üst</text>
+  <rect x="1160" y="303" width="122" height="74" rx="8" fill="#e8fff3" stroke="#18875f" stroke-width="2"/>
+  <text x="1221.0" y="323" text-anchor="middle" class="node-title">Yükselt10</text>
+  <text x="1221.0" y="342" text-anchor="middle" class="node-meta">kanal: 4f</text>
+  <text x="1221.0" y="359" text-anchor="middle" class="node-meta">grid: 18^3</text>
+  <text x="1221.0" y="373" text-anchor="middle" class="node-note">birl. + üst</text>
+  <rect x="1160" y="203" width="122" height="74" rx="8" fill="#e8fff3" stroke="#18875f" stroke-width="2"/>
+  <text x="1221.0" y="223" text-anchor="middle" class="node-title">Yükselt11</text>
+  <text x="1221.0" y="242" text-anchor="middle" class="node-meta">kanal: 2f</text>
+  <text x="1221.0" y="259" text-anchor="middle" class="node-meta">grid: 36^3</text>
+  <text x="1221.0" y="273" text-anchor="middle" class="node-note">birl. + üst</text>
+  <rect x="1210" y="103" width="100" height="74" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  <text x="1260.0" y="123" text-anchor="middle" class="node-title">Çıktı</text>
+  <text x="1260.0" y="142" text-anchor="middle" class="node-meta">kanal: 1</text>
+  <text x="1260.0" y="159" text-anchor="middle" class="node-meta">grid: 36^3</text>
+  <text x="1260.0" y="173" text-anchor="middle" class="node-note">Conv3D 1x1</text>
+
+  <g transform="translate(36,558)">
+    <text x="0" y="0" class="section">Açıklama</text>
+    <line x1="0" y1="24" x2="42" y2="24" stroke="#1d4ed8" stroke-width="3" marker-end="url(#arrow-blue)"/>
+    <text x="54" y="29" class="legend">Konvolüsyon/blok akışı</text>
+    <line x1="0" y1="50" x2="42" y2="50" stroke="#b91c1c" stroke-width="3" marker-end="url(#arrow-red)"/>
+    <text x="54" y="55" class="legend">Alt örnekleme</text>
+    <line x1="0" y1="76" x2="42" y2="76" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <text x="54" y="81" class="legend">Üst örnekleme</text>
+    <line x1="0" y1="102" x2="42" y2="102" stroke="#9ca3af" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#arrow-gray)"/>
+    <text x="54" y="107" class="legend">Atlama bağlantısı</text>
+  </g>
+
+</svg>

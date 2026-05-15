@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+OUTPUT_ROOT="${OUTPUT_ROOT:-/Users/tevfik/Sandbox/github/PHD/runs/work5_apbs_only_clip20_model_sweep_fold1_250epoch_thr040}"
+FOLDS="${FOLDS:-1}"
+EPOCHS="${EPOCHS:-250}"
+EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-0}"
+VALIDATION_THRESHOLD="${VALIDATION_THRESHOLD:-0.40}"
+MODELS="${MODELS:-UNet3D4LStrided,UNet3D4LAStrided,UNet3D4L,UNet3D4LA,UNet3D5L,ResidualUNet3D,SEResUNet3D,CBAMUNet3D,LightweightUNet3D,UNetPlusPlus3D,ResNet3D4L,ResNet3D5L,ConvNeXtUNet3D,ConvNeXt3D}"
+SKIP_COMPLETED="${SKIP_COMPLETED:-1}"
+CLEAN_INCOMPLETE="${CLEAN_INCOMPLETE:-1}"
+DRY_RUN="${DRY_RUN:-0}"
+
+mkdir -p "$OUTPUT_ROOT"
+
+echo "Work5 APBS-only clip20 model sweep"
+echo "Output root: $OUTPUT_ROOT"
+echo "Fold(s): $FOLDS"
+echo "Epochs: $EPOCHS"
+echo "Models: $MODELS"
+
+OUTPUT_ROOT="$OUTPUT_ROOT" \
+FOLDS="$FOLDS" \
+EPOCHS="$EPOCHS" \
+EARLY_STOPPING_PATIENCE="$EARLY_STOPPING_PATIENCE" \
+VALIDATION_THRESHOLD="$VALIDATION_THRESHOLD" \
+MODELS="$MODELS" \
+FEATURE_SET=apbs_only \
+CUTOFF_VARIANTS=apbs_clip20 \
+SKIP_COMPLETED="$SKIP_COMPLETED" \
+CLEAN_INCOMPLETE="$CLEAN_INCOMPLETE" \
+DRY_RUN="$DRY_RUN" \
+"$SCRIPT_DIR/run_apbs_only_clip20_model_sweep.sh"

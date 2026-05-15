@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial, Helvetica, sans-serif; fill:#111827} .small{font-size:12px}.label{font-size:13px}.title{font-size:18px;font-weight:700}.subtitle{font-size:14px;fill:#374151}.tick{font-size:11px;fill:#374151}.note{font-size:12px;fill:#374151}</style>
+<text x="40" y="35" class="title" text-anchor="start">Work1: APBS contribution to DVO / DCC / DCA</text>
+<text x="40" y="58" class="subtitle" text-anchor="start">5-fold averages. Delta labels show change after adding APBS.</text>
+<text x="55" y="82" class="label" text-anchor="start" font-weight="700">Shape only -&gt; Shape + APBS</text>
+<line x1="55.00" y1="420.00" x2="475.00" y2="420.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="47" y="424.0" class="tick" text-anchor="end">0.0</text>
+<line x1="55.00" y1="337.50" x2="475.00" y2="337.50" stroke="#E5E7EB" stroke-width="1"/>
+<text x="47" y="341.5" class="tick" text-anchor="end">0.2</text>
+<line x1="55.00" y1="255.00" x2="475.00" y2="255.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="47" y="259.0" class="tick" text-anchor="end">0.4</text>
+<line x1="55.00" y1="172.50" x2="475.00" y2="172.50" stroke="#E5E7EB" stroke-width="1"/>
+<text x="47" y="176.50000000000003" class="tick" text-anchor="end">0.6</text>
+<line x1="55.00" y1="90.00" x2="475.00" y2="90.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="47" y="94.0" class="tick" text-anchor="end">0.8</text>
+<line x1="55.00" y1="420.00" x2="475.00" y2="420.00" stroke="#374151" stroke-width="1.2"/>
+<line x1="55.00" y1="90.00" x2="55.00" y2="420.00" stroke="#374151" stroke-width="1.2"/>
+<rect x="80.50" y="225.13" width="24.00" height="194.87" fill="#4C78A8" stroke="none" rx="0"/>
+<rect x="110.50" y="212.93" width="24.00" height="207.07" fill="#F58518" stroke="none" rx="0"/>
+<text x="107.5" y="444" class="tick" text-anchor="middle">DVO_success</text>
+<text x="107.5" y="202.932283390595" class="small" text-anchor="middle" font-weight="700">+0.030</text>
+<rect x="185.50" y="285.16" width="24.00" height="134.84" fill="#4C78A8" stroke="none" rx="0"/>
+<rect x="215.50" y="277.84" width="24.00" height="142.16" fill="#F58518" stroke="none" rx="0"/>
+<text x="212.5" y="444" class="tick" text-anchor="middle">DVO_all</text>
+<text x="212.5" y="267.8401546119369" class="small" text-anchor="middle" font-weight="700">+0.018</text>
+<rect x="290.50" y="237.19" width="24.00" height="182.81" fill="#4C78A8" stroke="none" rx="0"/>
+<rect x="320.50" y="228.00" width="24.00" height="192.00" fill="#F58518" stroke="none" rx="0"/>
+<text x="317.5" y="444" class="tick" text-anchor="middle">DCC@4A</text>
+<text x="317.5" y="217.9997403946002" class="small" text-anchor="middle" font-weight="700">+0.022</text>
+<rect x="395.50" y="135.01" width="24.00" height="284.99" fill="#4C78A8" stroke="none" rx="0"/>
+<rect x="425.50" y="138.87" width="24.00" height="281.13" fill="#F58518" stroke="none" rx="0"/>
+<text x="422.5" y="444" class="tick" text-anchor="middle">DCA@4A</text>
+<text x="422.5" y="125.01233125649014" class="small" text-anchor="middle" font-weight="700">-0.009</text>
+<rect x="55.00" y="450.00" width="14.00" height="14.00" fill="#4C78A8" stroke="none" rx="0"/>
+<text x="75" y="462" class="small" text-anchor="start">Shape only</text>
+<rect x="230.00" y="450.00" width="14.00" height="14.00" fill="#F58518" stroke="none" rx="0"/>
+<text x="250" y="462" class="small" text-anchor="start">Shape + APBS</text>
+<text x="585" y="82" class="label" text-anchor="start" font-weight="700">Shape + chem -&gt; Shape + chem + APBS</text>
+<line x1="585.00" y1="420.00" x2="1005.00" y2="420.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="577" y="424.0" class="tick" text-anchor="end">0.0</text>
+<line x1="585.00" y1="337.50" x2="1005.00" y2="337.50" stroke="#E5E7EB" stroke-width="1"/>
+<text x="577" y="341.5" class="tick" text-anchor="end">0.2</text>
+<line x1="585.00" y1="255.00" x2="1005.00" y2="255.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="577" y="259.0" class="tick" text-anchor="end">0.4</text>
+<line x1="585.00" y1="172.50" x2="1005.00" y2="172.50" stroke="#E5E7EB" stroke-width="1"/>
+<text x="577" y="176.50000000000003" class="tick" text-anchor="end">0.6</text>
+<line x1="585.00" y1="90.00" x2="1005.00" y2="90.00" stroke="#E5E7EB" stroke-width="1"/>
+<text x="577" y="94.0" class="tick" text-anchor="end">0.8</text>
+<line x1="585.00" y1="420.00" x2="1005.00" y2="420.00" stroke="#374151" stroke-width="1.2"/>
+<line x1="585.00" y1="90.00" x2="585.00" y2="420.00" stroke="#374151" stroke-width="1.2"/>
+<rect x="610.50" y="217.11" width="24.00" height="202.89" fill="#54A24B" stroke="none" rx="0"/>
+<rect x="640.50" y="204.15" width="24.00" height="215.85" fill="#B279A2" stroke="none" rx="0"/>
+<text x="637.5" y="444" class="tick" text-anchor="middle">DVO_success</text>
+<text x="637.5" y="194.14702853224952" class="small" text-anchor="middle" font-weight="700">+0.031</text>
+<rect x="715.50" y="279.24" width="24.00" height="140.76" fill="#54A24B" stroke="none" rx="0"/>
+<rect x="745.50" y="270.43" width="24.00" height="149.57" fill="#B279A2" stroke="none" rx="0"/>
+<text x="742.5" y="444" class="tick" text-anchor="middle">DVO_all</text>
+<text x="742.5" y="260.43271544475834" class="small" text-anchor="middle" font-weight="700">+0.021</text>
+<rect x="820.50" y="233.29" width="24.00" height="186.71" fill="#54A24B" stroke="none" rx="0"/>
+<rect x="850.50" y="225.69" width="24.00" height="194.31" fill="#B279A2" stroke="none" rx="0"/>
+<text x="847.5" y="444" class="tick" text-anchor="middle">DCC@4A</text>
+<text x="847.5" y="215.693795430945" class="small" text-anchor="middle" font-weight="700">+0.018</text>
+<rect x="925.50" y="129.59" width="24.00" height="290.41" fill="#54A24B" stroke="none" rx="0"/>
+<rect x="955.50" y="128.89" width="24.00" height="291.11" fill="#B279A2" stroke="none" rx="0"/>
+<text x="952.5" y="444" class="tick" text-anchor="middle">DCA@4A</text>
+<text x="952.5" y="118.89408099688472" class="small" text-anchor="middle" font-weight="700">+0.002</text>
+<rect x="585.00" y="450.00" width="14.00" height="14.00" fill="#54A24B" stroke="none" rx="0"/>
+<text x="605" y="462" class="small" text-anchor="start">Shape + chem</text>
+<rect x="760.00" y="450.00" width="14.00" height="14.00" fill="#B279A2" stroke="none" rx="0"/>
+<text x="780" y="462" class="small" text-anchor="start">Shape + chem + APBS</text>
+</svg>

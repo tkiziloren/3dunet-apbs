@@ -151,6 +151,50 @@ class BCEDiceLoss(nn.Module):
         return total_loss
 
 
+class BCEFocalTverskyLoss(nn.Module):
+    def __init__(
+        self,
+        bce_weight=0.5,
+        tversky_weight=1.0,
+        alpha_fp=0.7,
+        beta_fn=0.3,
+        gamma=1.33,
+        smooth=1.0,
+        pos_weight=None,
+    ):
+        super(BCEFocalTverskyLoss, self).__init__()
+        self.bce_weight = bce_weight
+        self.tversky_weight = tversky_weight
+        self.alpha_fp = alpha_fp
+        self.beta_fn = beta_fn
+        self.gamma = gamma
+        self.smooth = smooth
+        self.pos_weight = pos_weight
+
+    def forward(self, inputs, targets):
+        inputs = inputs.to(torch.float32)
+        targets = targets.to(torch.float32)
+
+        bce_loss = nn.functional.binary_cross_entropy_with_logits(
+            inputs, targets, pos_weight=self.pos_weight
+        )
+        probabilities = torch.sigmoid(inputs)
+        probabilities_flat = flatten(probabilities)
+        targets_flat = flatten(targets)
+
+        true_positive = (probabilities_flat * targets_flat).sum()
+        false_positive = (probabilities_flat * (1.0 - targets_flat)).sum()
+        false_negative = ((1.0 - probabilities_flat) * targets_flat).sum()
+        tversky = (true_positive + self.smooth) / (
+            true_positive
+            + self.alpha_fp * false_positive
+            + self.beta_fn * false_negative
+            + self.smooth
+        )
+        focal_tversky_loss = torch.pow(1.0 - tversky, self.gamma)
+        return self.bce_weight * bce_loss + self.tversky_weight * focal_tversky_loss
+
+
 class BCEDiceLoss1(nn.Module):
     def forward(self, inputs, targets):
         # Giriş ve hedef tensörlerin veri tiplerini float32'ye dönüştür

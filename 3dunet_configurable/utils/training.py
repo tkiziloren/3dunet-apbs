@@ -1,10 +1,34 @@
+import random
+
 import numpy as np
 import torch
 import torch.optim as optim
 from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
 from torchmetrics.classification import F1Score, Precision, Recall, ConfusionMatrix
 
-from .losses import BCEDiceLoss
+from .losses import BCEDiceLoss, BCEFocalTverskyLoss
+
+
+def set_reproducibility(seed):
+    """
+    Set the random seeds used by Python, NumPy and PyTorch.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+
+
+def seed_worker(worker_id):
+    """
+    Seed DataLoader workers from PyTorch's worker seed.
+    """
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
 
 
 def calculate_pos_weight_from_loader(train_loader, max_batches=50):
@@ -59,6 +83,8 @@ def get_scheduler(scheduler_config, optimizer):
     """
     Scheduler oluşturur.
     """
+    if scheduler_config is None:
+        return None
     scheduler_type = scheduler_config.get("type")
     if scheduler_type == "ReduceLROnPlateau":
         return optim.lr_scheduler.ReduceLROnPlateau(
@@ -87,6 +113,16 @@ def get_loss_function(loss_config, device):
             alpha=loss_config.get("alpha", 0.5),
             smooth=loss_config.get("smooth", 1.0),
             pos_weight=torch.tensor([loss_config.get("pos_weight", 1.0)]).to(device)
+        )
+    elif loss_type == "BCEFocalTverskyLoss":
+        return BCEFocalTverskyLoss(
+            bce_weight=loss_config.get("bce_weight", 0.5),
+            tversky_weight=loss_config.get("tversky_weight", 1.0),
+            alpha_fp=loss_config.get("alpha_fp", 0.7),
+            beta_fn=loss_config.get("beta_fn", 0.3),
+            gamma=loss_config.get("gamma", 1.33),
+            smooth=loss_config.get("smooth", 1.0),
+            pos_weight=torch.tensor([loss_config.get("pos_weight", 1.0)]).to(device),
         )
     elif loss_type == "CrossEntropyLoss":
         return torch.nn.CrossEntropyLoss()
@@ -127,9 +163,9 @@ def initialize_metrics(threshold=0.5, device=None):
 
 
 def calculate_metrics_sklearn(targets, preds):
-    f1 = f1_score(targets, preds, average='binary')
-    precision = precision_score(targets, preds, average='binary')
-    recall = recall_score(targets, preds, average='binary')
+    f1 = f1_score(targets, preds, average='binary', zero_division=0)
+    precision = precision_score(targets, preds, average='binary', zero_division=0)
+    recall = recall_score(targets, preds, average='binary', zero_division=0)
     tn, fp, fn, tp = confusion_matrix(targets, preds, labels=[0, 1]).ravel()
     return f1, precision, recall, (tp, fp, tn, fn)
 
@@ -150,7 +186,7 @@ def calculate_metrics_torchmetrics(targets, preds, metrics):
 
 
 def calculate_f1_sklearn(targets, preds):
-    return f1_score(targets, preds, average='binary')
+    return f1_score(targets, preds, average='binary', zero_division=0)
 
 
 def calculate_f1_torchmetrics(targets, preds, metrics):
@@ -169,7 +205,58 @@ def calculate_metrics(pocket_label, output, metrics, threshold=0.5):
         return calculate_metrics_sklearn(targets_flattened, predictions_flattened)
 
 
-def calculate_pocket_dcc(prediction, label, threshold=4.0):
+def calculate_binary_stats_from_probs(targets, probabilities, threshold=0.5):
+    """
+    Calculate binary segmentation stats from target labels and sigmoid probabilities.
+    """
+    targets_bool = np.asarray(targets > 0.5, dtype=bool)
+    preds_bool = np.asarray(probabilities > threshold, dtype=bool)
+
+    tp = int(np.logical_and(preds_bool, targets_bool).sum())
+    fp = int(np.logical_and(preds_bool, np.logical_not(targets_bool)).sum())
+    tn = int(np.logical_and(np.logical_not(preds_bool), np.logical_not(targets_bool)).sum())
+    fn = int(np.logical_and(np.logical_not(preds_bool), targets_bool).sum())
+
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    positive_voxels = int(targets_bool.sum())
+    predicted_positive_voxels = int(preds_bool.sum())
+
+    return {
+        "threshold": float(threshold),
+        "tp": tp,
+        "fp": fp,
+        "tn": tn,
+        "fn": fn,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "positive_voxels": positive_voxels,
+        "predicted_positive_voxels": predicted_positive_voxels,
+    }
+
+
+def calculate_binary_stats_from_counts(tp, fp, tn, fn, threshold):
+    """
+    Calculate binary metrics from already aggregated confusion-matrix counts.
+    """
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    return {
+        "threshold": float(threshold),
+        "tp": int(tp),
+        "fp": int(fp),
+        "tn": int(tn),
+        "fn": int(fn),
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+    }
+
+
+def calculate_pocket_dcc(prediction, label, threshold=4.0, resolution=1.0):
     """
     Calculate pocket-level Distance Criterion Center (DCC) - LOCALIZATION metric.
     
@@ -181,10 +268,11 @@ def calculate_pocket_dcc(prediction, label, threshold=4.0):
         prediction: Model output (sigmoid applied, thresholded) - binary mask
         label: Ground truth binding site - binary mask
         threshold: Distance threshold in Angstroms (default 4.0Å)
+        resolution: Grid spacing in Angstroms per voxel.
     
     Returns:
         float: 1.0 if distance < threshold (success), 0.0 otherwise
-        float: actual distance in voxels (for logging)
+        float: actual distance in Angstroms (for logging)
     """
     # Convert to numpy if tensor
     if torch.is_tensor(prediction):
@@ -210,12 +298,10 @@ def calculate_pocket_dcc(prediction, label, threshold=4.0):
         return 0.0, float('inf')
     label_center = label_coords.mean(axis=0)
     
-    # Euclidean distance between centers (in voxels)
-    distance = np.linalg.norm(pred_center - label_center)
+    # Euclidean distance between centers in Angstroms.
+    distance = np.linalg.norm((pred_center - label_center) * float(resolution))
     
-    # Success if distance < threshold
-    # Note: threshold is in Angstroms, but distance is in voxels
-    # Assuming 1 voxel ≈ 1 Angstrom (adjust if needed)
+    # Success if distance < threshold.
     success = 1.0 if distance < threshold else 0.0
     
     return success, distance
