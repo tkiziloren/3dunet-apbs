@@ -4,15 +4,25 @@ from collections import defaultdict
 import numpy as np
 from scipy.ndimage import (
     binary_closing,
+    binary_dilation,
     find_objects,
     generate_binary_structure,
     label as connected_components,
 )
+from scipy.spatial import cKDTree
 
 
 RAW_POSTPROCESS = "raw"
 KALASANTY_PURESNET_POSTPROCESS = "kalasanty_puresnet"
-SUPPORTED_POSTPROCESS_MODES = {RAW_POSTPROCESS, KALASANTY_PURESNET_POSTPROCESS}
+PURESNET_DBSCAN_POSTPROCESS = "puresnet_dbscan"
+SUPPORTED_POSTPROCESS_MODES = {
+    RAW_POSTPROCESS,
+    KALASANTY_PURESNET_POSTPROCESS,
+    PURESNET_DBSCAN_POSTPROCESS,
+}
+
+PURESNET_DBSCAN_EPS_ANGSTROM = 5.5
+DBSCAN_EXACT_MAX_POINTS = 100_000
 
 
 POCKET_SUMMARY_FIELDNAMES = [
@@ -199,6 +209,11 @@ def normalize_postprocess_mode(postprocess_mode):
         "puresnet": KALASANTY_PURESNET_POSTPROCESS,
         "puresnet_v1": KALASANTY_PURESNET_POSTPROCESS,
         "kalasanty_puresnet_v1": KALASANTY_PURESNET_POSTPROCESS,
+        "dbscan": PURESNET_DBSCAN_POSTPROCESS,
+        "puresnet_dbscan": PURESNET_DBSCAN_POSTPROCESS,
+        "puresnet_v2": PURESNET_DBSCAN_POSTPROCESS,
+        "puresnetv2": PURESNET_DBSCAN_POSTPROCESS,
+        "puresnet_v2_dbscan": PURESNET_DBSCAN_POSTPROCESS,
     }
     mode = aliases.get(str(postprocess_mode).strip().lower(), str(postprocess_mode).strip().lower())
     if mode not in SUPPORTED_POSTPROCESS_MODES:
@@ -249,32 +264,81 @@ def _postprocess_mask(
     if postprocess_mode == KALASANTY_PURESNET_POSTPROCESS:
         closed = binary_closing(pred_mask, structure=structure)
         return _clear_border(closed, structure=structure)
+    if postprocess_mode == PURESNET_DBSCAN_POSTPROCESS:
+        return pred_mask
     raise ValueError(f"Unsupported pocket postprocess mode: {postprocess_mode}")
 
 
-def extract_components(
-    probabilities,
-    threshold,
-    min_component_voxels=5,
-    max_components=3,
-    postprocess_mode=RAW_POSTPROCESS,
-    resolution=1.0,
-    min_component_volume_angstrom3=None,
-):
-    postprocess_mode = normalize_postprocess_mode(postprocess_mode)
-    pred_mask = np.asarray(probabilities) > threshold
-    structure = generate_binary_structure(rank=3, connectivity=3)
-    pred_mask = _postprocess_mask(pred_mask, postprocess_mode, structure=structure)
-    minimum_voxels = _minimum_component_voxels(
-        min_component_voxels,
-        min_component_volume_angstrom3,
-        resolution,
-    )
-    predicted_positive_voxels = int(pred_mask.sum())
-    if predicted_positive_voxels == 0:
-        return [], 0, predicted_positive_voxels, None
+def _ball_structure(radius_voxels):
+    radius_voxels = max(1, int(radius_voxels))
+    coords = np.indices((2 * radius_voxels + 1,) * 3, dtype=np.float32)
+    center = float(radius_voxels)
+    squared_distance = sum((coords[axis] - center) ** 2 for axis in range(3))
+    return squared_distance <= float(radius_voxels) ** 2
 
-    labeled, component_count = connected_components(pred_mask, structure=structure)
+
+def _dbscan_labels_exact(coords, shape, eps_voxels):
+    tree = cKDTree(coords.astype(np.float32, copy=False))
+    visited = np.zeros(coords.shape[0], dtype=bool)
+    point_labels = np.zeros(coords.shape[0], dtype=np.int32)
+    cluster_id = 0
+
+    for point_idx in range(coords.shape[0]):
+        if visited[point_idx]:
+            continue
+        cluster_id += 1
+        queue = [point_idx]
+        visited[point_idx] = True
+        point_labels[point_idx] = cluster_id
+        queue_pos = 0
+
+        while queue_pos < len(queue):
+            current_idx = queue[queue_pos]
+            queue_pos += 1
+            neighbor_indices = tree.query_ball_point(coords[current_idx], eps_voxels)
+            for neighbor_idx in neighbor_indices:
+                if not visited[neighbor_idx]:
+                    visited[neighbor_idx] = True
+                    point_labels[neighbor_idx] = cluster_id
+                    queue.append(neighbor_idx)
+                elif point_labels[neighbor_idx] == 0:
+                    point_labels[neighbor_idx] = cluster_id
+
+    labeled = np.zeros(shape, dtype=np.int32)
+    labeled[tuple(coords.T)] = point_labels
+    return labeled, int(cluster_id)
+
+
+def _dbscan_labels_approximate(pred_mask, eps_voxels):
+    radius = max(1, int(math.ceil(eps_voxels / 2.0)))
+    expanded = binary_dilation(pred_mask, structure=_ball_structure(radius))
+    expanded_labels, component_count = connected_components(expanded)
+    labeled = np.where(pred_mask, expanded_labels, 0).astype(np.int32, copy=False)
+    return labeled, int(component_count)
+
+
+def _puresnet_dbscan_labels(pred_mask, resolution):
+    coords = np.argwhere(pred_mask)
+    if coords.size == 0:
+        return np.zeros(pred_mask.shape, dtype=np.int32), 0
+
+    eps_voxels = PURESNET_DBSCAN_EPS_ANGSTROM / max(float(resolution), 1e-6)
+    if coords.shape[0] <= DBSCAN_EXACT_MAX_POINTS:
+        return _dbscan_labels_exact(coords, pred_mask.shape, eps_voxels)
+    return _dbscan_labels_approximate(pred_mask, eps_voxels)
+
+
+def _components_from_labeled(
+    probabilities,
+    labeled,
+    component_count,
+    predicted_positive_voxels,
+    minimum_voxels,
+    max_components,
+):
+    if predicted_positive_voxels == 0 or component_count == 0:
+        return [], int(component_count), int(predicted_positive_voxels), labeled
+
     component_slices = find_objects(labeled)
     components = []
 
@@ -304,7 +368,43 @@ def extract_components(
         )
 
     components.sort(key=lambda item: (item["score_sum"], item["voxel_count"]), reverse=True)
-    return components[:max_components], component_count, predicted_positive_voxels, labeled
+    return components[:max_components], int(component_count), int(predicted_positive_voxels), labeled
+
+
+def extract_components(
+    probabilities,
+    threshold,
+    min_component_voxels=5,
+    max_components=3,
+    postprocess_mode=RAW_POSTPROCESS,
+    resolution=1.0,
+    min_component_volume_angstrom3=None,
+):
+    postprocess_mode = normalize_postprocess_mode(postprocess_mode)
+    pred_mask = np.asarray(probabilities) > threshold
+    structure = generate_binary_structure(rank=3, connectivity=3)
+    pred_mask = _postprocess_mask(pred_mask, postprocess_mode, structure=structure)
+    minimum_voxels = _minimum_component_voxels(
+        min_component_voxels,
+        min_component_volume_angstrom3,
+        resolution,
+    )
+    predicted_positive_voxels = int(pred_mask.sum())
+    if predicted_positive_voxels == 0:
+        return [], 0, predicted_positive_voxels, None
+
+    if postprocess_mode == PURESNET_DBSCAN_POSTPROCESS:
+        labeled, component_count = _puresnet_dbscan_labels(pred_mask, resolution)
+    else:
+        labeled, component_count = connected_components(pred_mask, structure=structure)
+    return _components_from_labeled(
+        probabilities,
+        labeled,
+        component_count,
+        predicted_positive_voxels,
+        minimum_voxels,
+        max_components,
+    )
 
 
 def _distance_angstrom(center_a, center_b, resolution):

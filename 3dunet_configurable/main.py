@@ -190,6 +190,8 @@ def metric_postprocess_label(mode):
         return "Raw connected-component"
     if mode == "kalasanty_puresnet":
         return "Kalasanty/PUResNet-style"
+    if mode == "puresnet_dbscan":
+        return "PUResNet DBSCAN-style"
     return mode
 
 

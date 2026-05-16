@@ -48,6 +48,14 @@ def parse_args():
     )
     parser.add_argument("--top-k", default="1,2,3", help="Comma-separated Top-k values to report.")
     parser.add_argument(
+        "--postprocess-modes",
+        default="",
+        help=(
+            "Comma-separated postprocess modes to evaluate. "
+            "Default: use the run config primary postprocess only."
+        ),
+    )
+    parser.add_argument(
         "--reference-pocket-count",
         type=int,
         default=1,
@@ -117,7 +125,7 @@ def parse_base_features(run_dir, default=8):
 
 def discover_runs(runs_root, checkpoint_fragment):
     run_dirs = []
-    for config_path in sorted(runs_root.glob("*/*/*/config_snapshot.yml")):
+    for config_path in sorted(runs_root.rglob("config_snapshot.yml")):
         run_dir = config_path.parent
         weights_dir = run_dir / "weights"
         if not weights_dir.exists():
@@ -128,9 +136,18 @@ def discover_runs(runs_root, checkpoint_fragment):
         model = parse_model_from_checkpoint(candidates[0])
         try:
             relative = run_dir.relative_to(runs_root)
-            model_family = relative.parts[0]
-            feature_family = relative.parts[1]
-            run_name = relative.parts[2]
+            if len(relative.parts) >= 3:
+                model_family = relative.parts[0]
+                feature_family = relative.parts[1]
+                run_name = relative.parts[2]
+            elif len(relative.parts) == 2:
+                model_family = relative.parts[0]
+                feature_family = ""
+                run_name = relative.parts[1]
+            else:
+                model_family = model
+                feature_family = ""
+                run_name = run_dir.name
         except ValueError:
             model_family = model
             feature_family = ""
@@ -180,7 +197,15 @@ def clean_state_dict(state_dict, model_state_dict):
     return state_dict
 
 
-def evaluate_run(run, device, num_workers, top_k_values, include_top_n_plus_2, reference_pocket_count):
+def evaluate_run(
+    run,
+    device,
+    num_workers,
+    top_k_values,
+    include_top_n_plus_2,
+    reference_pocket_count,
+    postprocess_modes_override=None,
+):
     config = resolve_dataset_lists(load_config(str(run["config"])), str(run["config"]))
     set_reproducibility(int(config.get("seed", config.get("training", {}).get("seed", 42))))
     validation_config = config.get("validation", {})
@@ -220,24 +245,21 @@ def evaluate_run(run, device, num_workers, top_k_values, include_top_n_plus_2, r
         [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
     )
     thresholds = sorted({float(value) for value in [*threshold_sweep, threshold]})
-    postprocess_mode = normalize_postprocess_mode(paper_config.get("postprocess", "raw"))
+    if postprocess_modes_override:
+        postprocess_modes = [normalize_postprocess_mode(mode) for mode in postprocess_modes_override]
+    else:
+        postprocess_modes = [normalize_postprocess_mode(paper_config.get("postprocess", "raw"))]
     dcc_cutoff = float(paper_config.get("dcc_cutoff_angstrom", 4.0))
     dca_cutoff = float(paper_config.get("dca_cutoff_angstrom", 4.0))
     min_component_voxels = int(paper_config.get("min_component_voxels", 5))
-    min_component_volume = paper_config.get("min_component_volume_angstrom3")
-    if min_component_volume is not None and postprocess_mode != "raw":
-        min_component_volume = float(min_component_volume)
-    else:
-        min_component_volume = None
 
-    run_context = {
+    base_run_context = {
         "epoch": "",
         "run": run["run"],
         "model": run["model_family"],
         "feature_family": run["feature_family"],
         "apbs_variant": run["apbs_variant"],
         "checkpoint": run["checkpoint"].name,
-        "postprocess_mode": postprocess_mode,
     }
     component_rows = []
     topk_rows = []
@@ -255,25 +277,32 @@ def evaluate_run(run, device, num_workers, top_k_values, include_top_n_plus_2, r
                 protein_name = dataset.samples[dataset_idx][0]
                 metadata = dataset.get_metadata(dataset_idx)
                 ligand_mask = dataset.load_metric_mask(dataset_idx, "features", "ligand")
-                sample_components, sample_topk = evaluate_topk_metrics_for_sample(
-                    probabilities=probabilities[sample_idx],
-                    label_mask=targets[sample_idx],
-                    ligand_mask=ligand_mask,
-                    protein_name=protein_name,
-                    thresholds=thresholds,
-                    resolution=metadata["resolution"],
-                    max_distance_angstrom=metadata["max_distance_angstrom"],
-                    dcc_cutoff_angstrom=dcc_cutoff,
-                    dca_cutoff_angstrom=dca_cutoff,
-                    min_component_voxels=min_component_voxels,
-                    min_component_volume_angstrom3=min_component_volume,
-                    postprocess_mode=postprocess_mode,
-                    top_k_values=top_k_values,
-                    reference_pocket_count=reference_pocket_count,
-                    include_top_n_plus_2=include_top_n_plus_2,
-                )
-                component_rows.extend({**run_context, **row} for row in sample_components)
-                topk_rows.extend({**run_context, **row} for row in sample_topk)
+                for postprocess_mode in postprocess_modes:
+                    min_component_volume = paper_config.get("min_component_volume_angstrom3")
+                    if min_component_volume is not None and postprocess_mode != "raw":
+                        min_component_volume = float(min_component_volume)
+                    else:
+                        min_component_volume = None
+                    sample_components, sample_topk = evaluate_topk_metrics_for_sample(
+                        probabilities=probabilities[sample_idx],
+                        label_mask=targets[sample_idx],
+                        ligand_mask=ligand_mask,
+                        protein_name=protein_name,
+                        thresholds=thresholds,
+                        resolution=metadata["resolution"],
+                        max_distance_angstrom=metadata["max_distance_angstrom"],
+                        dcc_cutoff_angstrom=dcc_cutoff,
+                        dca_cutoff_angstrom=dca_cutoff,
+                        min_component_voxels=min_component_voxels,
+                        min_component_volume_angstrom3=min_component_volume,
+                        postprocess_mode=postprocess_mode,
+                        top_k_values=top_k_values,
+                        reference_pocket_count=reference_pocket_count,
+                        include_top_n_plus_2=include_top_n_plus_2,
+                    )
+                    run_context = {**base_run_context, "postprocess_mode": postprocess_mode}
+                    component_rows.extend({**run_context, **row} for row in sample_components)
+                    topk_rows.extend({**run_context, **row} for row in sample_topk)
 
     return component_rows, topk_rows
 
@@ -281,7 +310,7 @@ def evaluate_run(run, device, num_workers, top_k_values, include_top_n_plus_2, r
 def select_best_rows(summary_rows):
     grouped = {}
     for row in summary_rows:
-        key = (row["run"], row["checkpoint"], row["top_k_label"])
+        key = (row["run"], row["checkpoint"], row["postprocess_mode"], row["top_k_label"])
         current = grouped.get(key)
         if current is None or best_key(row) > best_key(current):
             grouped[key] = row
@@ -307,6 +336,7 @@ def write_markdown_report(output_dir, best_rows, total_runs):
     def line(row):
         return (
             f"| {row['model']} | {row['feature_family']} | {row['apbs_variant']} | "
+            f"{row['postprocess_mode']} | "
             f"{float(row['threshold']):.2f} | {float(row['pocket_f1']):.4f} | "
             f"{float(row['dcc_success_rate_4a']):.4f} | {float(row['dca_success_rate_4a']):.4f} | "
             f"{float(row['mean_dvo_of_best_dcc_success']):.4f} | "
@@ -333,8 +363,8 @@ def write_markdown_report(output_dir, best_rows, total_runs):
         "",
         "## Top-3 Best Rows",
         "",
-        "| Model | Feature set | APBS variant | threshold | Pocket-F1 | DCC@4A | DCA@4A | DVO(success) | Best-DVO | Best-DVO DCC@4A | Best-DVO DCA@4A | Best-DVO mean DCC | Best-DVO mean DCA |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Model | Feature set | APBS variant | Postprocess | threshold | Pocket-F1 | DCC@4A | DCA@4A | DVO(success) | Best-DVO | Best-DVO DCC@4A | Best-DVO DCA@4A | Best-DVO mean DCC | Best-DVO mean DCA |",
+        "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     lines.extend(line(row) for row in top3_rows)
     lines.extend(
@@ -344,8 +374,8 @@ def write_markdown_report(output_dir, best_rows, total_runs):
             "",
             "For the current scPDB cache `n=1`, so Top-(n+2) is equivalent to Top-3 unless a future dataset provides multiple reference pockets per protein.",
             "",
-            "| Model | Feature set | APBS variant | threshold | Pocket-F1 | DCC@4A | DCA@4A | DVO(success) | Best-DVO | Best-DVO DCC@4A | Best-DVO DCA@4A | Best-DVO mean DCC | Best-DVO mean DCA |",
-            "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            "| Model | Feature set | APBS variant | Postprocess | threshold | Pocket-F1 | DCC@4A | DCA@4A | DVO(success) | Best-DVO | Best-DVO DCC@4A | Best-DVO DCA@4A | Best-DVO mean DCC | Best-DVO mean DCA |",
+            "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
         ]
     )
     lines.extend(line(row) for row in topn_rows)
@@ -358,6 +388,11 @@ def main():
     runs_root = Path(args.runs_root)
     output_dir = Path(args.output_dir)
     top_k_values = tuple(sorted({int(item.strip()) for item in args.top_k.split(",") if item.strip()}))
+    postprocess_modes = [
+        item.strip()
+        for item in args.postprocess_modes.split(",")
+        if item.strip()
+    ]
     device = choose_device(args.device)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -387,6 +422,7 @@ def main():
             top_k_values=top_k_values,
             include_top_n_plus_2=not args.no_top_n_plus_2,
             reference_pocket_count=args.reference_pocket_count,
+            postprocess_modes_override=postprocess_modes,
         )
         all_component_rows.extend(component_rows)
         all_topk_rows.extend(topk_rows)
