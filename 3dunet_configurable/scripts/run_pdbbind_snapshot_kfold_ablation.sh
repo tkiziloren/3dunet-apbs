@@ -16,6 +16,8 @@ MANIFEST="${MANIFEST:-$H5_DIR/manifest.csv}"
 EPOCHS="${EPOCHS:-150}"
 EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-0}"
 VALIDATION_THRESHOLD="${VALIDATION_THRESHOLD:-0.40}"
+BATCH_SIZE="${BATCH_SIZE:-4}"
+VALIDATION_BATCH_SIZE="${VALIDATION_BATCH_SIZE:-$BATCH_SIZE}"
 MODEL="${MODEL:-ResNet3D4L}"
 BASE_FEATURES="${BASE_FEATURES:-8}"
 NUM_WORKERS="${NUM_WORKERS:-8}"
@@ -43,6 +45,8 @@ echo "Base features: $BASE_FEATURES"
 echo "Epochs: $EPOCHS"
 echo "Early stopping patience: $EARLY_STOPPING_PATIENCE"
 echo "Fixed validation threshold: $VALIDATION_THRESHOLD"
+echo "Batch size: $BATCH_SIZE"
+echo "Validation batch size: $VALIDATION_BATCH_SIZE"
 echo "Output root: $OUTPUT_ROOT"
 echo "Generated configs: $CONFIG_DIR"
 echo "Run filter: ${RUN_FILTER:-<all>}"
@@ -84,7 +88,7 @@ else
   echo "Using existing split dir: $SPLIT_DIR"
 fi
 
-export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
+export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD BATCH_SIZE VALIDATION_BATCH_SIZE RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
 "$PYTHON_BIN" - <<'PY'
 import copy
 import csv
@@ -102,6 +106,8 @@ label = os.environ["LABEL"]
 epochs = int(os.environ["EPOCHS"])
 early_stopping_patience = int(os.environ["EARLY_STOPPING_PATIENCE"])
 validation_threshold = float(os.environ["VALIDATION_THRESHOLD"])
+batch_size = int(os.environ["BATCH_SIZE"])
+validation_batch_size = int(os.environ["VALIDATION_BATCH_SIZE"])
 folds = [int(item.strip()) for item in os.environ["FOLDS"].split(",") if item.strip()]
 run_filter = {item.strip() for item in os.environ.get("RUN_FILTER", "").split(",") if item.strip()}
 
@@ -198,8 +204,10 @@ for global_run_index, (fold_idx, suffix, features) in enumerate(requested_runs, 
     }
     config["training"]["num_epochs"] = epochs
     config["training"]["early_stopping_patience"] = early_stopping_patience
+    config["training"]["batch_size"] = batch_size
     config["training"].setdefault("loss", {})
     config["training"]["loss"]["dynamic_pos_weight"] = False
+    config["validation"]["batch_size"] = validation_batch_size
     config["validation"]["threshold"] = validation_threshold
     config["validation"]["threshold_sweep"] = threshold_sweep
     config.setdefault("datasets", {})
@@ -224,6 +232,8 @@ for global_run_index, (fold_idx, suffix, features) in enumerate(requested_runs, 
             "fixed_validation_threshold": validation_threshold,
             "epochs": epochs,
             "early_stopping_patience": early_stopping_patience,
+            "batch_size": batch_size,
+            "validation_batch_size": validation_batch_size,
         }
     )
 
@@ -247,6 +257,8 @@ with metadata_path.open("w", newline="") as handle:
             "fixed_validation_threshold",
             "epochs",
             "early_stopping_patience",
+            "batch_size",
+            "validation_batch_size",
         ],
     )
     writer.writeheader()

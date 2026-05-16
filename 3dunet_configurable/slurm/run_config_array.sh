@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=deep-apbs-config-array
 #SBATCH --gres=gpu:a100:1
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=80G
 #SBATCH --time=3-00:00:00
@@ -54,6 +55,11 @@ echo "Training log: $log_path"
 echo "Model: $MODEL"
 echo "Base features: $BASE_FEATURES"
 echo "Num workers: $NUM_WORKERS"
+echo "CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-<unset>}"
+
+if command -v nvidia-smi >/dev/null 2>&1; then
+  nvidia-smi --query-gpu=index,name,memory.total --format=csv
+fi
 
 if [[ "${SKIP_COMPLETED:-1}" == "1" && -f "$final_model_path" ]]; then
   echo "Skipping completed run: $run_name"
@@ -65,7 +71,10 @@ if [[ "${CLEAN_INCOMPLETE:-1}" == "1" && -d "$run_dir" && ! -f "$final_model_pat
   rm -rf "$run_dir"
 fi
 
-PYTORCH_ENABLE_MPS_FALLBACK=1 "$PYTHON_BIN" main.py \
+PYTHONUNBUFFERED=1 \
+PYTORCH_ENABLE_MPS_FALLBACK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+"$PYTHON_BIN" main.py \
   --config "$config_path" \
   --model "$MODEL" \
   --base_features "$BASE_FEATURES" \
