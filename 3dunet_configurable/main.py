@@ -560,6 +560,8 @@ def main():
 
     paper_config = validation_config.get("paper_metrics", {})
     paper_metrics_enabled = bool(paper_config.get("enabled", True))
+    paper_metrics_start_epoch = int(paper_config.get("full_evaluation_start_epoch", 1))
+    paper_metrics_start_epoch = max(1, paper_metrics_start_epoch)
     dcc_cutoff_angstrom = float(paper_config.get("dcc_cutoff_angstrom", 4.0))
     dca_cutoff_angstrom = float(paper_config.get("dca_cutoff_angstrom", 4.0))
     min_component_voxels = int(paper_config.get("min_component_voxels", 5))
@@ -616,6 +618,11 @@ def main():
             "Paper metric comparison postprocess: %s",
             [mode for mode in paper_postprocess_modes if mode != primary_paper_postprocess],
         )
+        if paper_metrics_start_epoch > 1:
+            logger.info(
+                "Paper/top-k metrics start at epoch %d; earlier epochs use lightweight voxel-only validation.",
+                paper_metrics_start_epoch,
+            )
         logger.info(
             "Paper model selection: metric=%s, dvo_weight=%.2f, voxel_f1_weight=%.2f, dca_weight=%.2f, no_dcc_score_scale=%.2f, max_mean_predicted_positive_voxels=%s",
             selection_metric,
@@ -827,6 +834,13 @@ def main():
 
         logger.info("")
         logger.info("Validation")
+        current_epoch = epoch + 1
+        paper_metrics_active = paper_metrics_enabled and current_epoch >= paper_metrics_start_epoch
+        if paper_metrics_enabled and not paper_metrics_active:
+            logger.info(
+                "Lightweight validation warmup: skipping paper/top-k pocket metrics until epoch %d.",
+                paper_metrics_start_epoch,
+            )
 
         model.eval()
         val_loss = 0.0
@@ -875,7 +889,7 @@ def main():
                     )
                     per_protein_rows.append({"epoch": epoch + 1, "protein": protein_name, **protein_stats})
 
-                    if paper_metrics_enabled:
+                    if paper_metrics_active:
                         metadata = validation_dataset.get_metadata(dataset_idx)
                         ligand_mask = validation_dataset.load_metric_mask(dataset_idx, "features", "ligand")
                         for postprocess_mode in paper_postprocess_modes:
@@ -982,7 +996,7 @@ def main():
         primary_paper_stats = None
         primary_paper_summary_rows = []
         comparison_paper_results = {}
-        if paper_metrics_enabled:
+        if paper_metrics_active:
             for postprocess_mode, postprocess_rows in paper_per_protein_rows_by_postprocess.items():
                 paper_summary_rows = summarize_pocket_metrics(
                     postprocess_rows,
@@ -1064,7 +1078,8 @@ def main():
         writer.add_scalar("Recall/Validation", val_recall, epoch)
 
         standard_score = best_threshold_stats["f1"]
-        if paper_metrics_enabled and best_paper_stats is not None:
+        selection_score_available = not paper_metrics_enabled or paper_metrics_active
+        if paper_metrics_active and best_paper_stats is not None:
             standard_score = best_paper_stats["selection_score"]
             writer.add_scalar("PaperF1/Validation_BestThreshold", best_paper_stats["paper_f1"], epoch)
             writer.add_scalar("DCC4/Validation_BestThreshold", best_paper_stats["dcc_success_rate_4a"], epoch)
@@ -1182,7 +1197,11 @@ def main():
                 epoch + 1,
             )
 
-        if standard_score > best_val_selection_score:
+        if not selection_score_available:
+            logger.info(
+                "Validation checkpoint and early stopping skipped during lightweight validation warmup."
+            )
+        elif standard_score > best_val_selection_score:
             best_val_selection_score = standard_score
             if best_paper_stats is not None:
                 best_val_paper_f1 = best_paper_stats["paper_f1"]
