@@ -90,6 +90,14 @@ def has_dataset(h5f, group_name, dataset_name):
     return dataset_name in h5f
 
 
+def has_dataset_in_any_group(h5f, group_names, dataset_name):
+    for group_name in group_names:
+        group = h5f.get(group_name)
+        if group is not None and dataset_name in group:
+            return True
+    return dataset_name in h5f
+
+
 def read_dataset(h5f, group_name, dataset_name):
     group = h5f.get(group_name)
     if group is not None and dataset_name in group:
@@ -141,9 +149,13 @@ def validate_case(
                     return False, f"shape_mismatch:{feature_name}"
 
             if require_ligand_mask:
-                if not has_dataset(h5f, "features", "ligand"):
+                if not has_dataset_in_any_group(h5f, ["features", "auxiliary"], "ligand"):
                     return False, "missing_metric_mask:ligand"
-                ligand_shape = read_dataset(h5f, "features", "ligand").shape
+                ligand_shape = (
+                    read_dataset(h5f, "features", "ligand").shape
+                    if has_dataset(h5f, "features", "ligand")
+                    else read_dataset(h5f, "auxiliary", "ligand").shape
+                )
                 if ligand_shape != reference_shape:
                     return False, "shape_mismatch:ligand"
     except OSError:

@@ -203,6 +203,9 @@ class ProteinLigandDatasetWithH5(Dataset):
             group = h5f.get(group_name)
             if group is not None and dataset_name in group:
                 return group[dataset_name][:]
+            auxiliary_group = h5f.get("auxiliary")
+            if group_name == "features" and auxiliary_group is not None and dataset_name in auxiliary_group:
+                return auxiliary_group[dataset_name][:]
             if dataset_name in h5f:
                 return h5f[dataset_name][:]
         return None
