@@ -25,6 +25,7 @@ PYTHON_BIN="${PYTHON_BIN:-python}"
 BASE_CONFIG="${BASE_CONFIG:-$CONFIGURABLE_DIR/config/local/expanded93/gridfix_expanded93_oldbest_dataset_electrostatic_shape_compact_chem.yml}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$DATA_ROOT/runs/work10_pdbbind_box36_span70_v1_hyperparameter_${MODEL}_${EPOCHS}epoch_thr${VALIDATION_THRESHOLD/./}}"
 CONFIG_DIR="${CONFIG_DIR:-$OUTPUT_ROOT/generated_configs}"
+FEATURE_SET_FILTER="${FEATURE_SET_FILTER:-apbs_v1_full_signed_shape_selected_chem}"
 RUN_FILTER="${RUN_FILTER:-}"
 SKIP_COMPLETED="${SKIP_COMPLETED:-1}"
 CLEAN_INCOMPLETE="${CLEAN_INCOMPLETE:-1}"
@@ -50,6 +51,7 @@ echo "Batch size: $BATCH_SIZE"
 echo "Validation batch size: $VALIDATION_BATCH_SIZE"
 echo "Output root: $OUTPUT_ROOT"
 echo "Generated configs: $CONFIG_DIR"
+echo "Feature set filter: ${FEATURE_SET_FILTER:-<all>}"
 echo "Run filter: ${RUN_FILTER:-<all>}"
 echo "Dry run: $DRY_RUN"
 
@@ -58,7 +60,7 @@ if [[ ! -f "$SPLIT_DIR/fold0_train_cases.txt" ]]; then
   exit 1
 fi
 
-export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD PAPER_METRICS_START_EPOCH BATCH_SIZE VALIDATION_BATCH_SIZE RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
+export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD PAPER_METRICS_START_EPOCH BATCH_SIZE VALIDATION_BATCH_SIZE FEATURE_SET_FILTER RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
 "$PYTHON_BIN" - <<'PY'
 import copy
 import csv
@@ -80,6 +82,11 @@ paper_metrics_start_epoch = int(os.environ["PAPER_METRICS_START_EPOCH"])
 batch_size = int(os.environ["BATCH_SIZE"])
 validation_batch_size = int(os.environ["VALIDATION_BATCH_SIZE"])
 folds = [int(item.strip()) for item in os.environ["FOLDS"].split(",") if item.strip()]
+feature_set_filter = {
+    item.strip()
+    for item in os.environ.get("FEATURE_SET_FILTER", "").split(",")
+    if item.strip()
+}
 run_filter = {item.strip() for item in os.environ.get("RUN_FILTER", "").split(",") if item.strip()}
 
 feature_sets = OrderedDict(
@@ -107,14 +114,30 @@ feature_sets = OrderedDict(
 )
 
 hyperparams = [
-    {"name": "base_lr1e4_alpha05_pos1", "lr": 1e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
-    {"name": "lr3e4_alpha05_pos1", "lr": 3e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
-    {"name": "lr5e5_alpha05_pos1", "lr": 5e-5, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
-    {"name": "lr1e4_alpha05_pos2", "lr": 1e-4, "alpha": 0.5, "pos_weight": 2.0, "weight_decay": 1e-5},
-    {"name": "lr1e4_alpha05_pos5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 5.0, "weight_decay": 1e-5},
-    {"name": "lr1e4_alpha07_pos1", "lr": 1e-4, "alpha": 0.7, "pos_weight": 1.0, "weight_decay": 1e-5},
-    {"name": "lr1e4_alpha03_pos1", "lr": 1e-4, "alpha": 0.3, "pos_weight": 1.0, "weight_decay": 1e-5},
-    {"name": "lr1e4_alpha07_pos2", "lr": 1e-4, "alpha": 0.7, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "base_lr1e4_alpha05_pos1_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr3e5_alpha05_pos1_wd1e5", "lr": 3e-5, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr5e5_alpha05_pos1_wd1e5", "lr": 5e-5, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr2e4_alpha05_pos1_wd1e5", "lr": 2e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr3e4_alpha05_pos1_wd1e5", "lr": 3e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha03_pos1_wd1e5", "lr": 1e-4, "alpha": 0.3, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha04_pos1_wd1e5", "lr": 1e-4, "alpha": 0.4, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha06_pos1_wd1e5", "lr": 1e-4, "alpha": 0.6, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha07_pos1_wd1e5", "lr": 1e-4, "alpha": 0.7, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha08_pos1_wd1e5", "lr": 1e-4, "alpha": 0.8, "pos_weight": 1.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos05_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 0.5, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos2_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos3_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 3.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos5_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 5.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos8_wd1e5", "lr": 1e-4, "alpha": 0.5, "pos_weight": 8.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha03_pos2_wd1e5", "lr": 1e-4, "alpha": 0.3, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha07_pos2_wd1e5", "lr": 1e-4, "alpha": 0.7, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha03_pos5_wd1e5", "lr": 1e-4, "alpha": 0.3, "pos_weight": 5.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha07_pos5_wd1e5", "lr": 1e-4, "alpha": 0.7, "pos_weight": 5.0, "weight_decay": 1e-5},
+    {"name": "lr5e5_alpha07_pos2_wd1e5", "lr": 5e-5, "alpha": 0.7, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr2e4_alpha03_pos2_wd1e5", "lr": 2e-4, "alpha": 0.3, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr2e4_alpha07_pos2_wd1e5", "lr": 2e-4, "alpha": 0.7, "pos_weight": 2.0, "weight_decay": 1e-5},
+    {"name": "lr1e4_alpha05_pos1_wd0", "lr": 1e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 0.0},
+    {"name": "lr1e4_alpha05_pos1_wd1e4", "lr": 1e-4, "alpha": 0.5, "pos_weight": 1.0, "weight_decay": 1e-4},
 ]
 
 with base_config_path.open() as handle:
@@ -130,7 +153,8 @@ requested_runs = [
     for fold_idx in folds
     for feature_suffix, features in feature_sets.items()
     for hp in hyperparams
-    if not run_filter or feature_suffix in run_filter or hp["name"] in run_filter
+    if (not feature_set_filter or feature_suffix in feature_set_filter)
+    and (not run_filter or feature_suffix in run_filter or hp["name"] in run_filter)
 ]
 total_run_count = len(requested_runs)
 
