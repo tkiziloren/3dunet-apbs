@@ -14,8 +14,9 @@ SPLIT_DIR="${SPLIT_DIR:-$H5_DIR/splits_cache_kfold${SPLIT_COUNT}_seed${SPLIT_SEE
 MANIFEST="${MANIFEST:-$H5_DIR/manifest.csv}"
 
 EPOCHS="${EPOCHS:-150}"
-EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-0}"
+EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-25}"
 VALIDATION_THRESHOLD="${VALIDATION_THRESHOLD:-0.40}"
+PAPER_METRICS_START_EPOCH="${PAPER_METRICS_START_EPOCH:-31}"
 BATCH_SIZE="${BATCH_SIZE:-4}"
 VALIDATION_BATCH_SIZE="${VALIDATION_BATCH_SIZE:-$BATCH_SIZE}"
 MODEL="${MODEL:-ResNet3D4L}"
@@ -45,6 +46,7 @@ echo "Base features: $BASE_FEATURES"
 echo "Epochs: $EPOCHS"
 echo "Early stopping patience: $EARLY_STOPPING_PATIENCE"
 echo "Fixed validation threshold: $VALIDATION_THRESHOLD"
+echo "Paper/top-k metrics start epoch: $PAPER_METRICS_START_EPOCH"
 echo "Batch size: $BATCH_SIZE"
 echo "Validation batch size: $VALIDATION_BATCH_SIZE"
 echo "Output root: $OUTPUT_ROOT"
@@ -88,7 +90,7 @@ else
   echo "Using existing split dir: $SPLIT_DIR"
 fi
 
-export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD BATCH_SIZE VALIDATION_BATCH_SIZE RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
+export BASE_CONFIG CONFIG_DIR EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD PAPER_METRICS_START_EPOCH BATCH_SIZE VALIDATION_BATCH_SIZE RUN_FILTER SPLIT_DIR FOLDS H5_DIR LABEL
 "$PYTHON_BIN" - <<'PY'
 import copy
 import csv
@@ -106,6 +108,7 @@ label = os.environ["LABEL"]
 epochs = int(os.environ["EPOCHS"])
 early_stopping_patience = int(os.environ["EARLY_STOPPING_PATIENCE"])
 validation_threshold = float(os.environ["VALIDATION_THRESHOLD"])
+paper_metrics_start_epoch = int(os.environ["PAPER_METRICS_START_EPOCH"])
 batch_size = int(os.environ["BATCH_SIZE"])
 validation_batch_size = int(os.environ["VALIDATION_BATCH_SIZE"])
 folds = [int(item.strip()) for item in os.environ["FOLDS"].split(",") if item.strip()]
@@ -210,6 +213,8 @@ for global_run_index, (fold_idx, suffix, features) in enumerate(requested_runs, 
     config["validation"]["batch_size"] = validation_batch_size
     config["validation"]["threshold"] = validation_threshold
     config["validation"]["threshold_sweep"] = threshold_sweep
+    config["validation"].setdefault("paper_metrics", {})
+    config["validation"]["paper_metrics"]["full_evaluation_start_epoch"] = paper_metrics_start_epoch
     config.setdefault("datasets", {})
     config["datasets"]["train_file"] = str(train_file)
     config["datasets"]["validation_file"] = str(validation_file)
@@ -230,6 +235,7 @@ for global_run_index, (fold_idx, suffix, features) in enumerate(requested_runs, 
             "train_file": str(train_file),
             "validation_file": str(validation_file),
             "fixed_validation_threshold": validation_threshold,
+            "paper_metrics_start_epoch": paper_metrics_start_epoch,
             "epochs": epochs,
             "early_stopping_patience": early_stopping_patience,
             "batch_size": batch_size,
@@ -255,6 +261,7 @@ with metadata_path.open("w", newline="") as handle:
             "train_file",
             "validation_file",
             "fixed_validation_threshold",
+            "paper_metrics_start_epoch",
             "epochs",
             "early_stopping_patience",
             "batch_size",
