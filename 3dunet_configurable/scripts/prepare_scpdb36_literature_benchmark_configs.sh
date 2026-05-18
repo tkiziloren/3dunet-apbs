@@ -17,6 +17,16 @@ if [[ -z "${PYTHON_BIN:-}" ]]; then
   fi
 fi
 
+if [[ -z "${TRAIN_PYTHON_BIN:-}" ]]; then
+  if [[ -x "$CONFIGURABLE_DIR/../.venv/bin/python" ]]; then
+    TRAIN_PYTHON_BIN="$CONFIGURABLE_DIR/../.venv/bin/python"
+  elif [[ -x /homes/tevfik/PHD/3dunet-apbs/.venv/bin/python ]]; then
+    TRAIN_PYTHON_BIN="/homes/tevfik/PHD/3dunet-apbs/.venv/bin/python"
+  else
+    TRAIN_PYTHON_BIN="$PYTHON_BIN"
+  fi
+fi
+
 if [[ -z "${KALASANTY_FOLD_DIR:-}" ]]; then
   for candidate in \
     "/homes/tevfik/PHD/generate_cache/data/kalasanty" \
@@ -118,6 +128,8 @@ echo "Base features: $BASE_FEATURES"
 echo "Epochs: $EPOCHS"
 echo "Batch size: $BATCH_SIZE"
 echo "Hyperparameters: lr=$LEARNING_RATE alpha=$LOSS_ALPHA pos_weight=$POS_WEIGHT wd=$WEIGHT_DECAY"
+echo "Config/split Python: $PYTHON_BIN"
+echo "Training Python: $TRAIN_PYTHON_BIN"
 echo "Submit: $SUBMIT"
 
 common_split_args=(
@@ -398,6 +410,12 @@ if [[ "$SUBMIT" != "1" ]]; then
   exit 0
 fi
 
+echo "Checking training Python can import torch"
+"$TRAIN_PYTHON_BIN" - <<'PY'
+import torch
+print(f"torch {torch.__version__}")
+PY
+
 mkdir -p "$OUTPUT_ROOT/slurm"
 echo "Submitting Slurm array 1-${CONFIG_COUNT}%${SBATCH_ARRAY_LIMIT}"
 sbatch \
@@ -409,5 +427,5 @@ sbatch \
   --time "$WALLTIME" \
   --output "$OUTPUT_ROOT/slurm/%x_%A_%a.out" \
   --error "$OUTPUT_ROOT/slurm/%x_%A_%a.err" \
-  --export "ALL,CONFIG_LIST=$CONFIG_LIST,OUTPUT_ROOT=$OUTPUT_ROOT,REPO_DIR=$CONFIGURABLE_DIR,PYTHON_BIN=$PYTHON_BIN,MODEL=$MODEL,BASE_FEATURES=$BASE_FEATURES,NUM_WORKERS=$NUM_WORKERS,SKIP_COMPLETED=$SKIP_COMPLETED,CLEAN_INCOMPLETE=$CLEAN_INCOMPLETE" \
+  --export "ALL,CONFIG_LIST=$CONFIG_LIST,OUTPUT_ROOT=$OUTPUT_ROOT,REPO_DIR=$CONFIGURABLE_DIR,PYTHON_BIN=$TRAIN_PYTHON_BIN,MODEL=$MODEL,BASE_FEATURES=$BASE_FEATURES,NUM_WORKERS=$NUM_WORKERS,SKIP_COMPLETED=$SKIP_COMPLETED,CLEAN_INCOMPLETE=$CLEAN_INCOMPLETE" \
   "$CONFIGURABLE_DIR/slurm/run_config_array.sh"
