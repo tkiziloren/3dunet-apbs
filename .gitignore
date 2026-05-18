@@ -147,3 +147,8 @@ run/
 
 # Graphify local cache
 graphify-out/cache/
+
+# Slurm/DCGM runtime outputs
+dcgm/
+**/dcgm/
+slurm_run_logs/
