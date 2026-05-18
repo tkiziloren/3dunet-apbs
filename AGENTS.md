@@ -43,6 +43,129 @@ This repository trains and evaluates 3D voxel-based neural networks for protein-
 - For dataset changes, inspect at least one HDF5 sample and report feature keys, label keys, shapes, positive voxel ratios, and continuous feature ranges.
 - For metric or loss changes, prefer a small synthetic tensor check before launching a large experiment.
 
+## Agent Savepoint
+
+Use `~/AgentSavepoint` for saved Codex notes. If unavailable, use `.agent-savepoint`.
+
+In this environment, `/sp` commands are protocol commands handled by the agent, not confirmed native Codex slash commands. Type `/sp help` to see the cheat sheet. A user skill named `agent-savepoint` may provide `/sp` as a trigger in environments that surface custom skills, but do not claim native slash-menu/autocomplete support unless it is actually available.
+
+Agent Savepoint uses stable project IDs, not git-based sessions. It must work for non-git projects, random folders, local experiments, and normal git repositories.
+
+Global behavior:
+
+- On every `/sp save`, `/sp list`, `/sp show`, `/sp use`, and `/sp status`, resolve the current workspace/project fresh.
+- Do not cache or reuse the previous project identity across different workspaces.
+- Switching to another project must automatically switch the save target.
+- Never keep saving to a previous project after the workspace changes.
+
+Storage:
+
+```text
+~/AgentSavepoint/
+  global.md
+  projects/<project-id>-<project-slug>/
+    meta.md
+    notes.md
+```
+
+Project identity:
+
+- Primary identity source is `.agent-savepoint-id` in the current project/workspace root.
+- If `.agent-savepoint-id` exists, read it and use its `project_id`.
+- If `.agent-savepoint-id` does not exist, create a new stable project identity on first `/sp save` or `/sp status`.
+- Generated IDs should look like `asp_YYYYMMDD_<short-random-hex>`.
+- Derive `project_slug` from the current workspace/folder name.
+- Store notes under `projects/<project-id>-<project-slug>/`.
+- If the folder is renamed later, keep using the same `project_id` from `.agent-savepoint-id`; do not create a new project just because the folder name changed.
+- Git remote origin may be recorded in `meta.md` if available, but git is not required and must not be the main identity source.
+- Do not commit `.agent-savepoint-id` automatically.
+- Do not modify `.gitignore` for Agent Savepoint unless the user asks.
+
+Commands:
+
+- `/sp help`: show a short Agent Savepoint command cheat sheet and mention that commands are quiet by default.
+- `/sp save`: append a concise reusable summary of the previous assistant answer to `projects/<project-id>-<project-slug>/notes.md`.
+- `/sp save global`: append generally reusable content to `global.md`.
+- `/sp list`: list saved notes from the current project as a numbered list of titles only.
+- `/sp show <number-or-keyword>`: show the full saved note from current project notes.
+- `/sp use <keyword>`: search current project notes first, then `global.md`, and reuse the best match.
+- `/sp status`: show storage path, current project id, current project slug, project identity source, project notes file, and whether `.agent-savepoint-id` exists.
+- `/sp project rename <display-name>`: update only the display name in `projects/<project-id>-<project-slug>/meta.md` and `.agent-savepoint-id`; do not change the project id or move files.
+
+Response style:
+
+- Agent Savepoint commands must be quiet and concise.
+- `/sp save` must only confirm:
+  - `Saved: <title>`
+  - `Project: <project-slug>`
+  - `File: <path>`
+- `/sp list` must only show a numbered list of saved note titles. Do not explain how listing works.
+- `/sp show <number-or-keyword>` must show the selected saved note as clean Markdown. Do not wrap the entire note in a code block. Render headings, tags, and content normally. Preserve code snippets inside fenced code blocks only when the saved content contains actual code. Do not add extra commentary before or after the note.
+- `/sp show <number-or-keyword>` output format:
+
+```text
+## <title>
+
+**Tags:** tag1, tag2
+
+<saved content rendered as normal Markdown>
+```
+
+- `/sp status` must show only:
+
+```text
+Storage: <path>
+Project: <project-id>-<project-slug>
+Identity: <source>
+Notes: <path>
+```
+
+- `/sp use <keyword>` adapts or reuses the saved note for the current task. Do not display internal search details unless needed.
+
+Deprecated aliases:
+
+- `/sp session <name>` -> no longer needed; stable project IDs are selected automatically.
+- `/session <name>` -> no longer needed; stable project IDs are selected automatically.
+- `/save` -> use `/sp save`.
+- `/save-global` -> use `/sp save global`.
+- `/list-saved` -> use `/sp list`.
+- `/use-saved <keyword>` -> use `/sp use <keyword>`.
+
+List/show behavior:
+
+- `/sp list` shows only numbers and note titles from current project notes, not full content.
+- `/sp show 1` shows the first item from the most recent `/sp list` result if possible.
+- If there is no recent list context, `/sp show 1` shows the first saved note in the current project notes file.
+- `/sp show <keyword>` searches titles, tags, and content.
+- `/sp show <keyword>` searches current project notes first, then `global.md`.
+- If multiple keyword matches exist, show a numbered shortlist and ask the user to choose.
+- `/sp show <keyword>` only displays a saved note; `/sp use <keyword>` adapts or reuses the saved note for the current task.
+- Do not modify saved files when showing notes.
+
+Save format:
+
+```markdown
+## YYYY-MM-DD HH:mm - Title
+
+Tags: tag1, tag2
+
+### Content
+
+Saved content here as normal Markdown.
+```
+
+If the saved content includes code, preserve code blocks properly.
+
+When reading older entries that use `Content: ...`, convert them mentally when displaying with `/sp show`, so the output still renders cleanly.
+
+Rules:
+- Do not save automatically.
+- Do not ask the user to copy-paste the previous answer.
+- Save only the useful/reusable part.
+- Keep entries concise.
+- Redact secrets as `[REDACTED]`.
+- After saving, briefly confirm what was saved and which project file was updated.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

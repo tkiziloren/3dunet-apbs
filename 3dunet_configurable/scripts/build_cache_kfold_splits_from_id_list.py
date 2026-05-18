@@ -52,6 +52,14 @@ def parse_args():
             "features/, auxiliary/, label(s)/, masks/, or the H5 root."
         ),
     )
+    parser.add_argument(
+        "--h5-exists-only",
+        action="store_true",
+        help=(
+            "Only require that a requested ID resolves to an existing .h5 file. "
+            "Do not open H5 files or validate labels/features/metric masks."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -116,39 +124,54 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     requested_ids = read_id_list(args.id_list)
+    print(f"Requested IDs: {len(requested_ids)}", flush=True)
     h5_cases = discover_h5_cases(args.h5_dir)
+    print(f"Indexed available H5 files: {len(h5_cases)} cases", flush=True)
     requested_cases, missing_ids = resolve_requested_cases(requested_ids, h5_cases)
-    manifest_rows = read_manifest_rows(args.manifest)
-    required_features = args.required_features or DEFAULT_REQUIRED_FEATURES
+    print(f"Resolved requested H5 cases: {len(requested_cases)}", flush=True)
+    print(f"Missing requested IDs: {len(missing_ids)}", flush=True)
 
     valid_cases = []
     invalid_rows = []
     invalid_reasons = Counter()
     cases_by_base = defaultdict(list)
 
-    for case in requested_cases:
-        status = validate_case(
-            case,
-            args.h5_dir,
-            manifest_rows,
-            args.label,
-            required_features,
-            require_ligand_mask=not args.allow_missing_ligand_mask,
-            exclude_label_atoms_outside_box=not args.allow_label_atoms_outside_box,
-        )
-        if not status.ok:
-            invalid_rows.append({"case": case, "reason": status.reason})
-            invalid_reasons[status.reason] += 1
-            continue
-        valid_cases.append(case)
-        cases_by_base[strip_scpdb_suffix(case)].append(case)
+    if args.h5_exists_only:
+        print("Split mode: H5 existence only; skipping H5 content validation", flush=True)
+        valid_cases = list(requested_cases)
+        for case in valid_cases:
+            cases_by_base[strip_scpdb_suffix(case)].append(case)
+    else:
+        manifest_rows = read_manifest_rows(args.manifest)
+        required_features = args.required_features or DEFAULT_REQUIRED_FEATURES
+        print(f"Validating requested H5 contents: {len(requested_cases)} cases", flush=True)
+        for case_index, case in enumerate(requested_cases, start=1):
+            if case_index == 1 or case_index % 500 == 0 or case_index == len(requested_cases):
+                print(f"  validated {case_index}/{len(requested_cases)} requested H5 cases", flush=True)
+            status = validate_case(
+                case,
+                args.h5_dir,
+                manifest_rows,
+                args.label,
+                required_features,
+                require_ligand_mask=not args.allow_missing_ligand_mask,
+                exclude_label_atoms_outside_box=not args.allow_label_atoms_outside_box,
+            )
+            if not status.ok:
+                invalid_rows.append({"case": case, "reason": status.reason})
+                invalid_reasons[status.reason] += 1
+                continue
+            valid_cases.append(case)
+            cases_by_base[strip_scpdb_suffix(case)].append(case)
 
     for base_id in cases_by_base:
         cases_by_base[base_id].sort()
 
-    folds = assign_balanced_folds(cases_by_base, args.folds, args.seed)
     all_valid_base_ids = sorted(cases_by_base)
     all_valid_cases = sorted(valid_cases)
+    print(f"Available requested base IDs with H5: {len(all_valid_base_ids)}", flush=True)
+    print(f"Available requested cases with H5: {len(all_valid_cases)}", flush=True)
+    folds = assign_balanced_folds(cases_by_base, args.folds, args.seed)
 
     write_list(output_dir / "requested_ids.txt", requested_ids)
     write_list(output_dir / "missing_ids.txt", missing_ids)
@@ -158,6 +181,7 @@ def main():
 
     summary_rows = []
     for fold_idx, validation_fold in enumerate(folds):
+        print(f"Writing fold {fold_idx + 1}/{len(folds)}", flush=True)
         validation_base_ids = sorted(validation_fold["base_ids"])
         validation_cases = sorted(validation_fold["cases"])
         train_base_ids = sorted(
@@ -202,6 +226,7 @@ def main():
                 "label": args.label,
                 "folds": args.folds,
                 "seed": args.seed,
+                "split_mode": "h5_exists_only" if args.h5_exists_only else "validated_h5",
                 "requested_ids": len(requested_ids),
                 "discovered_h5_cases": len(h5_cases),
                 "resolved_requested_cases": len(requested_cases),

@@ -68,6 +68,14 @@ def parse_args():
         action="store_true",
         help="Warn and continue when a fold ID is not available in the validated H5 cache.",
     )
+    parser.add_argument(
+        "--h5-exists-only",
+        action="store_true",
+        help=(
+            "Only require that a matching .h5 file exists. Do not open H5 files or "
+            "validate labels/features/metric masks."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -112,12 +120,25 @@ def case_to_base_id(case):
 
 
 def build_valid_case_index(args):
+    h5_cases = discover_h5_cases(args.h5_dir)
+    if args.h5_exists_only:
+        print(f"Indexing available H5 files only: {len(h5_cases)} cases", flush=True)
+        cases_by_base = defaultdict(list)
+        for case in h5_cases:
+            cases_by_base[case_to_base_id(case)].append(case)
+        for base_id in cases_by_base:
+            cases_by_base[base_id].sort()
+        return dict(cases_by_base), []
+
     manifest_rows = read_manifest_rows(args.manifest)
     required_features = args.required_features or DEFAULT_REQUIRED_FEATURES
     cases_by_base = defaultdict(list)
     invalid_rows = []
 
-    for case in discover_h5_cases(args.h5_dir):
+    print(f"Validating H5 contents: {len(h5_cases)} cases", flush=True)
+    for case_index, case in enumerate(h5_cases, start=1):
+        if case_index == 1 or case_index % 500 == 0 or case_index == len(h5_cases):
+            print(f"  validated {case_index}/{len(h5_cases)} H5 cases", flush=True)
         status = validate_case(
             case,
             args.h5_dir,
@@ -160,6 +181,7 @@ def main():
     cases_by_base, invalid_rows = build_valid_case_index(args)
     all_base_ids = set(cases_by_base)
     write_list(output_dir / "valid_base_ids.txt", sorted(all_base_ids))
+    print(f"Available base IDs with H5: {len(all_base_ids)}", flush=True)
 
     if invalid_rows:
         with (output_dir / "invalid_cases.csv").open("w", newline="") as handle:
@@ -171,6 +193,7 @@ def main():
     missing_by_fold = {}
 
     for fold in folds:
+        print(f"Processing fold {fold} ({folds.index(fold) + 1}/{len(folds)})", flush=True)
         validation_path = fold_path(args.fold_dir, args.validation_pattern, fold)
         if not validation_path.exists():
             raise SystemExit(f"Missing validation fold file: {validation_path}")
@@ -238,6 +261,7 @@ def main():
                 "h5_dir": args.h5_dir,
                 "fold_dir": args.fold_dir,
                 "folds": folds,
+                "split_mode": "h5_exists_only" if args.h5_exists_only else "validated_h5",
                 "valid_base_ids": len(all_base_ids),
                 "invalid_cases": len(invalid_rows),
                 "missing_by_fold": missing_by_fold,

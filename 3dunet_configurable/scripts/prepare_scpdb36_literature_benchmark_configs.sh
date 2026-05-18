@@ -141,6 +141,7 @@ if contains_benchmark "kalasanty"; then
   echo "Building Kalasanty 10-fold splits from official fold ID files"
   "$PYTHON_BIN" scripts/build_cache_splits_from_fold_ids.py \
     "${common_split_args[@]}" \
+    --h5-exists-only \
     --fold-dir "$KALASANTY_FOLD_DIR" \
     --output-dir "$KALASANTY_SPLIT_DIR" \
     --folds "$KALASANTY_FOLDS" \
@@ -158,6 +159,7 @@ if contains_benchmark "puresnet"; then
   echo "Building PUResNet 5020-derived deterministic 4-fold splits from available H5 cases"
   "$PYTHON_BIN" scripts/build_cache_kfold_splits_from_id_list.py \
     "${common_split_args[@]}" \
+    --h5-exists-only \
     --id-list "$PURESNET_ID_LIST" \
     --output-dir "$PURESNET_SPLIT_DIR" \
     --folds "$PURESNET_FOLD_COUNT" \
