@@ -50,6 +50,8 @@ POCKET_SUMMARY_FIELDNAMES = [
     "mean_dca_angstrom",
     "mean_dvo_all",
     "mean_dvo_dcc_success",
+    "mean_pli_all",
+    "mean_pli_dcc_success",
     "dcc_success_count",
     "mean_predicted_positive_voxels",
     "mean_top_component_voxels",
@@ -70,8 +72,10 @@ POCKET_PER_PROTEIN_FIELDNAMES = [
     "predicted_positive_voxels",
     "dcc_angstrom",
     "dcc_to_label_angstrom",
+    "dcc_to_ligand_angstrom",
     "dca_angstrom",
     "dvo",
+    "pli",
     "dcc_success_4a",
     "dca_success_4a",
     "top1_dcc_success_4a",
@@ -106,8 +110,10 @@ POCKET_TOPK_COMPONENT_FIELDNAMES = [
     "center_z",
     "dcc_angstrom",
     "dcc_to_label_angstrom",
+    "dcc_to_ligand_angstrom",
     "dca_angstrom",
     "dvo",
+    "pli",
     "dcc_success_4a",
     "dca_success_4a",
     "dcc_reference",
@@ -134,15 +140,25 @@ POCKET_TOPK_PER_PROTEIN_FIELDNAMES = [
     "best_dcc_angstrom",
     "best_dcc_component_rank",
     "dvo_of_best_dcc_component",
+    "pli_of_best_dcc_component",
     "best_dca_angstrom",
     "best_dca_component_rank",
     "dvo_of_best_dca_component",
+    "pli_of_best_dca_component",
     "best_dvo",
     "best_dvo_component_rank",
     "dcc_of_best_dvo_component",
     "dca_of_best_dvo_component",
+    "pli_of_best_dvo_component",
+    "best_pli",
+    "best_pli_component_rank",
+    "dcc_of_best_pli_component",
+    "dca_of_best_pli_component",
+    "dvo_of_best_pli_component",
     "best_dvo_dcc_success_4a",
     "best_dvo_dca_success_4a",
+    "best_pli_dcc_success_4a",
+    "best_pli_dca_success_4a",
     "dcc_success_4a",
     "dca_success_4a",
     "paper_tp",
@@ -174,12 +190,20 @@ POCKET_TOPK_SUMMARY_FIELDNAMES = [
     "mean_best_dcc_angstrom",
     "mean_best_dca_angstrom",
     "mean_best_dvo_all",
+    "mean_best_pli_all",
     "mean_dcc_of_best_dvo_angstrom",
     "mean_dca_of_best_dvo_angstrom",
+    "mean_dcc_of_best_pli_angstrom",
+    "mean_dca_of_best_pli_angstrom",
     "best_dvo_dcc_success_rate_4a",
     "best_dvo_dca_success_rate_4a",
+    "best_pli_dcc_success_rate_4a",
+    "best_pli_dca_success_rate_4a",
     "mean_dvo_of_best_dcc_all",
     "mean_dvo_of_best_dcc_success",
+    "mean_pli_of_best_dcc_all",
+    "mean_pli_of_best_dcc_success",
+    "mean_best_pli_dcc_success",
     "mean_predicted_positive_voxels",
     "mean_candidate_count",
     "no_prediction_count",
@@ -426,6 +450,26 @@ def _component_mask(labeled_components, component_id):
     return labeled_components == component_id
 
 
+def _resolve_dcc_reference(label_center, ligand_center, mode):
+    mode = (mode or "label_center").strip().lower()
+    if mode in {"label", "label_center", "binding_site", "actual_binding_site"}:
+        if label_center is not None:
+            return label_center, "label_center"
+        return ligand_center, "ligand_center"
+    if mode in {"ligand", "ligand_center"}:
+        if ligand_center is not None:
+            return ligand_center, "ligand_center"
+        return label_center, "label_center"
+    if mode == "auto":
+        if ligand_center is not None:
+            return ligand_center, "ligand_center"
+        return label_center, "label_center"
+    raise ValueError(
+        "dcc_reference must be one of label_center, ligand_center, or auto; "
+        f"got {mode!r}"
+    )
+
+
 def _dvo(component_mask, label_mask):
     if component_mask is None:
         return 0.0
@@ -435,6 +479,18 @@ def _dvo(component_mask, label_mask):
         return 0.0
     intersection = np.logical_and(component_mask, label_bool).sum()
     return float(intersection / union)
+
+
+def _pli(component_mask, ligand_mask):
+    """Proportion of ligand voxels included in the predicted binding site."""
+    if component_mask is None or ligand_mask is None:
+        return 0.0
+    ligand_bool = np.asarray(ligand_mask) > 0.5
+    ligand_volume = int(ligand_bool.sum())
+    if ligand_volume == 0:
+        return 0.0
+    intersection = np.logical_and(component_mask, ligand_bool).sum()
+    return float(intersection / ligand_volume)
 
 
 def evaluate_pocket_metrics_for_sample(
@@ -451,6 +507,7 @@ def evaluate_pocket_metrics_for_sample(
     min_component_volume_angstrom3=None,
     postprocess_mode=RAW_POSTPROCESS,
     top_k_values=(1, 3),
+    dcc_reference="label_center",
 ):
     postprocess_mode = normalize_postprocess_mode(postprocess_mode)
     probabilities = np.asarray(probabilities, dtype=np.float32)
@@ -462,8 +519,11 @@ def evaluate_pocket_metrics_for_sample(
 
     label_center, _ = center_of_mask(label_mask)
     ligand_center, ligand_coords = center_of_mask(ligand_mask) if ligand_mask is not None else (None, None)
-    dcc_reference_center = ligand_center if ligand_center is not None else label_center
-    dcc_reference = "ligand_center" if ligand_center is not None else "label_center"
+    dcc_reference_center, dcc_reference_label = _resolve_dcc_reference(
+        label_center,
+        ligand_center,
+        dcc_reference,
+    )
 
     rows = []
     for threshold in thresholds:
@@ -484,14 +544,18 @@ def evaluate_pocket_metrics_for_sample(
             predicted_center = top_component["center"]
             dcc = _distance_angstrom(predicted_center, dcc_reference_center, resolution)
             dcc_to_label = _distance_angstrom(predicted_center, label_center, resolution)
+            dcc_to_ligand = _distance_angstrom(predicted_center, ligand_center, resolution)
             dca = _dca_angstrom(predicted_center, ligand_coords, resolution)
             dvo = _dvo(top_component_mask, label_mask)
+            pli = _pli(top_component_mask, ligand_mask)
             top_component_voxels = top_component["voxel_count"]
         else:
             dcc = max_distance_angstrom
             dcc_to_label = max_distance_angstrom
+            dcc_to_ligand = max_distance_angstrom
             dca = max_distance_angstrom
             dvo = 0.0
+            pli = 0.0
             top_component_voxels = 0
 
         top_k_success = {}
@@ -525,8 +589,10 @@ def evaluate_pocket_metrics_for_sample(
                 "predicted_positive_voxels": int(predicted_positive_voxels),
                 "dcc_angstrom": float(dcc),
                 "dcc_to_label_angstrom": float(dcc_to_label),
+                "dcc_to_ligand_angstrom": float(dcc_to_ligand),
                 "dca_angstrom": float(dca),
                 "dvo": float(dvo),
+                "pli": float(pli),
                 "dcc_success_4a": int(dcc_success),
                 "dca_success_4a": int(dca_success),
                 "top1_dcc_success_4a": int(top_k_success.get(1, dcc_success)),
@@ -537,7 +603,7 @@ def evaluate_pocket_metrics_for_sample(
                 "strict_tp": strict_tp,
                 "strict_fp": strict_fp,
                 "strict_fn": strict_fn,
-                "dcc_reference": dcc_reference,
+                "dcc_reference": dcc_reference_label,
             }
         )
 
@@ -560,6 +626,7 @@ def evaluate_topk_metrics_for_sample(
     top_k_values=(1, 2, 3),
     reference_pocket_count=1,
     include_top_n_plus_2=True,
+    dcc_reference="label_center",
 ):
     postprocess_mode = normalize_postprocess_mode(postprocess_mode)
     probabilities = np.asarray(probabilities, dtype=np.float32)
@@ -576,8 +643,11 @@ def evaluate_topk_metrics_for_sample(
     max_components = max((top_k for _, top_k in top_k_specs), default=1)
     label_center, _ = center_of_mask(label_mask)
     ligand_center, ligand_coords = center_of_mask(ligand_mask) if ligand_mask is not None else (None, None)
-    dcc_reference_center = ligand_center if ligand_center is not None else label_center
-    dcc_reference = "ligand_center" if ligand_center is not None else "label_center"
+    dcc_reference_center, dcc_reference_label = _resolve_dcc_reference(
+        label_center,
+        ligand_center,
+        dcc_reference,
+    )
 
     component_rows = []
     topk_rows = []
@@ -598,8 +668,10 @@ def evaluate_topk_metrics_for_sample(
             component_mask = _component_mask(labeled, component["component_id"])
             dcc = _distance_angstrom(component["center"], dcc_reference_center, resolution)
             dcc_to_label = _distance_angstrom(component["center"], label_center, resolution)
+            dcc_to_ligand = _distance_angstrom(component["center"], ligand_center, resolution)
             dca = _dca_angstrom(component["center"], ligand_coords, resolution)
             dvo = _dvo(component_mask, label_mask)
+            pli = _pli(component_mask, ligand_mask)
             center = component["center"]
             component_metric = {
                 "protein": protein_name,
@@ -614,11 +686,13 @@ def evaluate_topk_metrics_for_sample(
                 "center_z": float(center[2]),
                 "dcc_angstrom": float(dcc),
                 "dcc_to_label_angstrom": float(dcc_to_label),
+                "dcc_to_ligand_angstrom": float(dcc_to_ligand),
                 "dca_angstrom": float(dca),
                 "dvo": float(dvo),
+                "pli": float(pli),
                 "dcc_success_4a": int(dcc <= dcc_cutoff_angstrom),
                 "dca_success_4a": int(dca <= dca_cutoff_angstrom),
-                "dcc_reference": dcc_reference,
+                "dcc_reference": dcc_reference_label,
             }
             component_rows.append(component_metric)
             ranked_components.append(component_metric)
@@ -631,32 +705,51 @@ def evaluate_topk_metrics_for_sample(
                 best_dcc_component = min(candidates, key=lambda row: row["dcc_angstrom"])
                 best_dca_component = min(candidates, key=lambda row: row["dca_angstrom"])
                 best_dvo_component = max(candidates, key=lambda row: row["dvo"])
+                best_pli_component = max(candidates, key=lambda row: row["pli"])
                 best_dcc = float(best_dcc_component["dcc_angstrom"])
                 best_dca = float(best_dca_component["dca_angstrom"])
                 best_dvo = float(best_dvo_component["dvo"])
+                best_pli = float(best_pli_component["pli"])
                 dvo_of_best_dcc = float(best_dcc_component["dvo"])
                 dvo_of_best_dca = float(best_dca_component["dvo"])
+                pli_of_best_dcc = float(best_dcc_component["pli"])
+                pli_of_best_dca = float(best_dca_component["pli"])
                 best_dcc_rank = int(best_dcc_component["component_rank"])
                 best_dca_rank = int(best_dca_component["component_rank"])
                 best_dvo_rank = int(best_dvo_component["component_rank"])
+                best_pli_rank = int(best_pli_component["component_rank"])
                 dcc_of_best_dvo = float(best_dvo_component["dcc_angstrom"])
                 dca_of_best_dvo = float(best_dvo_component["dca_angstrom"])
+                pli_of_best_dvo = float(best_dvo_component["pli"])
+                dcc_of_best_pli = float(best_pli_component["dcc_angstrom"])
+                dca_of_best_pli = float(best_pli_component["dca_angstrom"])
+                dvo_of_best_pli = float(best_pli_component["dvo"])
             else:
                 best_dcc = max_distance_angstrom
                 best_dca = max_distance_angstrom
                 best_dvo = 0.0
+                best_pli = 0.0
                 dvo_of_best_dcc = 0.0
                 dvo_of_best_dca = 0.0
+                pli_of_best_dcc = 0.0
+                pli_of_best_dca = 0.0
                 best_dcc_rank = 0
                 best_dca_rank = 0
                 best_dvo_rank = 0
+                best_pli_rank = 0
                 dcc_of_best_dvo = max_distance_angstrom
                 dca_of_best_dvo = max_distance_angstrom
+                pli_of_best_dvo = 0.0
+                dcc_of_best_pli = max_distance_angstrom
+                dca_of_best_pli = max_distance_angstrom
+                dvo_of_best_pli = 0.0
 
             dcc_success = bool(best_dcc <= dcc_cutoff_angstrom)
             dca_success = bool(best_dca <= dca_cutoff_angstrom)
             best_dvo_dcc_success = bool(dcc_of_best_dvo <= dcc_cutoff_angstrom)
             best_dvo_dca_success = bool(dca_of_best_dvo <= dca_cutoff_angstrom)
+            best_pli_dcc_success = bool(dcc_of_best_pli <= dcc_cutoff_angstrom)
+            best_pli_dca_success = bool(dca_of_best_pli <= dca_cutoff_angstrom)
             topk_rows.append(
                 {
                     "protein": protein_name,
@@ -671,21 +764,31 @@ def evaluate_topk_metrics_for_sample(
                     "best_dcc_angstrom": float(best_dcc),
                     "best_dcc_component_rank": int(best_dcc_rank),
                     "dvo_of_best_dcc_component": float(dvo_of_best_dcc),
+                    "pli_of_best_dcc_component": float(pli_of_best_dcc),
                     "best_dca_angstrom": float(best_dca),
                     "best_dca_component_rank": int(best_dca_rank),
                     "dvo_of_best_dca_component": float(dvo_of_best_dca),
+                    "pli_of_best_dca_component": float(pli_of_best_dca),
                     "best_dvo": float(best_dvo),
                     "best_dvo_component_rank": int(best_dvo_rank),
                     "dcc_of_best_dvo_component": float(dcc_of_best_dvo),
                     "dca_of_best_dvo_component": float(dca_of_best_dvo),
+                    "pli_of_best_dvo_component": float(pli_of_best_dvo),
+                    "best_pli": float(best_pli),
+                    "best_pli_component_rank": int(best_pli_rank),
+                    "dcc_of_best_pli_component": float(dcc_of_best_pli),
+                    "dca_of_best_pli_component": float(dca_of_best_pli),
+                    "dvo_of_best_pli_component": float(dvo_of_best_pli),
                     "best_dvo_dcc_success_4a": int(best_dvo_dcc_success),
                     "best_dvo_dca_success_4a": int(best_dvo_dca_success),
+                    "best_pli_dcc_success_4a": int(best_pli_dcc_success),
+                    "best_pli_dca_success_4a": int(best_pli_dca_success),
                     "dcc_success_4a": int(dcc_success),
                     "dca_success_4a": int(dca_success),
                     "paper_tp": int(predicted and dcc_success),
                     "paper_fp": int(predicted and not dcc_success),
                     "paper_fn": int(not predicted),
-                    "dcc_reference": dcc_reference,
+                    "dcc_reference": dcc_reference_label,
                 }
             )
 
@@ -731,6 +834,15 @@ def summarize_topk_pocket_metrics(rows):
             [float(row["dvo_of_best_dcc_component"]) for row in dcc_success_rows],
             dtype=np.float64,
         )
+        pli_success_values = np.asarray(
+            [float(row["pli_of_best_dcc_component"]) for row in dcc_success_rows],
+            dtype=np.float64,
+        )
+        best_pli_success_rows = [row for row in grouped_rows if int(row["best_pli_dcc_success_4a"])]
+        best_pli_success_values = np.asarray(
+            [float(row["best_pli"]) for row in best_pli_success_rows],
+            dtype=np.float64,
+        )
         first_row = grouped_rows[0]
         summaries.append(
             {
@@ -757,8 +869,11 @@ def summarize_topk_pocket_metrics(rows):
                 "mean_best_dcc_angstrom": mean("best_dcc_angstrom"),
                 "mean_best_dca_angstrom": mean("best_dca_angstrom"),
                 "mean_best_dvo_all": mean("best_dvo"),
+                "mean_best_pli_all": mean("best_pli"),
                 "mean_dcc_of_best_dvo_angstrom": mean("dcc_of_best_dvo_component"),
                 "mean_dca_of_best_dvo_angstrom": mean("dca_of_best_dvo_component"),
+                "mean_dcc_of_best_pli_angstrom": mean("dcc_of_best_pli_component"),
+                "mean_dca_of_best_pli_angstrom": mean("dca_of_best_pli_component"),
                 "best_dvo_dcc_success_rate_4a": sum(
                     int(row["best_dvo_dcc_success_4a"]) for row in grouped_rows
                 )
@@ -767,9 +882,24 @@ def summarize_topk_pocket_metrics(rows):
                     int(row["best_dvo_dca_success_4a"]) for row in grouped_rows
                 )
                 / sample_count,
+                "best_pli_dcc_success_rate_4a": sum(
+                    int(row["best_pli_dcc_success_4a"]) for row in grouped_rows
+                )
+                / sample_count,
+                "best_pli_dca_success_rate_4a": sum(
+                    int(row["best_pli_dca_success_4a"]) for row in grouped_rows
+                )
+                / sample_count,
                 "mean_dvo_of_best_dcc_all": mean("dvo_of_best_dcc_component"),
                 "mean_dvo_of_best_dcc_success": (
                     float(dvo_success_values.mean()) if dvo_success_values.size else 0.0
+                ),
+                "mean_pli_of_best_dcc_all": mean("pli_of_best_dcc_component"),
+                "mean_pli_of_best_dcc_success": (
+                    float(pli_success_values.mean()) if pli_success_values.size else 0.0
+                ),
+                "mean_best_pli_dcc_success": (
+                    float(best_pli_success_values.mean()) if best_pli_success_values.size else 0.0
                 ),
                 "mean_predicted_positive_voxels": mean("predicted_positive_voxels"),
                 "mean_candidate_count": mean("candidate_count"),
@@ -858,8 +988,10 @@ def summarize_pocket_metrics(
         )
         dca_values = np.asarray([row["dca_angstrom"] for row in threshold_rows], dtype=np.float64)
         dvo_values = np.asarray([row["dvo"] for row in threshold_rows], dtype=np.float64)
+        pli_values = np.asarray([row["pli"] for row in threshold_rows], dtype=np.float64)
         dcc_success_rows = [row for row in threshold_rows if row["dcc_success_4a"]]
         dvo_success_values = np.asarray([row["dvo"] for row in dcc_success_rows], dtype=np.float64)
+        pli_success_values = np.asarray([row["pli"] for row in dcc_success_rows], dtype=np.float64)
         predicted_voxels = np.asarray(
             [row["predicted_positive_voxels"] for row in threshold_rows], dtype=np.float64
         )
@@ -893,6 +1025,8 @@ def summarize_pocket_metrics(
             "mean_dca_angstrom": float(dca_values.mean()),
             "mean_dvo_all": float(dvo_values.mean()),
             "mean_dvo_dcc_success": float(dvo_success_values.mean()) if dvo_success_values.size else 0.0,
+            "mean_pli_all": float(pli_values.mean()),
+            "mean_pli_dcc_success": float(pli_success_values.mean()) if pli_success_values.size else 0.0,
             "dcc_success_count": int(len(dcc_success_rows)),
             "mean_predicted_positive_voxels": float(predicted_voxels.mean()),
             "mean_top_component_voxels": float(top_component_voxels.mean()),

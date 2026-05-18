@@ -32,6 +32,7 @@ FEATURE_RANGES = {
     'atomic_aromatic': (0.0, 1.0),
     'atomic_halogen': (0.0, 1.0),
 }
+METRIC_MASK_FALLBACK_GROUPS = ("auxiliary", "label", "labels", "masks")
 
 def normalize_feature(feature_array, feature_name, normalization_overrides=None):
     """
@@ -200,12 +201,14 @@ class ProteinLigandDatasetWithH5(Dataset):
     def load_metric_mask(self, idx, group_name, dataset_name):
         _, h5_filepath = self.samples[idx]
         with h5py.File(h5_filepath, "r") as h5f:
-            group = h5f.get(group_name)
-            if group is not None and dataset_name in group:
-                return group[dataset_name][:]
-            auxiliary_group = h5f.get("auxiliary")
-            if group_name == "features" and auxiliary_group is not None and dataset_name in auxiliary_group:
-                return auxiliary_group[dataset_name][:]
+            searched_groups = []
+            for candidate_group in (group_name, *METRIC_MASK_FALLBACK_GROUPS):
+                if candidate_group in searched_groups:
+                    continue
+                searched_groups.append(candidate_group)
+                group = h5f.get(candidate_group)
+                if group is not None and dataset_name in group:
+                    return group[dataset_name][:]
             if dataset_name in h5f:
                 return h5f[dataset_name][:]
         return None

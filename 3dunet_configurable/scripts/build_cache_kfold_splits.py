@@ -5,6 +5,7 @@ import os
 import random
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 
 import h5py
 import numpy as np
@@ -22,6 +23,18 @@ DEFAULT_REQUIRED_FEATURES = [
     "hydrophobicity",
     "dist_to_surface",
 ]
+LABEL_GROUPS = ("label", "labels")
+METRIC_MASK_GROUPS = ("features", "auxiliary", "label", "labels", "masks")
+
+
+@dataclass(frozen=True)
+class ValidationStatus:
+    ok: bool
+    reason: str
+
+    def __iter__(self):
+        yield self.ok
+        yield self.reason
 
 
 def parse_args():
@@ -52,7 +65,10 @@ def parse_args():
     parser.add_argument(
         "--allow-missing-ligand-mask",
         action="store_true",
-        help="Do not require features/ligand for DCC/DCA reference metrics.",
+        help=(
+            "Do not require a metric ligand mask. By default ligand is accepted from "
+            "features/, auxiliary/, label(s)/, masks/, or the H5 root."
+        ),
     )
     return parser.parse_args()
 
@@ -91,11 +107,17 @@ def has_dataset(h5f, group_name, dataset_name):
 
 
 def has_dataset_in_any_group(h5f, group_names, dataset_name):
+    return find_dataset_path_in_any_group(h5f, group_names, dataset_name) is not None
+
+
+def find_dataset_path_in_any_group(h5f, group_names, dataset_name):
     for group_name in group_names:
         group = h5f.get(group_name)
         if group is not None and dataset_name in group:
-            return True
-    return dataset_name in h5f
+            return f"{group_name}/{dataset_name}"
+    if dataset_name in h5f:
+        return dataset_name
+    return None
 
 
 def read_dataset(h5f, group_name, dataset_name):
@@ -105,6 +127,13 @@ def read_dataset(h5f, group_name, dataset_name):
     if dataset_name in h5f:
         return h5f[dataset_name][:]
     raise KeyError(dataset_name)
+
+
+def read_dataset_from_any_group(h5f, group_names, dataset_name):
+    path = find_dataset_path_in_any_group(h5f, group_names, dataset_name)
+    if path is None:
+        raise KeyError(dataset_name)
+    return h5f[path][:]
 
 
 def validate_case(
@@ -118,50 +147,47 @@ def validate_case(
 ):
     h5_path = os.path.join(h5_dir, f"{case}.h5")
     if not os.path.exists(h5_path):
-        return False, "missing_h5"
+        return ValidationStatus(False, "missing_h5")
 
     manifest_row = manifest_rows.get(case, {})
     if manifest_row.get("status") == "failed":
-        return False, "failed_manifest"
+        return ValidationStatus(False, "failed_manifest")
 
     label_prefix = label.replace("binding_site_", "")
     if exclude_label_atoms_outside_box:
         atoms = int_or_none(manifest_row.get(f"{label_prefix}_label_atoms"))
         atoms_in_box = int_or_none(manifest_row.get(f"{label_prefix}_label_atoms_in_box"))
         if atoms is not None and atoms_in_box is not None and atoms_in_box < atoms:
-            return False, "label_atoms_outside_box"
+            return ValidationStatus(False, "label_atoms_outside_box")
 
     try:
         with h5py.File(h5_path, "r") as h5f:
-            if not has_dataset(h5f, "label", label):
-                return False, f"missing_label:{label}"
+            if not has_dataset_in_any_group(h5f, LABEL_GROUPS, label):
+                return ValidationStatus(False, f"missing_label:{label}")
 
-            label_array = read_dataset(h5f, "label", label)
+            label_array = read_dataset_from_any_group(h5f, LABEL_GROUPS, label)
             if int(np.count_nonzero(label_array)) <= 0:
-                return False, "empty_label"
+                return ValidationStatus(False, "empty_label")
 
             reference_shape = label_array.shape
             for feature_name in required_features:
                 if not has_dataset(h5f, "features", feature_name):
-                    return False, f"missing_feature:{feature_name}"
+                    return ValidationStatus(False, f"missing_feature:{feature_name}")
                 feature_shape = read_dataset(h5f, "features", feature_name).shape
                 if feature_shape != reference_shape:
-                    return False, f"shape_mismatch:{feature_name}"
+                    return ValidationStatus(False, f"shape_mismatch:{feature_name}")
 
             if require_ligand_mask:
-                if not has_dataset_in_any_group(h5f, ["features", "auxiliary"], "ligand"):
-                    return False, "missing_metric_mask:ligand"
-                ligand_shape = (
-                    read_dataset(h5f, "features", "ligand").shape
-                    if has_dataset(h5f, "features", "ligand")
-                    else read_dataset(h5f, "auxiliary", "ligand").shape
-                )
+                ligand_path = find_dataset_path_in_any_group(h5f, METRIC_MASK_GROUPS, "ligand")
+                if ligand_path is None:
+                    return ValidationStatus(False, "missing_metric_mask:ligand")
+                ligand_shape = h5f[ligand_path].shape
                 if ligand_shape != reference_shape:
-                    return False, "shape_mismatch:ligand"
+                    return ValidationStatus(False, "shape_mismatch:ligand")
     except OSError:
-        return False, "unreadable_h5"
+        return ValidationStatus(False, "unreadable_h5")
 
-    return True, "ok"
+    return ValidationStatus(True, "ok")
 
 
 def write_list(path, values):

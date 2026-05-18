@@ -307,6 +307,11 @@ def log_readable_validation_summary(
             format_count(primary_paper_stats["no_prediction_count"]),
             format_count(primary_paper_stats["sample_count"]),
         )
+        logger.info(
+            "    PLI(all): %.4f | PLI(success): %.4f",
+            primary_paper_stats["mean_pli_all"],
+            primary_paper_stats["mean_pli_dcc_success"],
+        )
 
     if best_paper_stats is not None:
         logger.info("")
@@ -318,6 +323,12 @@ def log_readable_validation_summary(
             dcc_cutoff_angstrom,
         )
         logger.info("    Pocket-level F1: %.4f", best_paper_stats["paper_f1"])
+        logger.info(
+            "    DVO(success): %.4f | PLI(all): %.4f | PLI(success): %.4f",
+            best_paper_stats["mean_dvo_dcc_success"],
+            best_paper_stats["mean_pli_all"],
+            best_paper_stats["mean_pli_dcc_success"],
+        )
         logger.info(
             "    Average predicted pocket size: %s voxels",
             format_count(round(best_paper_stats["mean_predicted_positive_voxels"])),
@@ -341,11 +352,12 @@ def log_readable_validation_summary(
                 dcc_cutoff_angstrom,
             )
             logger.info(
-                "    Pocket-level F1: %.4f | DCA@%.1fA: %.4f | DVO(success): %.4f",
+                "    Pocket-level F1: %.4f | DCA@%.1fA: %.4f | DVO(success): %.4f | PLI(success): %.4f",
                 comparison_primary["paper_f1"],
                 dca_cutoff_angstrom,
                 comparison_primary["dca_success_rate_4a"],
                 comparison_primary["mean_dvo_dcc_success"],
+                comparison_primary["mean_pli_dcc_success"],
             )
             logger.info(
                 "    No-prediction proteins: %s/%s",
@@ -362,6 +374,12 @@ def log_readable_validation_summary(
                 dcc_cutoff_angstrom,
             )
             logger.info("    Pocket-level F1: %.4f", comparison_best["paper_f1"])
+            logger.info(
+                "    DVO(success): %.4f | PLI(all): %.4f | PLI(success): %.4f",
+                comparison_best["mean_dvo_dcc_success"],
+                comparison_best["mean_pli_all"],
+                comparison_best["mean_pli_dcc_success"],
+            )
             logger.info(
                 "    Average predicted pocket size: %s voxels",
                 format_count(round(comparison_best["mean_predicted_positive_voxels"])),
@@ -564,6 +582,7 @@ def main():
     paper_metrics_start_epoch = max(1, paper_metrics_start_epoch)
     dcc_cutoff_angstrom = float(paper_config.get("dcc_cutoff_angstrom", 4.0))
     dca_cutoff_angstrom = float(paper_config.get("dca_cutoff_angstrom", 4.0))
+    dcc_reference = str(paper_config.get("dcc_reference", "label_center"))
     min_component_voxels = int(paper_config.get("min_component_voxels", 5))
     min_component_volume_angstrom3 = paper_config.get("min_component_volume_angstrom3", 50.0)
     if min_component_volume_angstrom3 is not None:
@@ -599,9 +618,10 @@ def main():
     logger.info("Validation threshold sweep: %s", threshold_sweep)
     if paper_metrics_enabled:
         logger.info(
-            "Paper metrics enabled: DCC<=%.1fA, DCA<=%.1fA, min_component_voxels=%d, min_component_volume=%s A^3, top_k=%s",
+            "Paper metrics enabled: DCC<=%.1fA, DCA<=%.1fA, dcc_reference=%s, min_component_voxels=%d, min_component_volume=%s A^3, top_k=%s",
             dcc_cutoff_angstrom,
             dca_cutoff_angstrom,
+            dcc_reference,
             min_component_voxels,
             min_component_volume_angstrom3,
             top_k_values,
@@ -719,6 +739,8 @@ def main():
         "best_paper_dca_success_rate_4a",
         "best_paper_dvo_all",
         "best_paper_dvo_dcc_success",
+        "best_paper_pli_all",
+        "best_paper_pli_dcc_success",
         "best_paper_dcc_success_count",
         "best_paper_mean_dcc_angstrom",
         "best_paper_mean_predicted_positive_voxels",
@@ -911,6 +933,7 @@ def main():
                                 ),
                                 postprocess_mode=postprocess_mode,
                                 top_k_values=top_k_values,
+                                dcc_reference=dcc_reference,
                             )
                             paper_per_protein_rows_by_postprocess[postprocess_mode].extend(
                                 {"epoch": epoch + 1, **row} for row in sample_paper_rows
@@ -936,6 +959,7 @@ def main():
                                     top_k_values=topk_metric_values,
                                     reference_pocket_count=reference_pocket_count,
                                     include_top_n_plus_2=include_top_n_plus_2,
+                                    dcc_reference=dcc_reference,
                                 )
                                 topk_context = {
                                     "epoch": epoch + 1,
@@ -1090,6 +1114,12 @@ def main():
                 best_paper_stats["mean_dvo_dcc_success"],
                 epoch,
             )
+            writer.add_scalar("PLI_All/Validation_BestThreshold", best_paper_stats["mean_pli_all"], epoch)
+            writer.add_scalar(
+                "PLI_DCCSuccess/Validation_BestThreshold",
+                best_paper_stats["mean_pli_dcc_success"],
+                epoch,
+            )
             writer.add_scalar("Threshold/Validation_BestPaperF1", best_paper_stats["threshold"], epoch)
             for postprocess_mode, postprocess_result in comparison_paper_results.items():
                 postprocess_best = postprocess_result.get("best")
@@ -1110,6 +1140,11 @@ def main():
                 writer.add_scalar(
                     f"{scalar_prefix}/DVO_DCCSuccess_BestThreshold",
                     postprocess_best["mean_dvo_dcc_success"],
+                    epoch,
+                )
+                writer.add_scalar(
+                    f"{scalar_prefix}/PLI_DCCSuccess_BestThreshold",
+                    postprocess_best["mean_pli_dcc_success"],
                     epoch,
                 )
                 writer.add_scalar(f"{scalar_prefix}/BestThreshold", postprocess_best["threshold"], epoch)
@@ -1140,6 +1175,8 @@ def main():
             "best_paper_dca_success_rate_4a": "",
             "best_paper_dvo_all": "",
             "best_paper_dvo_dcc_success": "",
+            "best_paper_pli_all": "",
+            "best_paper_pli_dcc_success": "",
             "best_paper_dcc_success_count": "",
             "best_paper_mean_dcc_angstrom": "",
             "best_paper_mean_predicted_positive_voxels": "",
@@ -1167,6 +1204,8 @@ def main():
                     "best_paper_dca_success_rate_4a": best_paper_stats["dca_success_rate_4a"],
                     "best_paper_dvo_all": best_paper_stats["mean_dvo_all"],
                     "best_paper_dvo_dcc_success": best_paper_stats["mean_dvo_dcc_success"],
+                    "best_paper_pli_all": best_paper_stats["mean_pli_all"],
+                    "best_paper_pli_dcc_success": best_paper_stats["mean_pli_dcc_success"],
                     "best_paper_dcc_success_count": best_paper_stats["dcc_success_count"],
                     "best_paper_mean_dcc_angstrom": best_paper_stats["mean_dcc_angstrom"],
                     "best_paper_mean_predicted_positive_voxels": best_paper_stats[

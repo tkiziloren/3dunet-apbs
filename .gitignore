@@ -123,8 +123,27 @@ checkpoints/
 *.pth
 *.pt
 
+# HDF5/cache and prediction arrays
+*.h5
+*.hdf5
+*.npy
+*.npz
+
 # Compiled Python files
 *.pyc
 
 # IDE run configurations generated locally
 run/
+
+# Project training/runtime artifacts
+3dunet_configurable/weights/
+3dunet_configurable/runs/
+3dunet_configurable/predictions/
+3dunet_configurable/outputs/
+3dunet_configurable/log/
+3dunet_configurable/logs/
+3dunet_configurable/reports/**/topk_component_metrics.csv
+3dunet_configurable/reports/**/topk_per_protein.csv
+
+# Graphify local cache
+graphify-out/cache/

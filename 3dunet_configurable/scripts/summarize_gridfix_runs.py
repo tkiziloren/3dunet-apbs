@@ -21,6 +21,8 @@ FLOAT_COLUMNS = {
     "best_paper_dca_success_rate_4a",
     "best_paper_dvo_all",
     "best_paper_dvo_dcc_success",
+    "best_paper_pli_all",
+    "best_paper_pli_dcc_success",
     "best_paper_mean_dcc_angstrom",
     "best_paper_mean_predicted_positive_voxels",
     "best_paper_selection_score",
@@ -144,6 +146,8 @@ def best_rows_for_run(run_dir: Path):
         "paper_dca4": best_by_paper.get("best_paper_dca_success_rate_4a", ""),
         "paper_dvo_all": best_by_paper.get("best_paper_dvo_all", ""),
         "paper_dvo_success": best_by_paper.get("best_paper_dvo_dcc_success", ""),
+        "paper_pli_all": best_by_paper.get("best_paper_pli_all", ""),
+        "paper_pli_success": best_by_paper.get("best_paper_pli_dcc_success", ""),
         "paper_mean_dcc": best_by_paper.get("best_paper_mean_dcc_angstrom", ""),
         "paper_mean_pred_voxels": best_by_paper.get("best_paper_mean_predicted_positive_voxels", ""),
         "voxel_epoch": best_by_voxel["epoch"],
@@ -194,8 +198,8 @@ def main():
     print(f"Summary CSV: {csv_path}")
     print(
         "rank,run,fold,feature_set,label,pos_weight,paper_score,paper_f1,paper_threshold,"
-        "paper_f1_at_040,paper_f1_at_050,dcc4,dca4,dvo_success,voxel_f1,voxel_threshold,"
-        "primary_threshold,primary_f1_fixed"
+        "paper_f1_at_040,paper_f1_at_050,dcc4,dca4,dvo_success,pli_success,"
+        "voxel_f1,voxel_threshold,primary_threshold,primary_f1_fixed"
     )
     for idx, row in enumerate(summaries, start=1):
         print(
@@ -203,7 +207,7 @@ def main():
             f"{row['paper_selection_score']},{row['paper_f1']},{row['paper_threshold']},"
             f"{row['paper_f1_fixed_threshold_040']},{row['paper_f1_fixed_threshold_050']},"
             f"{row['paper_dcc4']},{row['paper_dca4']},{row['paper_dvo_success']},"
-            f"{row['voxel_f1']},{row['voxel_threshold']},"
+            f"{row['paper_pli_success']},{row['voxel_f1']},{row['voxel_threshold']},"
             f"{row['primary_threshold']},{row['primary_f1_fixed_threshold']}"
         )
 

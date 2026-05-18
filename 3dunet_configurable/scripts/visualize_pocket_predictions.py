@@ -94,6 +94,16 @@ def load_state_dict(model, checkpoint_path, device):
     model.load_state_dict(state_dict)
 
 
+def read_metric_mask(h5f, dataset_name):
+    for group_name in ("features", "auxiliary", "label", "labels", "masks"):
+        group = h5f.get(group_name)
+        if group is not None and dataset_name in group:
+            return group[dataset_name][:]
+    if dataset_name in h5f:
+        return h5f[dataset_name][:]
+    return None
+
+
 def load_sample(h5_path, features, label_name, standardize_enabled=True, channel_wise=False):
     with h5py.File(h5_path, "r") as h5f:
         feature_arrays = []
@@ -113,7 +123,7 @@ def load_sample(h5_path, features, label_name, standardize_enabled=True, channel
         else:
             raise KeyError(f"Label '{label_name}' not found in {h5_path}")
 
-        ligand = h5f["features"]["ligand"][:] if "features" in h5f and "ligand" in h5f["features"] else None
+        ligand = read_metric_mask(h5f, "ligand")
         resolution = float(h5f.attrs.get("resolution", 1.0))
 
     protein = torch.tensor(np.stack(feature_arrays), dtype=torch.float32)

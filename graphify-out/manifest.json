@@ -1,0 +1,1522 @@
+{
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/transforms.py": {
+    "mtime": 1777401472.2394807,
+    "ast_hash": "1122d2e43d057481b371a2341a91b8df",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/randomize_config.py": {
+    "mtime": 1748157413.145526,
+    "ast_hash": "543b2e30b3282561714bf924b6d4193a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/bsp_with_attention.py": {
+    "mtime": 1746724958.457003,
+    "ast_hash": "f4b756e455a4e7425534b5d2a7f0c514",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/analysis.py": {
+    "mtime": 1748294011.2657073,
+    "ast_hash": "298b50a962021efa22c6efa526e930fb",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/bsp.py": {
+    "mtime": 1746724775.8772373,
+    "ast_hash": "d6182596b48a4d6288be2c7d1b845881",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/predict.py": {
+    "mtime": 1735495518.4778953,
+    "ast_hash": "56e94fe58b4b87a2b8abbbae61981a2b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/model.py": {
+    "mtime": 1748018760.0431912,
+    "ast_hash": "dfbe70411e0dffbc940eca8975556951",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/dataset.py": {
+    "mtime": 1779119586.0577426,
+    "ast_hash": "56ac05c5b6cc635abd0595a8a7a66478",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/main.py": {
+    "mtime": 1779107663.0164227,
+    "ast_hash": "f3676f0c5a5dcf20697519ef12af1255",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/generate_configs.py": {
+    "mtime": 1768338473.8131647,
+    "ast_hash": "8a24444f1ceb7affea34ec49aa64f4b5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/add_new_params.py": {
+    "mtime": 1768347423.5618515,
+    "ast_hash": "989fecccf1bc255f97b650ad68593c3d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/show_gpu_nodes.sh": {
+    "mtime": 1748005308.3635554,
+    "ast_hash": "01e76405a76ca0c5ba37a94732753189",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/run_config_array.sh": {
+    "mtime": 1778944990.923458,
+    "ast_hash": "0289502adddf0acafe7a951b5619c9f5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train.sh": {
+    "mtime": 1748039125.666464,
+    "ast_hash": "7da669ebee97ae956af7c1db876cc338",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train_4_gpus.sh": {
+    "mtime": 1734280941.2261555,
+    "ast_hash": "51f7ffaa27b7341d0a7d13520f657178",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/show_jobs.sh": {
+    "mtime": 1748040126.499391,
+    "ast_hash": "6f6e7ec5ce59350b2dfb6ad71a8dea27",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train_8_gpus.sh": {
+    "mtime": 1734280932.1645381,
+    "ast_hash": "860ae2d075b230ba37f7d9a456343319",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train_new.sh": {
+    "mtime": 1768339142.742739,
+    "ast_hash": "6f5f98cd535d5a06e1b4f8dfce6acf47",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train128.sh": {
+    "mtime": 1734364939.2188067,
+    "ast_hash": "7c8fde8cb5d0dd7c7fca5dd766150a35",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/train_2_gpus.sh": {
+    "mtime": 1734280889.6380906,
+    "ast_hash": "b5cf61bdebb43e6e12503f2dfbed2650",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/utils/configuration.py": {
+    "mtime": 1748363775.74067,
+    "ast_hash": "21f86a69083e6a180630079e190eeba8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/utils/pocket_metrics.py": {
+    "mtime": 1779107637.8685043,
+    "ast_hash": "5da3782315c0bc1e3b3585d7a82336e9",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/utils/losses.py": {
+    "mtime": 1777401699.6464128,
+    "ast_hash": "23e78050a895e34bb947e05043fbb9be",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/utils/training.py": {
+    "mtime": 1777401706.809044,
+    "ast_hash": "9ea20318ae248f0c7ec260411910a1d8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ResNet3D6L.py": {
+    "mtime": 1748020929.8105707,
+    "ast_hash": "faefbd6b6fdbc18578110486ef2a8688",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/LiteratureModels3D.py": {
+    "mtime": 1778750755.9134119,
+    "ast_hash": "b542fd8008ea30f531ecc7283a98a480",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ConvNeXt3D.py": {
+    "mtime": 1748041636.704178,
+    "ast_hash": "973091d951c9c17f6964c3176b9b3207",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ResNet3D5L.py": {
+    "mtime": 1748020896.6708255,
+    "ast_hash": "967f9be4bc2eac72d3040a4f3ff9953a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ResNet3D4L.py": {
+    "mtime": 1748020659.1777384,
+    "ast_hash": "dad4f3bbd90aef8c35b407a80f868cfc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D4LC.py": {
+    "mtime": 1748020408.1596935,
+    "ast_hash": "7d6ec7dcfef5807eec4b73a66292c578",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D4LAC.py": {
+    "mtime": 1748020559.395547,
+    "ast_hash": "40863e5ac9ebd7a104732bb342c6412c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D4LStrided.py": {
+    "mtime": 1777461848.6307924,
+    "ast_hash": "2efb23d9e450bea2e7f2dce8d4b352d5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ModernUNet3D.py": {
+    "mtime": 1778231859.2031717,
+    "ast_hash": "5ea03719a250cb46f91e8f4951eb4902",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D4L.py": {
+    "mtime": 1768347692.1819723,
+    "ast_hash": "e8cedb16e54632ec335b3811f67b71d6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D5L.py": {
+    "mtime": 1748020146.0367436,
+    "ast_hash": "46511f4a631853d1b5c3baeae47d0aaf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D6L.py": {
+    "mtime": 1748020164.2199812,
+    "ast_hash": "0adbc554438eab0510cf4cee10a7ed49",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/UNet3D4LA.py": {
+    "mtime": 1768347795.1661203,
+    "ast_hash": "9bfde7cb8dd318af48210d57d56b91dc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/models/ConvNeXt3DV2.py": {
+    "mtime": 1748041913.8330011,
+    "ast_hash": "916fa53b6da1a7a7005660100e3aae3f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/create_box161_feature_configs.py": {
+    "mtime": 1777416799.8901799,
+    "ast_hash": "fbbc91df5ad0a23f427d16f054f5bd17",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_apbs_only_clip20_model_sweep.sh": {
+    "mtime": 1777830384.2199938,
+    "ast_hash": "5a0babd96c32b33742d49ec9e6afbc84",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/report_work8_status.sh": {
+    "mtime": 1778781719.785477,
+    "ast_hash": "fe4d6762e066ed58a3583a0700c453dc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/visualize_pocket_predictions.py": {
+    "mtime": 1779119592.8087628,
+    "ast_hash": "6f8b4ed14a6f4c5ebe5ca1cdb7e6ac1b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_scpdb_cache_kfold_feature_ablation.sh": {
+    "mtime": 1777555571.9133117,
+    "ast_hash": "c5cff3ba2049624d8471d8b2fa7fdba2",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_apbs_cutoff_sweep.sh": {
+    "mtime": 1778231894.8600416,
+    "ast_hash": "3b1b55911ef7958b203bf278d7e25839",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/create_box161_loss_calibration_configs.py": {
+    "mtime": 1777436126.3250341,
+    "ast_hash": "f46ac8617f427ea846a0dc7a5636fdd7",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/check_cache_id_list.py": {
+    "mtime": 1779119630.3443432,
+    "ast_hash": "16bbf05bac2d631e5bd68b42350b19cc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/build_cache_kfold_splits.py": {
+    "mtime": 1779119597.4801912,
+    "ast_hash": "586fc3fe4bad49c934eda7c0d5b5c31b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/create_gridfix_expanded_feature_configs.py": {
+    "mtime": 1777411206.9470844,
+    "ast_hash": "6957d626b8f7c494ef3a85703b1e98a3",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work4_apbs_clip20_combined_features.sh": {
+    "mtime": 1777828147.34982,
+    "ast_hash": "4b08d66a12866d37db8b38c59446e50f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_scpdb_kalasanty36_feature_ablation.sh": {
+    "mtime": 1777555571.9135895,
+    "ast_hash": "f1e9ca83c6d14114f42087f075ba43c2",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_local_gridfix_label_sweep.sh": {
+    "mtime": 1777409361.341032,
+    "ast_hash": "1487364526fbe2768753102ee81e4a40",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_local_box161_loss_calibration.sh": {
+    "mtime": 1777436134.2564461,
+    "ast_hash": "e105fdff49ca95de52d4bbec4880ca2b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_local_box161_feature_sweep.sh": {
+    "mtime": 1777416816.8741894,
+    "ast_hash": "6a853b074683f17d2a3d25e4a640e939",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/summarize_gridfix_runs.py": {
+    "mtime": 1779107258.968457,
+    "ast_hash": "e9f996f5b005441ce1a3b87c769facbb",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_pdbbind_snapshot_kfold_ablation.sh": {
+    "mtime": 1778964836.1699035,
+    "ast_hash": "ef78912f00becf1762bd15732f73ee21",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work8_combined_model_feature_sweep.sh": {
+    "mtime": 1778527611.9691205,
+    "ast_hash": "83059bf9e5aa831a97780775877cdfdf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/evaluate_work8a_topk_metrics.py": {
+    "mtime": 1778919296.3110976,
+    "ast_hash": "2718e840fb907639747d5f757ad69553",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work7_apbs_representation_resnet.sh": {
+    "mtime": 1778232180.0610545,
+    "ast_hash": "239c1643e429d0a377d16915e15050df",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work5_apbs_only_clip20_model_sweep_fold1.sh": {
+    "mtime": 1777830373.4991345,
+    "ast_hash": "02b86b6c95d5e7344292324619b3c7ff",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work2_box36_top5_plus_apbs_newsplit.sh": {
+    "mtime": 1777756737.9166057,
+    "ast_hash": "effa6730f4851793eef7148e54ae629e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work8c_literature_model_control_3runs.sh": {
+    "mtime": 1778839702.1572988,
+    "ast_hash": "a7dbcc13f861f12b5297b21eeac29a1d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/build_cache_splits_from_fold_ids.py": {
+    "mtime": 1779119601.8058987,
+    "ast_hash": "798c3692e1146f7376af804924de7e4c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work8b_unetplusplus_improvement_3runs.sh": {
+    "mtime": 1778839656.178556,
+    "ast_hash": "e5dbd0b5545f1bfdb2dd8a95ad86b4fa",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_local_gridfix_expanded93_feature_sweep.sh": {
+    "mtime": 1777411218.5884671,
+    "ast_hash": "9783dac718622ea95c12a16f61d64556",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work6_new_architecture_sweep.sh": {
+    "mtime": 1778232233.2795975,
+    "ast_hash": "47a5b06bc30f7de414d6e306e4f5216c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_work8_top_models_feature_sweep.sh": {
+    "mtime": 1778232180.133333,
+    "ast_hash": "2013e6f20143148fb5788cf4451a8656",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_apbs_cutoff_sweep_250epoch.sh": {
+    "mtime": 1777804232.364289,
+    "ast_hash": "51af4ac0ce918b88f1cc2f94bd4cff6b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/run_pdbbind_snapshot_hyperparameter_sweep.sh": {
+    "mtime": 1778965694.8973143,
+    "ast_hash": "446377080675f79afd324a0c48a4b631",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/write_work5_model_sweep_report.py": {
+    "mtime": 1778231965.973482,
+    "ast_hash": "5bb2bad6ebdfa139d867e24cdb6cee1b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/.vscode/launch.json": {
+    "mtime": 1735659338.2101083,
+    "ast_hash": "bb06a08ba4d7ab14a2d2e46c2e5269ee",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/caching/potgrid_example.py": {
+    "mtime": 1735658221.7833092,
+    "ast_hash": "bc7c77e32f6e173f7c16245e26a393d8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/caching/test_potgrid.py": {
+    "mtime": 1735658680.9295087,
+    "ast_hash": "655967a554f9542c6f0ff6d34c7bd518",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/caching/cache_generator_parallel.py": {
+    "mtime": 1733224521.6576579,
+    "ast_hash": "c1fc165811bbd303b2756c1687444a0d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/caching/h5_cache_generator_parallel.py": {
+    "mtime": 1747850384.2537801,
+    "ast_hash": "f7cde51034aacb10cec7e9de1e6d2401",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/find_proteins_with_h5_file.py": {
+    "mtime": 1733324224.404471,
+    "ast_hash": "ec05b13d3776ca17df5d29ff681b87e3",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/load_npy.py": {
+    "mtime": 1733497095.1609416,
+    "ast_hash": "b70efde8ebbad225551303a6e024492a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/rsync_from_server.sh": {
+    "mtime": 1734620364.6977804,
+    "ast_hash": "676f2f5d93b919d592de0356741a3910",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/performance_graph_from_log_file.py": {
+    "mtime": 1736258707.2720597,
+    "ast_hash": "c2f1123862b9fa81d7750cac316742dd",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/visualise_binding_side.py": {
+    "mtime": 1733244594.7977211,
+    "ast_hash": "fac7bd2d4be9a45db1e78699d7453037",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/helpers/check_ligand_labels.py": {
+    "mtime": 1733487619.1562443,
+    "ast_hash": "5692e67a8ce025ad9d2275f1d162b916",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/generate_architecture_svgs.py": {
+    "mtime": 1778784113.192074,
+    "ast_hash": "25ccca3c309d906aab7e70739f245283",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/transforms.py": {
+    "mtime": 1748290567.2234738,
+    "ast_hash": "1d7cfaf2d25a77228fc17524489fa4eb",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/randomize_config.py": {
+    "mtime": 1748157413.145526,
+    "ast_hash": "543b2e30b3282561714bf924b6d4193a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/bsp_with_attention.py": {
+    "mtime": 1746724958.457003,
+    "ast_hash": "f4b756e455a4e7425534b5d2a7f0c514",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/analysis.py": {
+    "mtime": 1748294011.2657073,
+    "ast_hash": "298b50a962021efa22c6efa526e930fb",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/bsp.py": {
+    "mtime": 1746724775.8772373,
+    "ast_hash": "d6182596b48a4d6288be2c7d1b845881",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/predict.py": {
+    "mtime": 1735495518.4778953,
+    "ast_hash": "56e94fe58b4b87a2b8abbbae61981a2b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/model.py": {
+    "mtime": 1748018760.0431912,
+    "ast_hash": "dfbe70411e0dffbc940eca8975556951",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/dataset.py": {
+    "mtime": 1748361392.3638313,
+    "ast_hash": "06de48adf225783ee57f4b95980d45ed",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/main.py": {
+    "mtime": 1748426753.1653419,
+    "ast_hash": "41e28c619d4dd47a0aba8cf6b13df47b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/show_gpu_nodes.sh": {
+    "mtime": 1748005308.3635554,
+    "ast_hash": "01e76405a76ca0c5ba37a94732753189",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/train.sh": {
+    "mtime": 1748039125.666464,
+    "ast_hash": "7da669ebee97ae956af7c1db876cc338",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/train_4_gpus.sh": {
+    "mtime": 1734280941.2261555,
+    "ast_hash": "51f7ffaa27b7341d0a7d13520f657178",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/show_jobs.sh": {
+    "mtime": 1748040126.499391,
+    "ast_hash": "6f6e7ec5ce59350b2dfb6ad71a8dea27",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/train_8_gpus.sh": {
+    "mtime": 1734280932.1645381,
+    "ast_hash": "860ae2d075b230ba37f7d9a456343319",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/train128.sh": {
+    "mtime": 1734364939.2188067,
+    "ast_hash": "7c8fde8cb5d0dd7c7fca5dd766150a35",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/slurm/train_2_gpus.sh": {
+    "mtime": 1734280889.6380906,
+    "ast_hash": "b5cf61bdebb43e6e12503f2dfbed2650",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/utils/configuration.py": {
+    "mtime": 1748367872.1012912,
+    "ast_hash": "f020bffba86d6a35307b721ce9274371",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/utils/losses.py": {
+    "mtime": 1733162788.5069942,
+    "ast_hash": "e4868038637326073092b486a592bc5e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/utils/training.py": {
+    "mtime": 1748367969.4505653,
+    "ast_hash": "786f0c98b5e7d26f47e84d2ef71c3241",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/ResNet3D6L.py": {
+    "mtime": 1748020929.8105707,
+    "ast_hash": "faefbd6b6fdbc18578110486ef2a8688",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/ConvNeXt3D.py": {
+    "mtime": 1748041636.704178,
+    "ast_hash": "973091d951c9c17f6964c3176b9b3207",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/ResNet3D5L.py": {
+    "mtime": 1748020896.6708255,
+    "ast_hash": "967f9be4bc2eac72d3040a4f3ff9953a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/ResNet3D4L.py": {
+    "mtime": 1748020659.1777384,
+    "ast_hash": "dad4f3bbd90aef8c35b407a80f868cfc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D4LC.py": {
+    "mtime": 1748020408.1596935,
+    "ast_hash": "7d6ec7dcfef5807eec4b73a66292c578",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D4LAC.py": {
+    "mtime": 1748020559.395547,
+    "ast_hash": "40863e5ac9ebd7a104732bb342c6412c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D4L.py": {
+    "mtime": 1748019852.6391459,
+    "ast_hash": "dfa958567614b6221b346b330e46ab8c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D5L.py": {
+    "mtime": 1748020146.0367436,
+    "ast_hash": "46511f4a631853d1b5c3baeae47d0aaf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D6L.py": {
+    "mtime": 1748020164.2199812,
+    "ast_hash": "0adbc554438eab0510cf4cee10a7ed49",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/UNet3D4LA.py": {
+    "mtime": 1748020369.2530084,
+    "ast_hash": "43ac22e3eeed088a0163c569ef994b91",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/models/ConvNeXt3DV2.py": {
+    "mtime": 1748041913.8330011,
+    "ast_hash": "916fa53b6da1a7a7005660100e3aae3f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/.vscode/launch.json": {
+    "mtime": 1735659338.2101083,
+    "ast_hash": "bb06a08ba4d7ab14a2d2e46c2e5269ee",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/caching/potgrid_example.py": {
+    "mtime": 1735658221.7833092,
+    "ast_hash": "bc7c77e32f6e173f7c16245e26a393d8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/caching/test_potgrid.py": {
+    "mtime": 1735658680.9295087,
+    "ast_hash": "655967a554f9542c6f0ff6d34c7bd518",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/caching/cache_generator_parallel.py": {
+    "mtime": 1733224521.6576579,
+    "ast_hash": "c1fc165811bbd303b2756c1687444a0d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/caching/h5_cache_generator_parallel.py": {
+    "mtime": 1747850384.2537801,
+    "ast_hash": "f7cde51034aacb10cec7e9de1e6d2401",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_simple.sh": {
+    "mtime": 1768332125.1538582,
+    "ast_hash": "c0788881bd6a4b46113a7796c68545cd",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_check_and_resume.sh": {
+    "mtime": 1768337030.7927084,
+    "ast_hash": "2c3580e4a4535eebb201e60201536a2b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_direct.sh": {
+    "mtime": 1768332115.4307392,
+    "ast_hash": "8f0c99083376da6635342c006b30f44b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/find_proteins_with_h5_file.py": {
+    "mtime": 1733324224.404471,
+    "ast_hash": "ec05b13d3776ca17df5d29ff681b87e3",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_ultrafast.sh": {
+    "mtime": 1768341494.9158096,
+    "ast_hash": "e822783c372ec42330cf19e87d91dacd",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/load_npy.py": {
+    "mtime": 1733497095.1609416,
+    "ast_hash": "b70efde8ebbad225551303a6e024492a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_parallel.sh": {
+    "mtime": 1768341014.6045794,
+    "ast_hash": "82a2ac39934569e480245e5c92e67b47",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_from_server.sh": {
+    "mtime": 1734620364.6977804,
+    "ast_hash": "676f2f5d93b919d592de0356741a3910",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_oneliner.sh": {
+    "mtime": 1768332025.6081376,
+    "ast_hash": "7581a76214cff77de13f004bd62286a9",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_resumable.sh": {
+    "mtime": 1768337010.0177646,
+    "ast_hash": "b34b91fbc37d9c52797c438df1227962",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_tar.sh": {
+    "mtime": 1768346850.0994744,
+    "ast_hash": "040fae6358570dade10545e37d16460e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_fast.sh": {
+    "mtime": 1768341002.6425323,
+    "ast_hash": "289e7903205818a5ce4c82d2e5f8aec6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_via_datamover.sh": {
+    "mtime": 1768341553.2150397,
+    "ast_hash": "7561672f1434ad5d78aa9e734fd20cb0",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server_2stage.sh": {
+    "mtime": 1768332105.730122,
+    "ast_hash": "cfc63b3de59c51216e0015142792c7ef",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/performance_graph_from_log_file.py": {
+    "mtime": 1748371394.4804375,
+    "ast_hash": "f99f23f7a086cab31fcf2cd282f9312b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/rsync_to_server.sh": {
+    "mtime": 1768332011.3017035,
+    "ast_hash": "0fb341509069b917f7b207c4f1c790f1",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/visualise_binding_side.py": {
+    "mtime": 1733244594.7977211,
+    "ast_hash": "fac7bd2d4be9a45db1e78699d7453037",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/helpers/check_ligand_labels.py": {
+    "mtime": 1733487619.1562443,
+    "ast_hash": "5692e67a8ce025ad9d2275f1d162b916",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/.vscode/launch.json": {
+    "mtime": 1768326253.8572538,
+    "ast_hash": "d58c4655b5a735ce0b34f2190fbcfb2a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/commands.txt": {
+    "mtime": 1748042006.6547976,
+    "ast_hash": "d536dce878b9104d9e44c02cae2c9a02",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/AGENTS.md": {
+    "mtime": 1779119263.3694613,
+    "ast_hash": "99a4e3417599bdcd99047f3e38f00dd9",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/requirements.txt": {
+    "mtime": 1748028501.6137805,
+    "ast_hash": "4b5b435ea024be3550d96b09c6e2ba46",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_dataset_pos5.yml": {
+    "mtime": 1777406715.651069,
+    "ast_hash": "5f4d99ade4697e2707516cc1db462142",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_oldbest_dataset_electrostatic_shape_hydrophobic_pos1.yml": {
+    "mtime": 1777409356.8774137,
+    "ast_hash": "557eef75aa6c940d8bac5d1398304338",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/config_with_feature_selection.yml": {
+    "mtime": 1768348442.8989239,
+    "ast_hash": "d8fa1480a81019b7611a2e7ec445646e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/baseline_box72_electrostatic_shape_calculated.yml": {
+    "mtime": 1777390434.3758566,
+    "ast_hash": "d8e335eaea6e086f96b2f5aaaebe2560",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_dataset_pos10.yml": {
+    "mtime": 1777406715.6515136,
+    "ast_hash": "b3b8390bf53a7f55e1b18e3396e5612b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_oldbest_dataset_label_pos1.yml": {
+    "mtime": 1777405182.034836,
+    "ast_hash": "a7ed971a002e5f12f2dedbb2043efcc6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_oldbest_calculated_label_pos1.yml": {
+    "mtime": 1777408595.4637175,
+    "ast_hash": "b3de4e91c482c9c76c987afeed9502c0",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_calculated_pos10.yml": {
+    "mtime": 1777401716.0682094,
+    "ast_hash": "a2f563e86e9f7a1edd06254a84f3ab1b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/pos_weight50_box72_electrostatic_shape_calculated.yml": {
+    "mtime": 1777395304.424756,
+    "ast_hash": "d8aa06bde4e0b3556c776ad85f2ed4b6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_oldbest_dataset_shape_pos1.yml": {
+    "mtime": 1777409356.8751836,
+    "ast_hash": "9f028f8cc92a41802b2c771e7c4c82b4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_calculated_pos25.yml": {
+    "mtime": 1777401710.001859,
+    "ast_hash": "124e4545142fad52bb326fa55bd645ea",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/pdbbind.yml": {
+    "mtime": 1734288313.9979968,
+    "ast_hash": "5e8d5752fbab8a5b7c24a93a746bead3",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_oldbest_dataset_electrostatic_pos1.yml": {
+    "mtime": 1777409356.8762705,
+    "ast_hash": "9f99a7bfa7f1e6b7752c67cefbdf2299",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/config_with_feature_selection_backup.yml": {
+    "mtime": 1768335143.8604822,
+    "ast_hash": "599e14699d44a47f9db8b0fae64d06e1",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_calculated_focal_tversky_pos10.yml": {
+    "mtime": 1777401720.8301742,
+    "ast_hash": "7b49bb1151392a4427a6cbe4da88e75c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/config.yml": {
+    "mtime": 1747850707.7476866,
+    "ast_hash": "d8183de2c85e04c3a9962c98b7447b37",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/pos_weight25_box72_electrostatic_shape_calculated.yml": {
+    "mtime": 1777393274.6969512,
+    "ast_hash": "86b3eb8dbf8aa65063f67a5e316a1118",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/gridfix_smoke_box72_electrostatic_shape_calculated_pos5.yml": {
+    "mtime": 1777406715.6543355,
+    "ast_hash": "e77bf78b125b41f8c951857f75af5b18",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/scpdb_kalasanty36/scpdb_kalasanty36_apbs_compact_chem_fold0.yml": {
+    "mtime": 1777547230.2780027,
+    "ast_hash": "e9d7b7708987cd3dc5c827302e8744a7",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/scpdb_kalasanty36/scpdb_kalasanty36_apbs_only_100_no_early_stop.yml": {
+    "mtime": 1777547234.896887,
+    "ast_hash": "fd4a036d13d3f68f0a2ae07d55b8525e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/scpdb_kalasanty36/scpdb_kalasanty36_apbs_compact_chem_fold0_local10.yml": {
+    "mtime": 1777547413.7812767,
+    "ast_hash": "cc5c2128a5b5de55e14f729b15b29da5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/scpdb_kalasanty36/scpdb_kalasanty36_apbs_compact_chem_fold0_smoke.yml": {
+    "mtime": 1777547413.7815723,
+    "ast_hash": "0e71e1cfd734759070b9197aba8af7bb",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161/box161_dataset_electrostatic_shape.yml": {
+    "mtime": 1777416822.8995206,
+    "ast_hash": "9a083649d2c0751408ce995f5607f2a6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161/box161_dataset_electrostatic_shape_compact_chem.yml": {
+    "mtime": 1777416822.901899,
+    "ast_hash": "436177dcfdb611dff1d720474928b086",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161/box161_dataset_split.yml": {
+    "mtime": 1777416822.8970218,
+    "ast_hash": "c296ac47f747808c35ce014398ffaf06",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_shape.yml": {
+    "mtime": 1777411224.055689,
+    "ast_hash": "3c5bbafdfbed76e980d4e3066ed3aa15",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_electrostatic_shape_hbond.yml": {
+    "mtime": 1777411224.0605094,
+    "ast_hash": "8a2ae21806de4bc5ed2bad0a69cf4e72",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_split.yml": {
+    "mtime": 1777411224.0531955,
+    "ast_hash": "6c1afb1c4d581f3775f6a4f16aa1d49c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_electrostatic_shape_hydrophobic_aromatic.yml": {
+    "mtime": 1777411224.0628014,
+    "ast_hash": "6c5127277bc7c4f931fa80b4c3e7e74a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_electrostatic_shape_compact_chem.yml": {
+    "mtime": 1777411224.0651658,
+    "ast_hash": "86ab3a6a5bc27432c2335bcee08acfde",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/expanded93/gridfix_expanded93_oldbest_dataset_electrostatic_shape.yml": {
+    "mtime": 1777411224.058212,
+    "ast_hash": "95f30094bcdcd2ea7a1b658dc4f61d3f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161_loss_calibration/box161_compact_pos5_long.yml": {
+    "mtime": 1777436138.8824306,
+    "ast_hash": "08a8a3a893cf15d918a457cfa3a8e12c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161_loss_calibration/box161_compact_pos10_long.yml": {
+    "mtime": 1777436138.884853,
+    "ast_hash": "4b4e1f7de2d2ef9b073ac793974011f6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/local/box161_loss_calibration/box161_compact_pos25_long.yml": {
+    "mtime": 1777436138.8870993,
+    "ast_hash": "d0a8ef3fb88d756ece66dbe0fcc674b4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_dist_ligand_label_calculated_binding_site.yml": {
+    "mtime": 1768349730.361918,
+    "ast_hash": "f14090f8422e5d630f10dacdaf5bdc3a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_nitrogen_label_dataset_binding_site.yml": {
+    "mtime": 1768349821.6495793,
+    "ast_hash": "1c699647ee9c80caaaf586aeb208cd75",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_donor_acceptor_label_dataset_binding_site.yml": {
+    "mtime": 1768349759.3441722,
+    "ast_hash": "e829bd0e48c98b14e7343d559e7e7197",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/baseline_label_dataset_binding_site.yml": {
+    "mtime": 1768349616.310476,
+    "ast_hash": "a441defb1b8dd17d2df67309852db407",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_dist_surface_label_dataset_binding_site.yml": {
+    "mtime": 1768349749.0789626,
+    "ast_hash": "c65614c847cbe99b267d43ad53c5d81f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_oxygen_label_calculated_binding_site.yml": {
+    "mtime": 1768349827.2376652,
+    "ast_hash": "562bb14e3751d4a10a512d0e415f23a6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_carbon_label_calculated_binding_site.yml": {
+    "mtime": 1768349700.093358,
+    "ast_hash": "c0d740c7742bd4274b92e83318fb0dd5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_comprehensive_label_calculated_binding_site.yml": {
+    "mtime": 1768349720.2604651,
+    "ast_hash": "6bec157cc0242596a6a0652b97af9d78",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_hydrophobic_label_dataset_binding_site.yml": {
+    "mtime": 1768349810.936148,
+    "ast_hash": "f1fb21cbf9288d1f7c23ac21b32cec01",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_sulfur_label_calculated_binding_site.yml": {
+    "mtime": 1768349862.959477,
+    "ast_hash": "be5e40d0d6f2af9462442feb934c112e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_carbon_label_dataset_binding_site.yml": {
+    "mtime": 1768349705.9440217,
+    "ast_hash": "8f298569f370e93f533521d8f26b55ad",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_dist_surface_label_calculated_binding_site.yml": {
+    "mtime": 1768349743.2434957,
+    "ast_hash": "9a2f57edcf04b8caab400321b469a956",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_phosphorus_label_dataset_binding_site.yml": {
+    "mtime": 1768349845.0871246,
+    "ast_hash": "94aa506d171796c4e71ca37aca78fdee",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_hydrophobic_aromatic_label_calculated_binding_site.yml": {
+    "mtime": 1768349793.2338254,
+    "ast_hash": "3f414b87c5a0de9132c87372799f2990",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_donor_label_calculated_binding_site.yml": {
+    "mtime": 1768349764.2352123,
+    "ast_hash": "cafeee986cfed0625341bab40adf592c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_hydrophobic_label_calculated_binding_site.yml": {
+    "mtime": 1768349805.3856103,
+    "ast_hash": "a00bce6dc9fc015e37ec4093eaab5445",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/baseline_with_shape_label_calculated_binding_site.yml": {
+    "mtime": 1768349624.5079253,
+    "ast_hash": "7afe80bef4d9ba02ef9e873e9d5c55cf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_atoms_label_dataset_binding_site.yml": {
+    "mtime": 1768349663.5273154,
+    "ast_hash": "359c520fb76c37fda9d98c696db3e501",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_aromatic_label_calculated_binding_site.yml": {
+    "mtime": 1768349689.5249915,
+    "ast_hash": "a0d9236fbaa9ce7461496f94f3a370d4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_atoms_label_calculated_binding_site.yml": {
+    "mtime": 1768349657.5720537,
+    "ast_hash": "c0e945e8805a8bf1ea7bbea97133e8ea",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_acceptor_label_dataset_binding_site.yml": {
+    "mtime": 1768349652.6212382,
+    "ast_hash": "cff80020af32affc5c4e2eccab983074",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_chemical_label_calculated_binding_site.yml": {
+    "mtime": 1768349668.691464,
+    "ast_hash": "c9663982f15a8a55e75b09645f603bbf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_nitrogen_label_calculated_binding_site.yml": {
+    "mtime": 1768349816.1005375,
+    "ast_hash": "0cba4c1599c5da20957f39184257fb0f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_oxygen_label_dataset_binding_site.yml": {
+    "mtime": 1768349833.1898198,
+    "ast_hash": "cb1d75274d5a98eff1511ca7ab597b22",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_comprehensive_label_dataset_binding_site.yml": {
+    "mtime": 1768349725.7444813,
+    "ast_hash": "78a5bfa1151e8d12cce30769ac18c5da",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_halogen_label_dataset_binding_site.yml": {
+    "mtime": 1768349788.8088524,
+    "ast_hash": "91f869744d7d1624a1d5fb6a940918ff",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_distances_label_dataset_binding_site.yml": {
+    "mtime": 1768349684.3861377,
+    "ast_hash": "1a00862760d0611b4e258b362537a55c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/baseline_with_shape_label_dataset_binding_site.yml": {
+    "mtime": 1768349629.447143,
+    "ast_hash": "38515cddef2c40bb384273e8d8650844",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_chemical_label_calculated_binding_site.yml": {
+    "mtime": 1768349710.8981266,
+    "ast_hash": "84a3654c60880bed160c45392b715238",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_shape_distances_label_dataset_binding_site.yml": {
+    "mtime": 1768349856.6861963,
+    "ast_hash": "1f335fd6a97640aaaa7bb836daab79e1",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_dist_ligand_label_dataset_binding_site.yml": {
+    "mtime": 1768349735.4071376,
+    "ast_hash": "7af579c63af89b7f5e9a80a70b7329f4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/baseline_label_calculated_binding_site.yml": {
+    "mtime": 1768349606.6669807,
+    "ast_hash": "ef4ad2eca665cbbcf79b7130b7b41800",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_sulfur_label_dataset_binding_site.yml": {
+    "mtime": 1768349868.6168041,
+    "ast_hash": "7d1356feb5aafda52049911a35bf7e07",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_full_context_label_calculated_binding_site.yml": {
+    "mtime": 1768349774.0948577,
+    "ast_hash": "12da82dc2ee06bf6726378542351ffa5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_distances_label_calculated_binding_site.yml": {
+    "mtime": 1768349679.8596165,
+    "ast_hash": "7474e926803c045fc03303877de44947",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/feature_combinations.yml": {
+    "mtime": 1768377876.1741219,
+    "ast_hash": "8ea482bce73c26b4f59f4a25dff4ff9e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_hydrophobic_aromatic_label_dataset_binding_site.yml": {
+    "mtime": 1768349800.726692,
+    "ast_hash": "b16098689dda01be6a8c8b5539005e7f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_phosphorus_label_calculated_binding_site.yml": {
+    "mtime": 1768349839.6050675,
+    "ast_hash": "e1bd4247cba52cbfbb17550ff4b880e0",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_chemical_label_dataset_binding_site.yml": {
+    "mtime": 1768349715.6939304,
+    "ast_hash": "5101a91f4f6d30f17cd055165c325fab",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_shape_distances_label_calculated_binding_site.yml": {
+    "mtime": 1768349850.4500787,
+    "ast_hash": "69be104339ef4f76f9f245d6a828084f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_donor_label_dataset_binding_site.yml": {
+    "mtime": 1768349769.3015354,
+    "ast_hash": "5ae1b97443c963811a1d31882203c156",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_acceptor_label_calculated_binding_site.yml": {
+    "mtime": 1768349645.4778144,
+    "ast_hash": "5f986060fc3f2660ab31b011d323ca07",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_halogen_label_calculated_binding_site.yml": {
+    "mtime": 1768349784.1481957,
+    "ast_hash": "5852573051aa053df6d49bfdd239e0d8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_full_context_label_dataset_binding_site.yml": {
+    "mtime": 1768349778.8965464,
+    "ast_hash": "fdd5104c5dcd1b696a0b1d38883c18c1",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_aromatic_label_dataset_binding_site.yml": {
+    "mtime": 1768349695.0372934,
+    "ast_hash": "0bc1e6d0b3581e1d3f341f5da882fa09",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_donor_acceptor_label_calculated_binding_site.yml": {
+    "mtime": 1768349754.3962152,
+    "ast_hash": "f6c04b5e5e3c95a52e9c8c3d44c16e09",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon_with_different_selections/electrostatic_all_chemical_label_dataset_binding_site.yml": {
+    "mtime": 1768349675.58976,
+    "ast_hash": "7c95b84cf4dcefa2660992c9ecf74852",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_randomized_config.yml": {
+    "mtime": 1748157551.9058652,
+    "ast_hash": "fbef570ccea9870e400aab05c107ef62",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_smooth_05.yml": {
+    "mtime": 1734464288.8556912,
+    "ast_hash": "32f65f6261380874eb62683ee3e7b278",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/wd_001.yml": {
+    "mtime": 1734464345.6755724,
+    "ast_hash": "29522f85ebfa8e964d5e1fe48c55aa07",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/scheduler_cosine_annealing.yml": {
+    "mtime": 1734464336.22388,
+    "ast_hash": "d6b9e4cafbe089c452dba13be702a396",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_optimized_pos_weight_1.yml": {
+    "mtime": 1736340234.155213,
+    "ast_hash": "cad419d6f7be45fb25a396839194733a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_pos_weight_5.yml": {
+    "mtime": 1734464271.1516635,
+    "ast_hash": "cfa71f5b56dcd4da83271a5896d1e493",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_pos_weight_15.yml": {
+    "mtime": 1734464276.0612304,
+    "ast_hash": "63a0874d142a2fcd149cdda3eb8e726e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_optimized_pos_weight_1_batch_size_4.yml": {
+    "mtime": 1748096641.098926,
+    "ast_hash": "a33d0df82db557138629d457716ac884",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_optimized_pos_weight_1_batch_size_4_monai.yml": {
+    "mtime": 1748096643.8920405,
+    "ast_hash": "0c0bcd6b4093494a96b6ee6b6a54a89f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_smooth_2.yml": {
+    "mtime": 1734464281.9849782,
+    "ast_hash": "ce9b6f05366d1a743089a345c50550d5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/lr_001.yml": {
+    "mtime": 1734289409.3171647,
+    "ast_hash": "65033409b6e1113cfd30a9e0c3cb2ace",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_optimized.yml": {
+    "mtime": 1748363218.3413382,
+    "ast_hash": "3ab07603bc2610467edcc69629eb2dfc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind.yml": {
+    "mtime": 1734464327.2630615,
+    "ast_hash": "ccf500c83fd2472cbf1b719a18c9e590",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_alpha_04.yml": {
+    "mtime": 1734289366.9220586,
+    "ast_hash": "97f9362fb772c3e222a894708a02e43d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/loss_alpha_07.yml": {
+    "mtime": 1734289372.8747106,
+    "ast_hash": "995ad465fcb7aa0b50121ada06747185",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/wd_00001.yml": {
+    "mtime": 1734464350.701128,
+    "ast_hash": "b8d43b80703521f95f2b96bfb33066ef",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/pdbbind_tmp.yml": {
+    "mtime": 1734464393.9498615,
+    "ast_hash": "7fae5ecc1bfc7e7907bff2a5dfe5e2a8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/lr_0001.yml": {
+    "mtime": 1734289416.667263,
+    "ast_hash": "54783fae68c7724863e385e0b55b9f46",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/codon/scheduler_step_lr.yml": {
+    "mtime": 1734464341.942074,
+    "ast_hash": "409d481dc9ae4ce6e558cbbf35b076df",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/caching/h5_cache_config_pdbbind_limited.yml": {
+    "mtime": 1735650925.4986815,
+    "ast_hash": "a261c0df19c84f11ab3c82f4a21f9197",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/config/caching/h5_cache_config_pdbbind_full.yml": {
+    "mtime": 1746723930.6781135,
+    "ast_hash": "a4398563bf1a1d26354a9f2ca5d40648",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/TRAINING_COMMANDS.md": {
+    "mtime": 1768344100.7890155,
+    "ast_hash": "6ea5d27ce16431243b76888bb6d7f012",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/slurm/commands.txt": {
+    "mtime": 1768344354.1435263,
+    "ast_hash": "22d5af417f34b4971065ef1e21a1ac79",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_results_2026-05-15.md": {
+    "mtime": 1778838716.4696097,
+    "ast_hash": "ffe0d6d6ab6fb3c2dee2c2a5c9068c61",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work12_v2_feature_ablation_plan_2026-05-12.md": {
+    "mtime": 1778592763.0692444,
+    "ast_hash": "a93bea63ed946288dac28e3db5050b30",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work12_work13_plan_2026-05-11.md": {
+    "mtime": 1778533362.5402517,
+    "ast_hash": "169c11ea30d886f3aede46cb6f0acc5d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/apbs_clipping_ablation_explainer_2026-05-08.md": {
+    "mtime": 1778234571.022653,
+    "ast_hash": "bd34d9b8077ef248498cf323fd77d552",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_design_2026-05-11.md": {
+    "mtime": 1778527611.9954052,
+    "ast_hash": "bc52b76b6962f3677d8d406612868ea7",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/literature_models_and_topk_metrics_plan_2026-05-14.md": {
+    "mtime": 1778750831.5694122,
+    "ast_hash": "4de5cf87fe18998b1ae246182165145b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/next_work_packages_2026-05-08.md": {
+    "mtime": 1778592877.5140073,
+    "ast_hash": "9f41bc74b7b61a0eb9b13021244ca26e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_top1_top3_comparison.md": {
+    "mtime": 1778740081.0512052,
+    "ast_hash": "4d8fb309b9817072afeeea1619c2937c",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/thesis_defense_question_bank_2026-05-08.md": {
+    "mtime": 1778233393.6437593,
+    "ast_hash": "4ac9e7b355ba25aef80e16bd35fa0edd",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work5_model_sweep_report.md": {
+    "mtime": 1778232146.150907,
+    "ast_hash": "b783f146f8b10c43c6be34e44dcd413d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/thesis_materials_review_2026-05-08.md": {
+    "mtime": 1778236837.6059244,
+    "ast_hash": "1923ade2563a76f71b7711d510de0ea8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8a_topk_metrics_2026-05-15/work8a_topk_report.md": {
+    "mtime": 1778840690.6002002,
+    "ast_hash": "e7b3804ad2c5ab297ec093fdd6db9dbd",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/index.html": {
+    "mtime": 1778784119.9086163,
+    "ast_hash": "a08eb6c5f5befac7f9645c3f42536dc4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/README.md": {
+    "mtime": 1778784119.9084995,
+    "ast_hash": "d42a5e59dd7abf1a5b803cd955db814f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8c_literature_model_control_3runs_fold1_200epoch_thr040/generated_configs/work8c03_puresnetv2denselike3d_apbs_shape_full_signed.yml": {
+    "mtime": 1778840060.306342,
+    "ast_hash": "9c1b8748eee64d7d6d94e5434bc3e81e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8c_literature_model_control_3runs_fold1_200epoch_thr040/generated_configs/work8c02_puresnetv1like3d_apbs_shape_full_signed.yml": {
+    "mtime": 1778840060.303969,
+    "ast_hash": "0b38068a78b8d4872aca8550c53ddc7e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8c_literature_model_control_3runs_fold1_200epoch_thr040/generated_configs/work8c01_kalasantyunet3d_apbs_shape_full_signed.yml": {
+    "mtime": 1778840060.3015041,
+    "ast_hash": "b245df1433c0004b0d98ac9d84596351",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8b_unetplusplus_improvement_3runs_fold1_200epoch_thr040/generated_configs/work8b02_unetpp_apbs_shape_full_signed_channelwise_rotate_only.yml": {
+    "mtime": 1778840060.1023629,
+    "ast_hash": "3379d5010487a6c2e6f50e4e4fa9a444",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8b_unetplusplus_improvement_3runs_fold1_200epoch_thr040/generated_configs/work8b03_unetpp_apbs_shape_selected_chem_full_signed_focal_tversky_bf12.yml": {
+    "mtime": 1778840060.1049616,
+    "ast_hash": "4d27c74bae9d2c9d4d278df624c7a6ad",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8b_unetplusplus_improvement_3runs_fold1_200epoch_thr040/generated_configs/work8b01_unetpp_apbs_shape_full_signed_channelwise.yml": {
+    "mtime": 1778840060.0998785,
+    "ast_hash": "c2bfe81c91871852f23054ec2ebd57bf",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/requirements.txt": {
+    "mtime": 1748028501.6137805,
+    "ast_hash": "4b5b435ea024be3550d96b09c6e2ba46",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/local/config_with_feature_selection.yml": {
+    "mtime": 1768309760.1464233,
+    "ast_hash": "b553312df32afb97bf7d46d21107103f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/local/pdbbind.yml": {
+    "mtime": 1734288313.9979968,
+    "ast_hash": "5e8d5752fbab8a5b7c24a93a746bead3",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/local/config.yml": {
+    "mtime": 1747850707.7476866,
+    "ast_hash": "d8183de2c85e04c3a9962c98b7447b37",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_randomized_config.yml": {
+    "mtime": 1748157551.9058652,
+    "ast_hash": "fbef570ccea9870e400aab05c107ef62",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_smooth_05.yml": {
+    "mtime": 1734464288.8556912,
+    "ast_hash": "32f65f6261380874eb62683ee3e7b278",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/wd_001.yml": {
+    "mtime": 1734464345.6755724,
+    "ast_hash": "29522f85ebfa8e964d5e1fe48c55aa07",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/scheduler_cosine_annealing.yml": {
+    "mtime": 1734464336.22388,
+    "ast_hash": "d6b9e4cafbe089c452dba13be702a396",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_optimized_pos_weight_1.yml": {
+    "mtime": 1736340234.155213,
+    "ast_hash": "cad419d6f7be45fb25a396839194733a",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_pos_weight_5.yml": {
+    "mtime": 1734464271.1516635,
+    "ast_hash": "cfa71f5b56dcd4da83271a5896d1e493",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_pos_weight_15.yml": {
+    "mtime": 1734464276.0612304,
+    "ast_hash": "63a0874d142a2fcd149cdda3eb8e726e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_optimized_pos_weight_1_batch_size_4.yml": {
+    "mtime": 1748364933.2156124,
+    "ast_hash": "db05197d0d7e9eaf61352eaf23c15a2d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_optimized_pos_weight_1_batch_size_4_monai.yml": {
+    "mtime": 1748096643.8920405,
+    "ast_hash": "0c0bcd6b4093494a96b6ee6b6a54a89f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_smooth_2.yml": {
+    "mtime": 1734464281.9849782,
+    "ast_hash": "ce9b6f05366d1a743089a345c50550d5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/lr_001.yml": {
+    "mtime": 1734289409.3171647,
+    "ast_hash": "65033409b6e1113cfd30a9e0c3cb2ace",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_optimized.yml": {
+    "mtime": 1748363218.3413382,
+    "ast_hash": "3ab07603bc2610467edcc69629eb2dfc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind.yml": {
+    "mtime": 1734464327.2630615,
+    "ast_hash": "ccf500c83fd2472cbf1b719a18c9e590",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_alpha_04.yml": {
+    "mtime": 1734289366.9220586,
+    "ast_hash": "97f9362fb772c3e222a894708a02e43d",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/loss_alpha_07.yml": {
+    "mtime": 1734289372.8747106,
+    "ast_hash": "995ad465fcb7aa0b50121ada06747185",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/wd_00001.yml": {
+    "mtime": 1734464350.701128,
+    "ast_hash": "b8d43b80703521f95f2b96bfb33066ef",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/pdbbind_tmp.yml": {
+    "mtime": 1734464393.9498615,
+    "ast_hash": "7fae5ecc1bfc7e7907bff2a5dfe5e2a8",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/lr_0001.yml": {
+    "mtime": 1734289416.667263,
+    "ast_hash": "54783fae68c7724863e385e0b55b9f46",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/codon/scheduler_step_lr.yml": {
+    "mtime": 1734464341.942074,
+    "ast_hash": "409d481dc9ae4ce6e558cbbf35b076df",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/caching/h5_cache_config_pdbbind_limited.yml": {
+    "mtime": 1735650925.4986815,
+    "ast_hash": "a261c0df19c84f11ab3c82f4a21f9197",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet/config/caching/h5_cache_config_pdbbind_full.yml": {
+    "mtime": 1746723930.6781135,
+    "ast_hash": "a4398563bf1a1d26354a9f2ca5d40648",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/resnet3d4l.svg": {
+    "mtime": 1778784119.906747,
+    "ast_hash": "325f2cf1986755dda986a776a0183c99",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/cbamunet3d.svg": {
+    "mtime": 1778784119.9071462,
+    "ast_hash": "b2478afa274b9ffeddc4422b707fcccc",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/swinsitelike3d.svg": {
+    "mtime": 1778784119.908369,
+    "ast_hash": "e1d80d0c68366228f396f3f785cdd095",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/kalasantyunet3d.svg": {
+    "mtime": 1778784119.9078126,
+    "ast_hash": "256f63e14fd450f239ea03d53c5a8fa5",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/puresnetv2denselike3d.svg": {
+    "mtime": 1778784119.9081795,
+    "ast_hash": "493502f3a706611eb2284efa5a7534a6",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/puresnetv1like3d.svg": {
+    "mtime": 1778784119.9080002,
+    "ast_hash": "03c23a07d10dfbbc2c0c07c1e0486dd4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/resnet3d4lgn.svg": {
+    "mtime": 1778784119.9074175,
+    "ast_hash": "af65fd3cd374229925c7b6046f65f7ba",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/unetplusplus3d.svg": {
+    "mtime": 1778784119.9069643,
+    "ast_hash": "e8ad080dd595e34863d127e416725850",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/unet3d4l.svg": {
+    "mtime": 1778784119.9062784,
+    "ast_hash": "3a684abf19378369bd304016cee3015e",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/tinyconvnextunet3d.svg": {
+    "mtime": 1778784119.9076264,
+    "ast_hash": "91fa112ba8e8fa5dcaf9124ba01b79a9",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/model_architectures/unet3d4la.svg": {
+    "mtime": 1778784119.9065428,
+    "ast_hash": "ceff9ae44151ee78bf1115c459f62db1",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/02_work1_apbs_metric_deltas.svg": {
+    "mtime": 1778737456.3007832,
+    "ast_hash": "8df862cbf4723f4c92a48245c11fd622",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/03_work8_apbs_representation_metric_averages.svg": {
+    "mtime": 1778737456.3193223,
+    "ast_hash": "49ff8007c97873822f188af07e4ac1a9",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/05_work8_top_dvo_success_runs.svg": {
+    "mtime": 1778737456.3199897,
+    "ast_hash": "6fe7d5f53e297db70f3233c3f619a8e4",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/04_work8_family_variant_heatmap.svg": {
+    "mtime": 1778737456.3198,
+    "ast_hash": "716ba3721264c01548300977d5933b89",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/06_work8_dcc_vs_dvo_scatter.svg": {
+    "mtime": 1778737456.3203452,
+    "ast_hash": "03a159d962fd040a93d19f8396ff157f",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/01_work1_apbs_vs_no_apbs_metrics.svg": {
+    "mtime": 1778737456.3004956,
+    "ast_hash": "47547096c5eed0f54eb44878836fbc42",
+    "semantic_hash": ""
+  }
+}
