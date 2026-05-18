@@ -54,6 +54,20 @@ KALASANTY_FOLDS="${KALASANTY_FOLDS:-0,1,2,3,4,5,6,7,8,9}"
 PURESNET_FOLDS="${PURESNET_FOLDS:-0,1,2,3}"
 PURESNET_FOLD_COUNT="${PURESNET_FOLD_COUNT:-4}"
 PURESNET_SPLIT_SEED="${PURESNET_SPLIT_SEED:-42}"
+PURESNET_SPLIT_MODE="${PURESNET_SPLIT_MODE:-deterministic}"
+
+if [[ -z "${PURESNET_GROUP_MAP:-}" ]]; then
+  for candidate in \
+    "/homes/tevfik/PHD/puresnet_scpdb_5020_family_map.csv" \
+    "/homes/tevfik/PHD/puresnet_scpdb_5020_group_map.csv" \
+    "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/external/puresnet/puresnet_scpdb_5020_family_map.csv" \
+    "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/external/puresnet/puresnet_scpdb_5020_group_map.csv"; do
+    if [[ -f "$candidate" ]]; then
+      PURESNET_GROUP_MAP="$candidate"
+      break
+    fi
+  done
+fi
 
 EPOCHS="${EPOCHS:-150}"
 EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-25}"
@@ -75,7 +89,21 @@ OUTPUT_ROOT="${OUTPUT_ROOT:-$DATA_ROOT/runs/work14_scpdb_box36_span70_literature
 CONFIG_DIR="${CONFIG_DIR:-$OUTPUT_ROOT/generated_configs}"
 SPLIT_ROOT="${SPLIT_ROOT:-$H5_DIR/splits_literature_benchmark}"
 KALASANTY_SPLIT_DIR="${KALASANTY_SPLIT_DIR:-$SPLIT_ROOT/kalasanty10_available_h5}"
-PURESNET_SPLIT_DIR="${PURESNET_SPLIT_DIR:-$SPLIT_ROOT/puresnet5020_available_h5_kfold${PURESNET_FOLD_COUNT}_seed${PURESNET_SPLIT_SEED}}"
+if [[ -z "${PURESNET_SPLIT_DIR:-}" ]]; then
+  case "$PURESNET_SPLIT_MODE" in
+    grouped|family|family_grouped)
+      PURESNET_SPLIT_DIR="$SPLIT_ROOT/puresnet5020_available_h5_family_grouped_kfold${PURESNET_FOLD_COUNT}_seed${PURESNET_SPLIT_SEED}"
+      ;;
+    deterministic|seeded|seeded_balanced|random)
+      PURESNET_SPLIT_DIR="$SPLIT_ROOT/puresnet5020_available_h5_kfold${PURESNET_FOLD_COUNT}_seed${PURESNET_SPLIT_SEED}"
+      ;;
+    *)
+      echo "Unsupported PURESNET_SPLIT_MODE: $PURESNET_SPLIT_MODE"
+      echo "Supported values: deterministic, grouped"
+      exit 1
+      ;;
+  esac
+fi
 FEATURE_SET_FILTER="${FEATURE_SET_FILTER:-}"
 
 SUBMIT="${SUBMIT:-0}"
@@ -121,6 +149,8 @@ echo "Label: $LABEL"
 echo "Benchmarks: $BENCHMARKS"
 echo "Kalasanty fold dir: ${KALASANTY_FOLD_DIR:-<missing>}"
 echo "PUResNet ID list: ${PURESNET_ID_LIST:-<missing>}"
+echo "PUResNet split mode: $PURESNET_SPLIT_MODE"
+echo "PUResNet group map: ${PURESNET_GROUP_MAP:-<missing>}"
 echo "Output root: $OUTPUT_ROOT"
 echo "Generated configs: $CONFIG_DIR"
 echo "Model: $MODEL"
@@ -168,20 +198,41 @@ if contains_benchmark "puresnet"; then
     exit 1
   fi
   echo
-  echo "Building PUResNet 5020-derived deterministic 4-fold splits from available H5 cases"
-  "$PYTHON_BIN" scripts/build_cache_kfold_splits_from_id_list.py \
-    "${common_split_args[@]}" \
-    --h5-exists-only \
-    --id-list "$PURESNET_ID_LIST" \
-    --output-dir "$PURESNET_SPLIT_DIR" \
-    --folds "$PURESNET_FOLD_COUNT" \
-    --seed "$PURESNET_SPLIT_SEED"
+  case "$PURESNET_SPLIT_MODE" in
+    grouped|family|family_grouped)
+      if [[ -z "${PURESNET_GROUP_MAP:-}" || ! -f "$PURESNET_GROUP_MAP" ]]; then
+        echo "PUResNet grouped split needs PURESNET_GROUP_MAP."
+        echo "Expected a CSV/TSV with case/base id and group/family columns."
+        exit 1
+      fi
+      echo "Building PUResNet 5020-derived family/grouped ${PURESNET_FOLD_COUNT}-fold splits from available H5 cases"
+      "$PYTHON_BIN" scripts/build_cache_grouped_splits_from_id_list.py \
+        "${common_split_args[@]}" \
+        --h5-exists-only \
+        --id-list "$PURESNET_ID_LIST" \
+        --group-map "$PURESNET_GROUP_MAP" \
+        --output-dir "$PURESNET_SPLIT_DIR" \
+        --folds "$PURESNET_FOLD_COUNT" \
+        --seed "$PURESNET_SPLIT_SEED"
+      ;;
+    deterministic|seeded|seeded_balanced|random)
+      echo "Building PUResNet 5020-derived deterministic ${PURESNET_FOLD_COUNT}-fold splits from available H5 cases"
+      "$PYTHON_BIN" scripts/build_cache_kfold_splits_from_id_list.py \
+        "${common_split_args[@]}" \
+        --h5-exists-only \
+        --id-list "$PURESNET_ID_LIST" \
+        --output-dir "$PURESNET_SPLIT_DIR" \
+        --folds "$PURESNET_FOLD_COUNT" \
+        --seed "$PURESNET_SPLIT_SEED"
+      ;;
+  esac
 fi
 
 export BASE_CONFIG CONFIG_DIR OUTPUT_ROOT H5_DIR LABEL
 export EPOCHS EARLY_STOPPING_PATIENCE VALIDATION_THRESHOLD PAPER_METRICS_START_EPOCH
 export BATCH_SIZE VALIDATION_BATCH_SIZE LEARNING_RATE LOSS_ALPHA POS_WEIGHT WEIGHT_DECAY HP_SUFFIX
 export BENCHMARKS KALASANTY_FOLDS PURESNET_FOLDS KALASANTY_SPLIT_DIR PURESNET_SPLIT_DIR FEATURE_SET_FILTER
+export PURESNET_SPLIT_MODE PURESNET_GROUP_MAP PURESNET_FOLD_COUNT
 "$PYTHON_BIN" - <<'PY'
 import copy
 import csv
@@ -214,6 +265,8 @@ weight_decay = float(os.environ["WEIGHT_DECAY"])
 hp_suffix = os.environ["HP_SUFFIX"]
 benchmarks = parse_items(os.environ["BENCHMARKS"])
 feature_set_filter = set(parse_items(os.environ.get("FEATURE_SET_FILTER", "")))
+puresnet_split_mode = os.environ.get("PURESNET_SPLIT_MODE", "deterministic").strip().lower()
+puresnet_fold_count = int(os.environ.get("PURESNET_FOLD_COUNT", "4"))
 
 selected_chem_features = [
     "atomic_donor",
@@ -294,12 +347,24 @@ if "kalasanty" in benchmarks:
         }
     )
 if "puresnet" in benchmarks:
+    if puresnet_split_mode in {"grouped", "family", "family_grouped"}:
+        puresnet_name = f"puresnet5020_family_kfold{puresnet_fold_count}"
+        puresnet_split_policy = (
+            "PUResNet 5020 ID list filtered to available H5 cases; "
+            f"family/grouped {puresnet_fold_count}-fold using supplied group map; original paper fold IDs not public"
+        )
+    else:
+        puresnet_name = f"puresnet5020_kfold{puresnet_fold_count}"
+        puresnet_split_policy = (
+            f"PUResNet 5020 ID list filtered to available H5 cases; deterministic {puresnet_fold_count}-fold, "
+            "not exact paper folds"
+        )
     benchmark_defs.append(
         {
-            "name": "puresnet5020_kfold4",
+            "name": puresnet_name,
             "split_dir": Path(os.environ["PURESNET_SPLIT_DIR"]),
             "folds": [int(item) for item in parse_items(os.environ["PURESNET_FOLDS"])],
-            "split_policy": "PUResNet 5020 ID list filtered to available H5 cases; deterministic 4-fold, not exact paper folds",
+            "split_policy": puresnet_split_policy,
         }
     )
 if not benchmark_defs:
@@ -394,6 +459,12 @@ for run_index, (benchmark, fold_idx, feature_name, features) in enumerate(reques
             "train_file": str(train_file),
             "validation_file": str(validation_file),
             "split_policy": benchmark["split_policy"],
+            "split_mode": puresnet_split_mode if benchmark["name"].startswith("puresnet") else "official_fold_ids",
+            "split_group_map": (
+                os.environ.get("PURESNET_GROUP_MAP", "")
+                if benchmark["name"].startswith("puresnet")
+                else ""
+            ),
             "learning_rate": learning_rate,
             "loss_alpha": loss_alpha,
             "pos_weight": pos_weight,
