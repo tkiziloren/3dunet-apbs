@@ -1,16 +1,16 @@
 # Graph Report - 3dunet-apbs  (2026-05-18)
 
 ## Corpus Check
-- 150 files · ~256,515 words
+- 153 files · ~258,531 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1244 nodes · 1728 edges · 123 communities (112 shown, 11 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.79)
+- 1258 nodes · 1750 edges · 125 communities (113 shown, 12 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 32 edges (avg confidence: 0.79)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `25114001`
+- Built from commit: `2c166cb1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -82,6 +82,7 @@
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 123|Community 123]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Thesis Defense Question Bank - 2026-05-08` - 53 edges
@@ -91,8 +92,8 @@
 5. `APBS Clipping and Ablation Explainer - 2026-05-08` - 15 edges
 6. `Work8 Sonuç Raporu` - 13 edges
 7. `evaluate_topk_metrics_for_sample()` - 12 edges
-8. `evaluate_pocket_metrics_for_sample()` - 11 edges
-9. `validate_case()` - 11 edges
+8. `validate_case()` - 12 edges
+9. `evaluate_pocket_metrics_for_sample()` - 11 edges
 10. `Work8 Design` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -107,19 +108,19 @@
 - `F1, Precision, Recall ve Confusion Matrix metriklerini bir kez başlatır.      Ar` --rationale_for--> `initialize_metrics()`  [EXTRACTED]
   3dunet_configurable/utils/training.py → 3dunet/utils/training.py
 
-## Communities (123 total, 11 thin omitted)
+## Communities (125 total, 12 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.07
-Nodes (59): append_csv_rows(), as_list(), build_monai_transforms(), build_transforms(), create_model(), format_count(), log_readable_validation_summary(), main() (+51 more)
+Cohesion: 0.08
+Nodes (53): append_csv_rows(), as_list(), build_monai_transforms(), build_transforms(), create_model(), format_count(), log_readable_validation_summary(), main() (+45 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.04
 Nodes (53): 10. Neden graph kullanmadın?, 11. APBS neden bu iş için anlamlı bir feature?, 12. APBS feature'ında normalization neden bu kadar önemli?, 13. `dist2ligand` gibi ligand-derived feature'lar neden riskli?, 14. Binding-site label'ı nasıl tanımlanıyor? Dataset label ile calculated label farkı nedir?, 15. DCC, DCA, DVO, Pocket-F1 ve voxel-F1 arasındaki fark nedir?, 16. Modelin eski F1 skorları neden düşük çıkıyordu?, 17. Selection score nedir ve neden kullanıyoruz? (+45 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (37): _AbstractDiceLoss, BCEDiceLoss, BCEDiceLoss1, BCEDiceLoss2, BCEFocalTverskyLoss, compute_per_channel_dice(), DiceLoss, flatten() (+29 more)
+Cohesion: 0.05
+Nodes (43): _AbstractDiceLoss, BCEDiceLoss, BCEDiceLoss1, BCEDiceLoss2, BCEFocalTverskyLoss, compute_per_channel_dice(), DiceLoss, flatten() (+35 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.04
@@ -142,12 +143,12 @@ Cohesion: 0.10
 Nodes (23): load_config(), normalize_feature(), ProteinLigandDatasetWithH5, Normalize a feature using the default physical range or a config override., add_center(), add_scatter(), binary_stats(), choose_device() (+15 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.08
-Nodes (14): ConvBlock, dice_coeff(), eval_epoch(), iou_score(), is_single_fragment(), main(), mol2_to_voxel(), Return True if mol2 file has exactly one disconnected fragment. (+6 more)
+Cohesion: 0.15
+Nodes (11): ConvBlock, dice_coeff(), eval_epoch(), iou_score(), is_single_fragment(), main(), mol2_to_voxel(), Return True if mol2 file has exactly one disconnected fragment. (+3 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.12
-Nodes (29): assign_balanced_folds(), discover_h5_cases(), find_dataset_path_in_any_group(), has_dataset(), has_dataset_in_any_group(), int_or_none(), main(), parse_args() (+21 more)
+Cohesion: 0.10
+Nodes (36): assign_balanced_folds(), discover_h5_cases(), find_dataset_path_in_any_group(), has_entry_suffix(), main(), normalize_id(), parse_args(), read_id_list() (+28 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.06
@@ -198,8 +199,8 @@ Cohesion: 0.10
 Nodes (20): Basari Kriteri, Beklenen Cevaplar, code:text (box36_span70), code:text (Top-1 Pocket-F1), code:text (legacy_apbs_only:), code:text (v2_apbs_full_raw_only:), code:text (ResNet3D4L), code:text (ResNet3D4LGN) (+12 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.15
-Nodes (11): ConvBlock, dice_coeff(), eval_epoch(), iou_score(), is_single_fragment(), main(), mol2_to_voxel(), Return True if mol2 file has exactly one disconnected fragment. (+3 more)
+Cohesion: 0.08
+Nodes (14): ConvBlock, dice_coeff(), eval_epoch(), iou_score(), is_single_fragment(), main(), mol2_to_voxel(), Return True if mol2 file has exactly one disconnected fragment. (+6 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.11
@@ -278,8 +279,8 @@ Cohesion: 0.27
 Nodes (8): create_output_dirs(), load_config(), parse_args(), Config dosyasını yükler., Log, ağırlık ve TensorBoard dosyalarını kaydetmek için dizinleri oluşturur., Konsola ve dosyaya log yazan bir logger ayarlama fonksiyonu.      Args:, Argümanları okuyarak döner., setup_logger()
 
 ### Community 42 - "Community 42"
-Cohesion: 0.22
-Nodes (7): Active Code Path, Communication, Experiment Discipline, Project Direction, Purpose, Training Best Practices, Verification
+Cohesion: 0.20
+Nodes (8): Active Code Path, Communication, Experiment Discipline, graphify, Project Direction, Purpose, Training Best Practices, Verification
 
 ### Community 43 - "Community 43"
 Cohesion: 0.22
@@ -334,13 +335,15 @@ Cohesion: 0.50
 Nodes (3): Top-3 Best Rows, Top-(n+2) Best Rows, Work8A Top-k Metric Re-evaluation
 
 ## Knowledge Gaps
-- **270 isolated node(s):** `Purpose`, `Communication`, `Active Code Path`, `Project Direction`, `Experiment Discipline` (+265 more)
+- **272 isolated node(s):** `PreToolUse`, `Purpose`, `Communication`, `Active Code Path`, `Project Direction` (+267 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `main()` connect `Community 0` to `Community 2`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `NullLogger` connect `Community 7` to `Community 24`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `Standardize` connect `Community 24` to `Community 7`?**
@@ -350,8 +353,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 3 inferred relationships involving `main()` (e.g. with `create_model()` and `center_of_mask()`) actually correct?**
   _`main()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Rastgele eksenlerde tensor üzerinde yansıma (flip) işlemi uygular.`, `Basit bir Z-skoru normalizasyonu uygular.`, `Tensor'a Z-skoru normalizasyonu uygular.          Args:             tensor (torc` to the rest of the system?**
-  _309 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _311 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06663141195134849 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.037037037037037035 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07792207792207792 - nodes in this community are weakly interconnected._

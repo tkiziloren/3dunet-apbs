@@ -680,8 +680,8 @@
     "semantic_hash": ""
   },
   "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/AGENTS.md": {
-    "mtime": 1779119263.3694613,
-    "ast_hash": "99a4e3417599bdcd99047f3e38f00dd9",
+    "mtime": 1779120809.4203897,
+    "ast_hash": "553d59335cd676a7dd38a4ced1686e3e",
     "semantic_hash": ""
   },
   "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/requirements.txt": {
@@ -1517,6 +1517,21 @@
   "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/reports/work8_apbs_effect_figures/01_work1_apbs_vs_no_apbs_metrics.svg": {
     "mtime": 1778737456.3004956,
     "ast_hash": "47547096c5eed0f54eb44878836fbc42",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/prepare_scpdb36_literature_benchmark_configs.sh": {
+    "mtime": 1779123585.7718265,
+    "ast_hash": "d8c979771c06eb111c0a8519e06fb85b",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/3dunet_configurable/scripts/build_cache_kfold_splits_from_id_list.py": {
+    "mtime": 1779123495.7865262,
+    "ast_hash": "8676ea95342ad954dc2c5818ccfaf3d2",
+    "semantic_hash": ""
+  },
+  "/Users/tevfik/Sandbox/Tevfik/Projects/phd_examples/3dunet-apbs/.codex/hooks.json": {
+    "mtime": 1779119893.0565658,
+    "ast_hash": "5bf09969e05d927d1cb46d36d17483dc",
     "semantic_hash": ""
   }
 }
