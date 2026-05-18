@@ -215,8 +215,43 @@ hp_suffix = os.environ["HP_SUFFIX"]
 benchmarks = parse_items(os.environ["BENCHMARKS"])
 feature_set_filter = set(parse_items(os.environ.get("FEATURE_SET_FILTER", "")))
 
+selected_chem_features = [
+    "atomic_donor",
+    "atomic_acceptor",
+    "atomic_hydrophobic",
+    "atomic_aromatic",
+]
+full_chem_features = [
+    "atomic_B",
+    "atomic_C",
+    "atomic_N",
+    "atomic_O",
+    "atomic_P",
+    "atomic_S",
+    "atomic_Se",
+    "atomic_halogen",
+    "atomic_metal",
+    "atomic_hyb",
+    "atomic_heavydegree",
+    "atomic_heterodegree",
+    "atomic_partialcharge",
+    "atomic_hydrophobic",
+    "atomic_aromatic",
+    "atomic_acceptor",
+    "atomic_donor",
+    "atomic_ring",
+]
+
 feature_sets = OrderedDict(
     [
+        ("full_chem", full_chem_features),
+        (
+            "full_chem_apbs_v1_full_signed",
+            full_chem_features + ["electrostatic_grid_v1_ligand_proximal_chains_7A_full_signed150"],
+        ),
+        ("full_chem_shape", full_chem_features + ["shape"]),
+        ("selected_chem_shape", selected_chem_features + ["shape"]),
+        ("selected_chem", selected_chem_features),
         (
             "apbs_v1_full_signed_shape",
             [
@@ -226,26 +261,14 @@ feature_sets = OrderedDict(
         ),
         (
             "apbs_v1_full_signed_shape_selected_chem",
-            [
-                "electrostatic_grid_v1_ligand_proximal_chains_7A_full_signed150",
-                "shape",
-                "atomic_donor",
-                "atomic_acceptor",
-                "atomic_hydrophobic",
-                "atomic_aromatic",
-            ],
+            ["electrostatic_grid_v1_ligand_proximal_chains_7A_full_signed150", "shape"]
+            + selected_chem_features,
         ),
         (
             "apbs_v1_full_signed_shape_selected_chem_surface",
-            [
-                "electrostatic_grid_v1_ligand_proximal_chains_7A_full_signed150",
-                "shape",
-                "atomic_donor",
-                "atomic_acceptor",
-                "atomic_hydrophobic",
-                "atomic_aromatic",
-                "dist_to_surface",
-            ],
+            ["electrostatic_grid_v1_ligand_proximal_chains_7A_full_signed150", "shape"]
+            + selected_chem_features
+            + ["dist_to_surface"],
         ),
     ]
 )
