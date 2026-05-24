@@ -14,12 +14,18 @@ import yaml
 
 
 REPO = Path(__file__).resolve().parents[1]
-BASE_CONFIG = (
+BASE_CONFIG_CANDIDATES = [
     REPO
     / "reports/work14_and_pdbbind_reeval_2026-05-19/remote_csv/scpdb_puresnet/"
     / "scpdb_box36_span70_puresnet5020_kfold4_fold0_apbs_v1_full_signed_shape_selected_chem_surface_lr1e4_alpha05_pos2_wd1e5"
-    / "config_snapshot.yml"
-)
+    / "config_snapshot.yml",
+    Path(
+        "/nfs/production/arl/chembl/tevfik/DEEP_APBS_DATASETS/runs/"
+        "work20_scpdb_box36_span70_puresnet5020_kfold4_unetplusplus_surface_250epoch_thr040/"
+        "scpdb_box36_span70_puresnet5020_kfold4_fold0_apbs_v1_full_signed_shape_selected_chem_surface_lr1e4_alpha05_pos2_wd1e5/"
+        "config_snapshot.yml"
+    ),
+]
 WORK_NAME = "work24_puresnet5020_fold0_unetplusplus_selection_score_sweep_250epoch_thr040"
 OUT_DIR = REPO / "reports" / WORK_NAME
 CONFIG_DIR = OUT_DIR / "generated_configs"
@@ -77,7 +83,11 @@ def profile_rows():
 
 def main():
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    with BASE_CONFIG.open() as handle:
+    base_config = next((path for path in BASE_CONFIG_CANDIDATES if path.exists()), None)
+    if base_config is None:
+        checked = "\n".join(str(path) for path in BASE_CONFIG_CANDIDATES)
+        raise FileNotFoundError(f"No base config found. Checked:\n{checked}")
+    with base_config.open() as handle:
         base = yaml.safe_load(handle)
 
     config_paths = []
