@@ -23,6 +23,7 @@ SUPPORTED_POSTPROCESS_MODES = {
 
 PURESNET_DBSCAN_EPS_ANGSTROM = 5.5
 DBSCAN_EXACT_MAX_POINTS = 100_000
+STANDARD_SELECTION_METRIC = "dcc_voxel_dca_dvo_volume"
 
 
 POCKET_SUMMARY_FIELDNAMES = [
@@ -60,6 +61,68 @@ POCKET_SUMMARY_FIELDNAMES = [
     "selection_metric",
     "selection_score",
 ]
+
+
+def resolve_selection_score_config(paper_config):
+    """Resolve model-selection score settings from flat or nested config syntax."""
+    paper_config = paper_config or {}
+    nested = paper_config.get("selection_score", {}) or {}
+
+    def pick(flat_key, nested_key=None, default=None):
+        if flat_key in paper_config:
+            return paper_config[flat_key]
+        if nested_key and nested_key in nested:
+            return nested[nested_key]
+        if flat_key in nested:
+            return nested[flat_key]
+        return default
+
+    profile = pick(
+        "selection_profile",
+        "profile",
+        paper_config.get("selection_score_profile", nested.get("selection_score_profile")),
+    )
+    metric = pick("selection_metric", "metric")
+    if profile is None:
+        profile = "custom" if metric else "standard"
+    if metric is None:
+        metric = STANDARD_SELECTION_METRIC if profile == "standard" else "paper_f1"
+    if metric == "standard":
+        metric = STANDARD_SELECTION_METRIC
+
+    standard_like = metric == STANDARD_SELECTION_METRIC
+    dvo_default = 1.0 if standard_like else 5.0
+    cap_default = 5000 if standard_like else None
+
+    min_paper_f1 = pick("selection_min_paper_f1", "min_paper_f1")
+    if min_paper_f1 is not None:
+        min_paper_f1 = float(min_paper_f1)
+
+    max_mean_predicted = pick(
+        "selection_max_mean_predicted_positive_voxels",
+        "max_mean_predicted_positive_voxels",
+        cap_default,
+    )
+    if max_mean_predicted is not None:
+        max_mean_predicted = float(max_mean_predicted)
+
+    return {
+        "selection_profile": profile,
+        "selection_metric": metric,
+        "selection_dvo_weight": float(pick("selection_dvo_weight", "dvo_weight", dvo_default)),
+        "selection_pli_weight": float(pick("selection_pli_weight", "pli_weight", 0.0)),
+        "selection_voxel_f1_weight": float(pick("selection_voxel_f1_weight", "voxel_f1_weight", 1.0)),
+        "selection_dca_weight": float(pick("selection_dca_weight", "dca_weight", 0.25)),
+        "selection_no_dcc_score_scale": float(pick("selection_no_dcc_score_scale", "no_dcc_score_scale", 0.05)),
+        "selection_max_mean_predicted_positive_voxels": max_mean_predicted,
+        "selection_weights": pick("selection_weights", "weights"),
+        "selection_no_prediction_weight": float(pick("selection_no_prediction_weight", "no_prediction_weight", 0.0)),
+        "selection_volume_penalty_power": float(pick("selection_volume_penalty_power", "volume_penalty_power", 1.0)),
+        "selection_min_paper_f1": min_paper_f1,
+        "selection_below_min_paper_f1_score_scale": float(
+            pick("selection_below_min_paper_f1_score_scale", "below_min_paper_f1_score_scale", 0.25)
+        ),
+    }
 
 
 POCKET_PER_PROTEIN_FIELDNAMES = [
@@ -914,37 +977,87 @@ def calculate_selection_score(
     summary_row,
     selection_metric="paper_f1",
     dvo_weight=5.0,
+    pli_weight=0.0,
     voxel_f1=0.0,
     voxel_f1_weight=1.0,
     dca_weight=0.25,
     no_dcc_score_scale=0.05,
     max_mean_predicted_positive_voxels=None,
+    selection_weights=None,
+    no_prediction_weight=0.0,
+    volume_penalty_power=1.0,
+    min_paper_f1=None,
+    below_min_paper_f1_score_scale=0.25,
 ):
+    if selection_metric == "standard":
+        selection_metric = STANDARD_SELECTION_METRIC
+
     base_score = float(summary_row["paper_f1"])
     if selection_metric == "paper_f1":
         return base_score
 
+    def volume_penalty():
+        if max_mean_predicted_positive_voxels is None:
+            return 1.0
+        mean_predicted = max(float(summary_row["mean_predicted_positive_voxels"]), 1.0)
+        penalty = min(1.0, float(max_mean_predicted_positive_voxels) / mean_predicted)
+        return penalty ** float(volume_penalty_power)
+
+    def metric_value(name):
+        aliases = {
+            "f1": "paper_f1",
+            "pocket_f1": "paper_f1",
+            "dcc": "dcc_success_rate_4a",
+            "dcc4": "dcc_success_rate_4a",
+            "dca": "dca_success_rate_4a",
+            "dca4": "dca_success_rate_4a",
+            "dvo": "mean_dvo_dcc_success",
+            "dvo_success": "mean_dvo_dcc_success",
+            "dvo_all": "mean_dvo_all",
+            "pli": "mean_pli_dcc_success",
+            "pli_success": "mean_pli_dcc_success",
+            "pli_all": "mean_pli_all",
+            "voxel_f1": "voxel_f1",
+            "no_prediction_rate": "no_prediction_rate",
+            "predicted_rate": "predicted_rate",
+        }
+        canonical = aliases.get(str(name), str(name))
+        if canonical == "voxel_f1":
+            return float(voxel_f1)
+        sample_count = max(float(summary_row.get("sample_count", 0.0)), 1.0)
+        no_prediction_rate = float(summary_row.get("no_prediction_count", 0.0)) / sample_count
+        if canonical == "no_prediction_rate":
+            return no_prediction_rate
+        if canonical == "predicted_rate":
+            return 1.0 - no_prediction_rate
+        return float(summary_row.get(canonical, 0.0))
+
+    def apply_f1_guard(score):
+        if min_paper_f1 is not None and base_score < float(min_paper_f1):
+            return score * float(below_min_paper_f1_score_scale)
+        return score
+
     dvo_for_selection = float(summary_row.get("mean_dvo_dcc_success", summary_row.get("mean_dvo_all", 0.0)))
     score = base_score * (1.0 + float(dvo_weight) * dvo_for_selection)
     if selection_metric == "dcc_dvo":
-        return score
+        return apply_f1_guard(score)
     if selection_metric == "dcc_dvo_volume":
-        if max_mean_predicted_positive_voxels is None:
-            return score
-        mean_predicted = max(float(summary_row["mean_predicted_positive_voxels"]), 1.0)
-        volume_penalty = min(1.0, float(max_mean_predicted_positive_voxels) / mean_predicted)
-        return score * volume_penalty
-    if selection_metric == "dcc_voxel_dca_dvo_volume":
+        return apply_f1_guard(score * volume_penalty())
+    if selection_metric in {"dcc_voxel_dca_dvo_volume", "dcc_voxel_dca_dvo_pli_volume"}:
         dca_reward = float(dca_weight) * float(summary_row["dca_success_rate_4a"])
         dvo_reward = float(dvo_weight) * float(summary_row["mean_dvo_all"])
+        pli_reward = 0.0
+        if selection_metric == "dcc_voxel_dca_dvo_pli_volume":
+            pli_reward = float(pli_weight) * float(summary_row["mean_pli_dcc_success"])
         voxel_reward = float(voxel_f1_weight) * float(voxel_f1)
         dcc_gate = 1.0 if base_score > 0.0 else float(no_dcc_score_scale)
-        score = base_score + dcc_gate * (voxel_reward + dca_reward + dvo_reward)
-        if max_mean_predicted_positive_voxels is None:
-            return score
-        mean_predicted = max(float(summary_row["mean_predicted_positive_voxels"]), 1.0)
-        volume_penalty = min(1.0, float(max_mean_predicted_positive_voxels) / mean_predicted)
-        return score * volume_penalty
+        score = base_score + dcc_gate * (voxel_reward + dca_reward + dvo_reward + pli_reward)
+        return apply_f1_guard(score * volume_penalty())
+    if selection_metric == "weighted_sum":
+        weights = selection_weights or {"paper_f1": 1.0}
+        score = sum(float(weight) * metric_value(name) for name, weight in weights.items())
+        score -= float(no_prediction_weight) * metric_value("no_prediction_rate")
+        return apply_f1_guard(score * volume_penalty())
     raise ValueError(f"Unsupported paper metric selection_metric: {selection_metric}")
 
 
@@ -953,10 +1066,16 @@ def summarize_pocket_metrics(
     thresholds,
     selection_metric="paper_f1",
     selection_dvo_weight=5.0,
+    selection_pli_weight=0.0,
     selection_voxel_f1_weight=1.0,
     selection_dca_weight=0.25,
     selection_no_dcc_score_scale=0.05,
     selection_max_mean_predicted_positive_voxels=None,
+    selection_weights=None,
+    selection_no_prediction_weight=0.0,
+    selection_volume_penalty_power=1.0,
+    selection_min_paper_f1=None,
+    selection_below_min_paper_f1_score_scale=0.25,
     voxel_summary_by_threshold=None,
 ):
     voxel_summary_by_threshold = voxel_summary_by_threshold or {}
@@ -1038,11 +1157,17 @@ def summarize_pocket_metrics(
             summary_row,
             selection_metric=selection_metric,
             dvo_weight=selection_dvo_weight,
+            pli_weight=selection_pli_weight,
             voxel_f1=voxel_summary_by_threshold.get(threshold, {}).get("f1", 0.0),
             voxel_f1_weight=selection_voxel_f1_weight,
             dca_weight=selection_dca_weight,
             no_dcc_score_scale=selection_no_dcc_score_scale,
             max_mean_predicted_positive_voxels=selection_max_mean_predicted_positive_voxels,
+            selection_weights=selection_weights,
+            no_prediction_weight=selection_no_prediction_weight,
+            volume_penalty_power=selection_volume_penalty_power,
+            min_paper_f1=selection_min_paper_f1,
+            below_min_paper_f1_score_scale=selection_below_min_paper_f1_score_scale,
         )
         summaries.append(summary_row)
 

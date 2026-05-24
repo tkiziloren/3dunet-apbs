@@ -52,6 +52,7 @@ from utils.pocket_metrics import (
     evaluate_pocket_metrics_for_sample,
     evaluate_topk_metrics_for_sample,
     normalize_postprocess_mode,
+    resolve_selection_score_config,
     select_best_paper_summary,
     summarize_pocket_metrics,
     summarize_topk_pocket_metrics,
@@ -603,16 +604,24 @@ def main():
     )
     reference_pocket_count = int(paper_config.get("reference_pocket_count", 1))
     include_top_n_plus_2 = bool(paper_config.get("include_top_n_plus_2", True))
-    selection_metric = paper_config.get("selection_metric", "paper_f1")
-    selection_dvo_weight = float(paper_config.get("selection_dvo_weight", 5.0))
-    selection_voxel_f1_weight = float(paper_config.get("selection_voxel_f1_weight", 1.0))
-    selection_dca_weight = float(paper_config.get("selection_dca_weight", 0.25))
-    selection_no_dcc_score_scale = float(paper_config.get("selection_no_dcc_score_scale", 0.05))
-    selection_max_mean_predicted_positive_voxels = paper_config.get(
+    selection_config = resolve_selection_score_config(paper_config)
+    selection_profile = selection_config["selection_profile"]
+    selection_metric = selection_config["selection_metric"]
+    selection_dvo_weight = selection_config["selection_dvo_weight"]
+    selection_pli_weight = selection_config["selection_pli_weight"]
+    selection_voxel_f1_weight = selection_config["selection_voxel_f1_weight"]
+    selection_dca_weight = selection_config["selection_dca_weight"]
+    selection_no_dcc_score_scale = selection_config["selection_no_dcc_score_scale"]
+    selection_max_mean_predicted_positive_voxels = selection_config[
         "selection_max_mean_predicted_positive_voxels"
-    )
-    if selection_max_mean_predicted_positive_voxels is not None:
-        selection_max_mean_predicted_positive_voxels = float(selection_max_mean_predicted_positive_voxels)
+    ]
+    selection_weights = selection_config["selection_weights"]
+    selection_no_prediction_weight = selection_config["selection_no_prediction_weight"]
+    selection_volume_penalty_power = selection_config["selection_volume_penalty_power"]
+    selection_min_paper_f1 = selection_config["selection_min_paper_f1"]
+    selection_below_min_paper_f1_score_scale = selection_config[
+        "selection_below_min_paper_f1_score_scale"
+    ]
 
     logger.info("Validation voxel threshold: %.2f", threshold)
     logger.info("Validation threshold sweep: %s", threshold_sweep)
@@ -644,13 +653,18 @@ def main():
                 paper_metrics_start_epoch,
             )
         logger.info(
-            "Paper model selection: metric=%s, dvo_weight=%.2f, voxel_f1_weight=%.2f, dca_weight=%.2f, no_dcc_score_scale=%.2f, max_mean_predicted_positive_voxels=%s",
+            "Paper model selection: profile=%s, metric=%s, dvo_weight=%.2f, pli_weight=%.2f, voxel_f1_weight=%.2f, dca_weight=%.2f, no_dcc_score_scale=%.2f, max_mean_predicted_positive_voxels=%s, weights=%s, no_prediction_weight=%.2f, min_paper_f1=%s",
+            selection_profile,
             selection_metric,
             selection_dvo_weight,
+            selection_pli_weight,
             selection_voxel_f1_weight,
             selection_dca_weight,
             selection_no_dcc_score_scale,
             selection_max_mean_predicted_positive_voxels,
+            selection_weights,
+            selection_no_prediction_weight,
+            selection_min_paper_f1,
         )
 
     best_val_f1 = 0.0
@@ -1027,10 +1041,16 @@ def main():
                     threshold_sweep,
                     selection_metric=selection_metric,
                     selection_dvo_weight=selection_dvo_weight,
+                    selection_pli_weight=selection_pli_weight,
                     selection_voxel_f1_weight=selection_voxel_f1_weight,
                     selection_dca_weight=selection_dca_weight,
                     selection_no_dcc_score_scale=selection_no_dcc_score_scale,
                     selection_max_mean_predicted_positive_voxels=selection_max_mean_predicted_positive_voxels,
+                    selection_weights=selection_weights,
+                    selection_no_prediction_weight=selection_no_prediction_weight,
+                    selection_volume_penalty_power=selection_volume_penalty_power,
+                    selection_min_paper_f1=selection_min_paper_f1,
+                    selection_below_min_paper_f1_score_scale=selection_below_min_paper_f1_score_scale,
                     voxel_summary_by_threshold=sweep_rows_by_threshold,
                 )
                 postprocess_best_paper_stats = select_best_paper_summary(paper_summary_rows)
