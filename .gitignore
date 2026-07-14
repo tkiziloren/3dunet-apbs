@@ -104,6 +104,12 @@ dmypy.json
 # VS Code
 .vscode/
 
+# Local AI/agent workspace metadata
+AGENTS.md
+.agent-savepoint-id
+.codex/
+.claude/
+
 # macOS
 .DS_Store
 
@@ -144,6 +150,12 @@ run/
 3dunet_configurable/logs/
 3dunet_configurable/reports/
 3dunet_configurable/docs/
+
+# Local work-package helpers and personal command notes
+3dunet_configurable/tmp_scripts/
+3dunet_configurable/scripts/*work[0-9]*
+/commands.txt
+/3dunet_configurable/slurm/commands.txt
 
 # Graphify output
 graphify-out/
