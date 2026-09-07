@@ -12,30 +12,75 @@ from torch.utils.data import Dataset
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Default feature normalization ranges.
+# Per-voxel value ranges used to scale each channel into [0, 1] before training.
+#
+# Corrected 2026-09-07 after measuring the cached grids over 120 scPDB proteins.
+# Two defects were fixed:
+#   1. The atom channels were documented and clipped as binary occupancy, but at the
+#      2 A grid spacing they are per-voxel ATOM COUNTS (observed up to 5). Clipping
+#      them at 1.0 discarded local atom density.
+#   2. Several channels had no entry at all, so normalize_feature passed them through
+#      raw. That silently mixed scales - atomic_hyb spans 0-12 and atomic_heavydegree
+#      0-11, an order of magnitude above the channels that were being clipped to 1.
+# Runs before this date used the old ranges; feature comparisons across that boundary
+# are not directly comparable.
+ATOM_COUNT_RANGE = (0.0, 6.0)  # covers the observed maximum of 5 without clipping
+
 FEATURE_RANGES = {
     'electrostatic_grid': (-5.0, 5.0),  # kV
     'shape': (0.0, 1.0),  # Already normalized
     'hydrophobicity': (-4.5, 4.5),
-    'dist_to_ligand': (0.0, 80.0),  # Å
-    'dist_to_surface': (0.0, 80.0),  # Å
-    'vdw_signed_distance': (-2.5, 80.0),  # Å, negative inside vdW volume
+    'dist_to_ligand': (0.0, 80.0),  # A
+    'dist_to_surface': (0.0, 80.0),  # A
+    'vdw_signed_distance': (-2.5, 80.0),  # A, negative inside vdW volume
     'vdw_proximity_exp3': (0.0, 1.0),
     'protein_atom_count_10A': (0.0, 256.0),
     'protein_atom_density_10A': (0.0, 1.0),
     'electrostatic_positive_clip20': (0.0, 1.0),
     'electrostatic_negative_clip20': (0.0, 1.0),
-    # Atomic features are binary (0 or 1), no normalization needed
-    'atomic_N': (0.0, 1.0),
-    'atomic_O': (0.0, 1.0),
-    'atomic_C': (0.0, 1.0),
-    'atomic_P': (0.0, 1.0),
-    'atomic_S': (0.0, 1.0),
-    'atomic_donor': (0.0, 1.0),
-    'atomic_acceptor': (0.0, 1.0),
-    'atomic_hydrophobic': (0.0, 1.0),
-    'atomic_aromatic': (0.0, 1.0),
-    'atomic_halogen': (0.0, 1.0),
+    # Per-voxel atom counts, not binary occupancy (see note above).
+    'atomic_N': ATOM_COUNT_RANGE,
+    'atomic_O': ATOM_COUNT_RANGE,
+    'atomic_C': ATOM_COUNT_RANGE,
+    'atomic_P': ATOM_COUNT_RANGE,
+    'atomic_S': ATOM_COUNT_RANGE,
+    'atomic_B': ATOM_COUNT_RANGE,
+    'atomic_Se': ATOM_COUNT_RANGE,
+    'atomic_metal': ATOM_COUNT_RANGE,
+    'atomic_donor': ATOM_COUNT_RANGE,
+    'atomic_acceptor': ATOM_COUNT_RANGE,
+    'atomic_hydrophobic': ATOM_COUNT_RANGE,
+    'atomic_aromatic': ATOM_COUNT_RANGE,
+    'atomic_ring': ATOM_COUNT_RANGE,
+    'atomic_halogen': ATOM_COUNT_RANGE,
+    # Aggregated atom descriptors; these used to fall through unnormalized.
+    'atomic_hyb': (0.0, 12.0),
+    'atomic_heavydegree': (0.0, 12.0),
+    'atomic_heterodegree': (0.0, 4.0),
+    'atomic_molcode': (-5.0, 0.0),
+    'atomic_partialcharge': (-1.5, 1.5),
 }
+
+# APBS representations are produced pre-scaled by the cache builder. The signed and
+# surface-weighted variants land in roughly [-1.2, 1.0] and the minmax variants in
+# [0, 1], so they are normalised on a shared symmetric range rather than passed
+# through raw. Applies to both the v1 (ligand-proximal) and v2 (full-protein) families.
+for _prefix in ('electrostatic_grid_v1_ligand_proximal_chains_7A',
+                'electrostatic_grid_v2_full_protein'):
+    for _suffix, _range in (
+        ('full_signed150', (-1.5, 1.5)),
+        ('full_signed150_surface_weighted', (-1.5, 1.5)),
+        ('clip150_signed', (-1.5, 1.5)),
+        ('clip20_signed', (-1.5, 1.5)),
+        ('clip20_signed_surface_weighted', (-1.5, 1.5)),
+        ('clip5_minmax', (0.0, 1.0)),
+        ('clip10_minmax', (0.0, 1.0)),
+        ('clip20_minmax', (0.0, 1.0)),
+        ('positive_clip20', (0.0, 1.0)),
+        ('negative_clip20', (0.0, 1.0)),
+        ('gradient_magnitude_robust', (0.0, 1.0)),
+    ):
+        FEATURE_RANGES[f'{_prefix}_{_suffix}'] = _range
 METRIC_MASK_FALLBACK_GROUPS = ("auxiliary", "label", "labels", "masks")
 
 def normalize_feature(feature_array, feature_name, normalization_overrides=None):
