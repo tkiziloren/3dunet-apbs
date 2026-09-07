@@ -5,6 +5,7 @@ import numpy as np
 from scipy.ndimage import (
     binary_closing,
     binary_dilation,
+    binary_fill_holes,
     find_objects,
     generate_binary_structure,
     label as connected_components,
@@ -15,10 +16,21 @@ from scipy.spatial import cKDTree
 RAW_POSTPROCESS = "raw"
 KALASANTY_PURESNET_POSTPROCESS = "kalasanty_puresnet"
 PURESNET_DBSCAN_POSTPROCESS = "puresnet_dbscan"
+CUSTOM_RANK_POSTPROCESS = "custom_rank"
+CUSTOM_ADAPTIVE_THRESHOLD_POSTPROCESS = "custom_adaptive_threshold"
+CUSTOM_SEED_GROW_POSTPROCESS = "custom_seed_grow"
+CUSTOM_CLEANUP_POSTPROCESS = "custom_cleanup"
+CUSTOM_POSTPROCESS_MODES = {
+    CUSTOM_RANK_POSTPROCESS,
+    CUSTOM_ADAPTIVE_THRESHOLD_POSTPROCESS,
+    CUSTOM_SEED_GROW_POSTPROCESS,
+    CUSTOM_CLEANUP_POSTPROCESS,
+}
 SUPPORTED_POSTPROCESS_MODES = {
     RAW_POSTPROCESS,
     KALASANTY_PURESNET_POSTPROCESS,
     PURESNET_DBSCAN_POSTPROCESS,
+    *CUSTOM_POSTPROCESS_MODES,
 }
 
 PURESNET_DBSCAN_EPS_ANGSTROM = 5.5
@@ -301,6 +313,18 @@ def normalize_postprocess_mode(postprocess_mode):
         "puresnet_v2": PURESNET_DBSCAN_POSTPROCESS,
         "puresnetv2": PURESNET_DBSCAN_POSTPROCESS,
         "puresnet_v2_dbscan": PURESNET_DBSCAN_POSTPROCESS,
+        "custom_process": CUSTOM_RANK_POSTPROCESS,
+        "custom_apbs_geometry": CUSTOM_RANK_POSTPROCESS,
+        "custom_re_rank": CUSTOM_RANK_POSTPROCESS,
+        "custom_rerank": CUSTOM_RANK_POSTPROCESS,
+        "custom_rank": CUSTOM_RANK_POSTPROCESS,
+        "custom_adaptive": CUSTOM_ADAPTIVE_THRESHOLD_POSTPROCESS,
+        "custom_adaptive_threshold": CUSTOM_ADAPTIVE_THRESHOLD_POSTPROCESS,
+        "custom_seed_grow": CUSTOM_SEED_GROW_POSTPROCESS,
+        "custom_grow": CUSTOM_SEED_GROW_POSTPROCESS,
+        "custom_refine": CUSTOM_SEED_GROW_POSTPROCESS,
+        "custom_cleanup": CUSTOM_CLEANUP_POSTPROCESS,
+        "custom_split_cleanup": CUSTOM_CLEANUP_POSTPROCESS,
     }
     mode = aliases.get(str(postprocess_mode).strip().lower(), str(postprocess_mode).strip().lower())
     if mode not in SUPPORTED_POSTPROCESS_MODES:
@@ -341,10 +365,84 @@ def _minimum_component_voxels(min_component_voxels, min_component_volume_angstro
     return max(min_voxels, int(math.ceil(float(min_component_volume_angstrom3) / voxel_volume)))
 
 
+def _bounded01(values):
+    values = np.asarray(values, dtype=np.float32)
+    values = np.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0)
+    return np.clip(values, 0.0, 1.0)
+
+
+def _robust_abs01(values):
+    values = np.abs(np.nan_to_num(np.asarray(values, dtype=np.float32), nan=0.0, posinf=0.0, neginf=0.0))
+    positives = values[values > 0.0]
+    if positives.size == 0:
+        return np.zeros_like(values, dtype=np.float32)
+    scale = float(np.percentile(positives, 95.0))
+    if scale <= 1e-6:
+        scale = float(positives.max()) or 1.0
+    return np.clip(values / max(scale, 1e-6), 0.0, 1.0).astype(np.float32, copy=False)
+
+
+def _custom_feature_support(feature_volume=None, feature_names=None):
+    if feature_volume is None or not feature_names:
+        return None
+
+    feature_volume = np.asarray(feature_volume)
+    feature_names = list(feature_names)
+    if feature_volume.ndim != 4 or feature_volume.shape[0] != len(feature_names):
+        return None
+
+    weighted_maps = []
+
+    def add_maps(predicate, transform, weight):
+        selected = [
+            transform(feature_volume[idx])
+            for idx, name in enumerate(feature_names)
+            if predicate(str(name).lower())
+        ]
+        if selected:
+            weighted_maps.append((float(weight), np.mean(selected, axis=0).astype(np.float32, copy=False)))
+
+    add_maps(
+        lambda name: "electrostatic" in name or "apbs" in name,
+        _robust_abs01,
+        0.30,
+    )
+    add_maps(
+        lambda name: "protein_proximity" in name or "vdw_proximity" in name or "density" in name,
+        _bounded01,
+        0.30,
+    )
+    add_maps(
+        lambda name: name == "dist_to_surface",
+        lambda values: 1.0 - _bounded01(values),
+        0.25,
+    )
+    add_maps(
+        lambda name: name == "vdw_signed_distance",
+        lambda values: 1.0 - _bounded01(values),
+        0.20,
+    )
+    add_maps(
+        lambda name: name in {"atomic_hydrophobic", "atomic_c", "shape"},
+        _bounded01,
+        0.10,
+    )
+
+    if not weighted_maps:
+        return None
+
+    total_weight = sum(weight for weight, _ in weighted_maps)
+    support = sum(weight * values for weight, values in weighted_maps) / max(total_weight, 1e-6)
+    return np.clip(support, 0.0, 1.0).astype(np.float32, copy=False)
+
+
 def _postprocess_mask(
     pred_mask,
     postprocess_mode,
     structure,
+    probabilities=None,
+    threshold=None,
+    feature_support=None,
 ):
     if postprocess_mode == RAW_POSTPROCESS:
         return pred_mask
@@ -353,6 +451,33 @@ def _postprocess_mask(
         return _clear_border(closed, structure=structure)
     if postprocess_mode == PURESNET_DBSCAN_POSTPROCESS:
         return pred_mask
+    if postprocess_mode == CUSTOM_RANK_POSTPROCESS:
+        return pred_mask
+    if postprocess_mode == CUSTOM_ADAPTIVE_THRESHOLD_POSTPROCESS:
+        if probabilities is None or threshold is None or feature_support is None:
+            return pred_mask
+        adaptive_threshold = float(threshold) + 0.04 - (0.12 * feature_support)
+        return np.asarray(probabilities) > adaptive_threshold
+    if postprocess_mode == CUSTOM_SEED_GROW_POSTPROCESS:
+        if probabilities is None:
+            return pred_mask
+        probabilities = np.asarray(probabilities)
+        threshold = float(0.5 if threshold is None else threshold)
+        support = np.ones_like(probabilities, dtype=np.float32) if feature_support is None else feature_support
+        seed_threshold = min(0.95, max(threshold + 0.15, threshold * 1.25))
+        grow_threshold = max(0.02, threshold - 0.12)
+        seed_mask = probabilities > seed_threshold
+        if not seed_mask.any():
+            seed_mask = pred_mask
+        grow_domain = (probabilities > grow_threshold) & ((support >= 0.35) | pred_mask)
+        grown = seed_mask.copy()
+        for _ in range(2):
+            grown = binary_dilation(grown, structure=structure) & grow_domain
+        return grown | seed_mask
+    if postprocess_mode == CUSTOM_CLEANUP_POSTPROCESS:
+        cleaned = binary_closing(pred_mask, structure=structure)
+        cleaned = binary_fill_holes(cleaned)
+        return cleaned
     raise ValueError(f"Unsupported pocket postprocess mode: {postprocess_mode}")
 
 
@@ -422,6 +547,8 @@ def _components_from_labeled(
     predicted_positive_voxels,
     minimum_voxels,
     max_components,
+    postprocess_mode=RAW_POSTPROCESS,
+    feature_support=None,
 ):
     if predicted_positive_voxels == 0 or component_count == 0:
         return [], int(component_count), int(predicted_positive_voxels), labeled
@@ -441,6 +568,19 @@ def _components_from_labeled(
         local_probabilities = probabilities[component_slice]
         score_sum = float(local_probabilities[local_mask].sum())
         score_mean = float(local_probabilities[local_mask].mean()) if voxel_count else 0.0
+        sort_score = score_sum
+        if postprocess_mode in CUSTOM_POSTPROCESS_MODES and feature_support is not None:
+            local_support = feature_support[component_slice]
+            support_mean = float(local_support[local_mask].mean()) if voxel_count else 0.0
+            bbox_volume = int(np.prod(local_mask.shape))
+            compactness = min(1.0, float(voxel_count) / max(float(bbox_volume), 1.0) * 3.0)
+            volume_score = min(1.0, math.sqrt(float(voxel_count) / 800.0))
+            sort_score = (
+                (0.55 * score_mean)
+                + (0.25 * support_mean)
+                + (0.15 * volume_score)
+                + (0.05 * compactness)
+            ) * math.log1p(float(voxel_count))
         local_coords = np.argwhere(local_mask)
         offset = np.asarray([axis_slice.start for axis_slice in component_slice], dtype=np.float64)
         center = local_coords.mean(axis=0) + offset
@@ -450,11 +590,12 @@ def _components_from_labeled(
                 "voxel_count": voxel_count,
                 "score_sum": score_sum,
                 "score_mean": score_mean,
+                "sort_score": sort_score,
                 "center": center,
             }
         )
 
-    components.sort(key=lambda item: (item["score_sum"], item["voxel_count"]), reverse=True)
+    components.sort(key=lambda item: (item["sort_score"], item["score_sum"], item["voxel_count"]), reverse=True)
     return components[:max_components], int(component_count), int(predicted_positive_voxels), labeled
 
 
@@ -466,11 +607,24 @@ def extract_components(
     postprocess_mode=RAW_POSTPROCESS,
     resolution=1.0,
     min_component_volume_angstrom3=None,
+    feature_volume=None,
+    feature_names=None,
+    feature_support=None,
 ):
     postprocess_mode = normalize_postprocess_mode(postprocess_mode)
+    probabilities = np.asarray(probabilities)
+    if feature_support is None and postprocess_mode in CUSTOM_POSTPROCESS_MODES:
+        feature_support = _custom_feature_support(feature_volume, feature_names)
     pred_mask = np.asarray(probabilities) > threshold
     structure = generate_binary_structure(rank=3, connectivity=3)
-    pred_mask = _postprocess_mask(pred_mask, postprocess_mode, structure=structure)
+    pred_mask = _postprocess_mask(
+        pred_mask,
+        postprocess_mode,
+        structure=structure,
+        probabilities=probabilities,
+        threshold=threshold,
+        feature_support=feature_support,
+    )
     minimum_voxels = _minimum_component_voxels(
         min_component_voxels,
         min_component_volume_angstrom3,
@@ -491,6 +645,8 @@ def extract_components(
         predicted_positive_voxels,
         minimum_voxels,
         max_components,
+        postprocess_mode=postprocess_mode,
+        feature_support=feature_support,
     )
 
 
@@ -571,6 +727,8 @@ def evaluate_pocket_metrics_for_sample(
     postprocess_mode=RAW_POSTPROCESS,
     top_k_values=(1, 3),
     dcc_reference="label_center",
+    feature_volume=None,
+    feature_names=None,
 ):
     postprocess_mode = normalize_postprocess_mode(postprocess_mode)
     probabilities = np.asarray(probabilities, dtype=np.float32)
@@ -579,6 +737,11 @@ def evaluate_pocket_metrics_for_sample(
     resolution = float(resolution)
     max_distance_angstrom = float(max_distance_angstrom)
     max_components = max(top_k_values) if top_k_values else 1
+    feature_support = (
+        _custom_feature_support(feature_volume, feature_names)
+        if postprocess_mode in CUSTOM_POSTPROCESS_MODES
+        else None
+    )
 
     label_center, _ = center_of_mask(label_mask)
     ligand_center, ligand_coords = center_of_mask(ligand_mask) if ligand_mask is not None else (None, None)
@@ -598,6 +761,9 @@ def evaluate_pocket_metrics_for_sample(
             postprocess_mode=postprocess_mode,
             resolution=resolution,
             min_component_volume_angstrom3=min_component_volume_angstrom3,
+            feature_volume=feature_volume,
+            feature_names=feature_names,
+            feature_support=feature_support,
         )
         top_component = components[0] if components else None
         top_component_mask = _component_mask(labeled, top_component["component_id"]) if top_component else None
@@ -690,6 +856,8 @@ def evaluate_topk_metrics_for_sample(
     reference_pocket_count=1,
     include_top_n_plus_2=True,
     dcc_reference="label_center",
+    feature_volume=None,
+    feature_names=None,
 ):
     postprocess_mode = normalize_postprocess_mode(postprocess_mode)
     probabilities = np.asarray(probabilities, dtype=np.float32)
@@ -704,6 +872,11 @@ def evaluate_topk_metrics_for_sample(
         top_k_specs.append(("top_n_plus_2", reference_pocket_count + 2))
 
     max_components = max((top_k for _, top_k in top_k_specs), default=1)
+    feature_support = (
+        _custom_feature_support(feature_volume, feature_names)
+        if postprocess_mode in CUSTOM_POSTPROCESS_MODES
+        else None
+    )
     label_center, _ = center_of_mask(label_mask)
     ligand_center, ligand_coords = center_of_mask(ligand_mask) if ligand_mask is not None else (None, None)
     dcc_reference_center, dcc_reference_label = _resolve_dcc_reference(
@@ -724,6 +897,9 @@ def evaluate_topk_metrics_for_sample(
             postprocess_mode=postprocess_mode,
             resolution=resolution,
             min_component_volume_angstrom3=min_component_volume_angstrom3,
+            feature_volume=feature_volume,
+            feature_names=feature_names,
+            feature_support=feature_support,
         )
 
         ranked_components = []

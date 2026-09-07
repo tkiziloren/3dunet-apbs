@@ -24,6 +24,7 @@ from utils.pocket_metrics import (
     evaluate_pocket_metrics_for_sample,
     evaluate_topk_metrics_for_sample,
     normalize_postprocess_mode,
+    resolve_selection_score_config,
     select_best_paper_summary,
     summarize_pocket_metrics,
     summarize_topk_pocket_metrics,
@@ -77,6 +78,11 @@ def parse_args():
         required=True,
         help="Run root containing run_name/config_snapshot.yml folders. Repeatable.",
     )
+    parser.add_argument(
+        "--run-name-file",
+        default="",
+        help="Optional file containing one run directory name per line; limits re-evaluation to those runs.",
+    )
     parser.add_argument("--output-dir", required=True)
     parser.add_argument(
         "--checkpoint-name",
@@ -95,6 +101,11 @@ def parse_args():
     )
     parser.add_argument("--dcc-reference", default="label_center")
     parser.add_argument("--top-k", default="1,2,3")
+    parser.add_argument(
+        "--thresholds",
+        default="",
+        help="Comma-separated thresholds to evaluate. Default: config threshold_sweep plus fixed threshold.",
+    )
     parser.add_argument("--disable-topk", action="store_true")
     parser.add_argument("--reference-pocket-count", type=int, default=1)
     parser.add_argument("--no-top-n-plus-2", action="store_true")
@@ -104,6 +115,20 @@ def parse_args():
 
 def parse_csv_items(value):
     return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def load_run_name_filter(path_value):
+    if not path_value:
+        return None
+    names = set()
+    path = Path(path_value)
+    with path.open() as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            names.update(parse_csv_items(line))
+    return names
 
 
 def choose_device(requested):
@@ -248,12 +273,15 @@ def evaluate_run(run, args, device):
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=args.num_workers)
     model = make_model(run, config, device)
 
-    fixed_threshold = float(validation_config.get("threshold", 0.5))
-    threshold_sweep = validation_config.get(
-        "threshold_sweep",
-        [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-    )
-    thresholds = sorted({float(value) for value in [*threshold_sweep, fixed_threshold]})
+    if args.thresholds:
+        thresholds = sorted({float(value) for value in parse_csv_items(args.thresholds)})
+    else:
+        fixed_threshold = float(validation_config.get("threshold", 0.5))
+        threshold_sweep = validation_config.get(
+            "threshold_sweep",
+            [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        )
+        thresholds = sorted({float(value) for value in [*threshold_sweep, fixed_threshold]})
     postprocess_modes = resolve_postprocess_modes(paper_config, args.postprocess_modes)
     top_k_values = tuple(sorted({int(item) for item in parse_csv_items(args.top_k)}))
 
@@ -261,16 +289,7 @@ def evaluate_run(run, args, device):
     dca_cutoff = float(paper_config.get("dca_cutoff_angstrom", 4.0))
     min_component_voxels = int(paper_config.get("min_component_voxels", 5))
     min_component_volume = paper_config.get("min_component_volume_angstrom3", 50.0)
-    selection_metric = paper_config.get("selection_metric", "paper_f1")
-    selection_dvo_weight = float(paper_config.get("selection_dvo_weight", 5.0))
-    selection_voxel_f1_weight = float(paper_config.get("selection_voxel_f1_weight", 1.0))
-    selection_dca_weight = float(paper_config.get("selection_dca_weight", 0.25))
-    selection_no_dcc_score_scale = float(paper_config.get("selection_no_dcc_score_scale", 0.05))
-    selection_max_mean_predicted_positive_voxels = paper_config.get(
-        "selection_max_mean_predicted_positive_voxels"
-    )
-    if selection_max_mean_predicted_positive_voxels is not None:
-        selection_max_mean_predicted_positive_voxels = float(selection_max_mean_predicted_positive_voxels)
+    selection_config = resolve_selection_score_config(paper_config)
 
     context = {
         "run_root": str(run["run_root"]),
@@ -288,8 +307,10 @@ def evaluate_run(run, args, device):
     topk_component_rows_by_postprocess = {mode: [] for mode in postprocess_modes}
 
     sample_offset = 0
+    feature_names = list(getattr(dataset, "feature_names", []))
     with torch.no_grad():
         for batch_idx, (protein, label) in enumerate(loader, start=1):
+            feature_batch = protein.detach().cpu().numpy()
             protein = protein.to(device)
             probabilities = torch.sigmoid(model(protein).squeeze(1)).detach().cpu().numpy()
             targets = label.detach().cpu().numpy()
@@ -307,7 +328,8 @@ def evaluate_run(run, args, device):
                 for postprocess_mode in postprocess_modes:
                     mode_min_component_volume = (
                         float(min_component_volume)
-                        if min_component_volume is not None and postprocess_mode != "raw"
+                        if min_component_volume is not None
+                        and postprocess_mode not in {"raw", "custom_rank"}
                         else None
                     )
                     paper_rows = evaluate_pocket_metrics_for_sample(
@@ -325,6 +347,8 @@ def evaluate_run(run, args, device):
                         postprocess_mode=postprocess_mode,
                         top_k_values=top_k_values,
                         dcc_reference=args.dcc_reference,
+                        feature_volume=feature_batch[sample_idx],
+                        feature_names=feature_names,
                     )
                     paper_rows_by_postprocess[postprocess_mode].extend(
                         {**context, "postprocess_mode": postprocess_mode, "epoch": "reeval", **row}
@@ -349,6 +373,8 @@ def evaluate_run(run, args, device):
                             reference_pocket_count=args.reference_pocket_count,
                             include_top_n_plus_2=not args.no_top_n_plus_2,
                             dcc_reference=args.dcc_reference,
+                            feature_volume=feature_batch[sample_idx],
+                            feature_names=feature_names,
                         )
                         topk_context = {
                             "run_root": str(run["run_root"]),
@@ -396,12 +422,22 @@ def evaluate_run(run, args, device):
         summaries = summarize_pocket_metrics(
             paper_rows_by_postprocess[postprocess_mode],
             thresholds,
-            selection_metric=selection_metric,
-            selection_dvo_weight=selection_dvo_weight,
-            selection_voxel_f1_weight=selection_voxel_f1_weight,
-            selection_dca_weight=selection_dca_weight,
-            selection_no_dcc_score_scale=selection_no_dcc_score_scale,
-            selection_max_mean_predicted_positive_voxels=selection_max_mean_predicted_positive_voxels,
+            selection_metric=selection_config["selection_metric"],
+            selection_dvo_weight=selection_config["selection_dvo_weight"],
+            selection_pli_weight=selection_config["selection_pli_weight"],
+            selection_voxel_f1_weight=selection_config["selection_voxel_f1_weight"],
+            selection_dca_weight=selection_config["selection_dca_weight"],
+            selection_no_dcc_score_scale=selection_config["selection_no_dcc_score_scale"],
+            selection_max_mean_predicted_positive_voxels=selection_config[
+                "selection_max_mean_predicted_positive_voxels"
+            ],
+            selection_weights=selection_config["selection_weights"],
+            selection_no_prediction_weight=selection_config["selection_no_prediction_weight"],
+            selection_volume_penalty_power=selection_config["selection_volume_penalty_power"],
+            selection_min_paper_f1=selection_config["selection_min_paper_f1"],
+            selection_below_min_paper_f1_score_scale=selection_config[
+                "selection_below_min_paper_f1_score_scale"
+            ],
             voxel_summary_by_threshold=voxel_summary_by_threshold,
         )
         summaries = [{**context, "postprocess_mode": postprocess_mode, "epoch": "reeval", **row} for row in summaries]
@@ -459,6 +495,18 @@ def main():
         write_header(topk_component_path, TOPK_EXTRA_FIELDNAMES + POCKET_TOPK_COMPONENT_FIELDNAMES)
 
     runs = discover_runs(args.runs_root, args.checkpoint_name, args.base_features)
+    run_name_filter = load_run_name_filter(args.run_name_file)
+    if run_name_filter:
+        discovered_count = len(runs)
+        runs = [run for run in runs if run["run"] in run_name_filter]
+        missing = sorted(run_name_filter.difference({run["run"] for run in runs}))
+        logging.info(
+            "Run-name filter: %d/%d discovered runs selected",
+            len(runs),
+            discovered_count,
+        )
+        if missing:
+            logging.warning("Missing requested runs: %s", ", ".join(missing[:20]))
     if args.limit_runs:
         runs = runs[: args.limit_runs]
     if not runs:

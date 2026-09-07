@@ -18,6 +18,10 @@ FEATURE_RANGES = {
     'hydrophobicity': (-4.5, 4.5),
     'dist_to_ligand': (0.0, 80.0),  # Å
     'dist_to_surface': (0.0, 80.0),  # Å
+    'vdw_signed_distance': (-2.5, 80.0),  # Å, negative inside vdW volume
+    'vdw_proximity_exp3': (0.0, 1.0),
+    'protein_atom_count_10A': (0.0, 256.0),
+    'protein_atom_density_10A': (0.0, 1.0),
     'electrostatic_positive_clip20': (0.0, 1.0),
     'electrostatic_negative_clip20': (0.0, 1.0),
     # Atomic features are binary (0 or 1), no normalization needed
