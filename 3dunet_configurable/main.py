@@ -1053,7 +1053,19 @@ def main():
                     selection_below_min_paper_f1_score_scale=selection_below_min_paper_f1_score_scale,
                     voxel_summary_by_threshold=sweep_rows_by_threshold,
                 )
-                postprocess_best_paper_stats = select_best_paper_summary(paper_summary_rows)
+                # Optional pre-registered operating point: restrict checkpoint/threshold selection to one
+                # threshold (validation.paper_metrics.selection_fixed_threshold). Logging still covers the
+                # full sweep; only the selection is pinned, so the reported threshold is not tuned on validation.
+                selection_rows = paper_summary_rows
+                fixed_selection_threshold = paper_config.get("selection_fixed_threshold")
+                if fixed_selection_threshold is not None:
+                    matching_rows = [
+                        row for row in paper_summary_rows
+                        if abs(float(row["threshold"]) - float(fixed_selection_threshold)) < 1e-9
+                    ]
+                    if matching_rows:
+                        selection_rows = matching_rows
+                postprocess_best_paper_stats = select_best_paper_summary(selection_rows)
                 postprocess_primary_paper_stats = next(
                     (row for row in paper_summary_rows if abs(row["threshold"] - threshold) < 1e-9),
                     None,
