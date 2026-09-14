@@ -42,7 +42,7 @@ from models.UNet3D4LC import UNet3D4LC
 from models.UNet3D4LStrided import UNet3D4LAStrided, UNet3D4LStrided
 from models.UNet3D5L import UNet3D5L
 from models.UNet3D6L import UNet3D6L
-from transforms import CustomCompose, MonaiWrapper, RandomFlip, RandomRotate3D, Standardize
+from transforms import CustomCompose, MonaiWrapper, RandomChannelDropout, RandomFlip, RandomRotate3D, Standardize
 from utils.configuration import create_output_dirs, load_config, parse_args, setup_logger
 from utils.pocket_metrics import (
     POCKET_PER_PROTEIN_FIELDNAMES,
@@ -446,6 +446,10 @@ def build_transforms(config, training):
 
     if standardize_enabled:
         transforms.append(Standardize(channel_wise=channel_wise))
+    dropout_config = augmentation.get("channel_dropout") or {}
+    if training and bool(augmentation.get("enabled", True)) and dropout_config:
+        indices = [config["features"].index(name) for name in dropout_config.get("features", [])]
+        transforms.append(RandomChannelDropout(indices, prob=float(dropout_config.get("prob", 0.5))))
     return CustomCompose(transforms)
 
 

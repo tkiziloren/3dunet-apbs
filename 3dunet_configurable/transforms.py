@@ -89,3 +89,22 @@ class Standardize:
         else:
             protein = (protein - protein.mean()) / (protein.std() + self.eps)
         return protein, label
+
+
+class RandomChannelDropout:
+    """With probability ``prob``, zero the given input channels for one training sample.
+
+    Applied after standardisation, a zeroed channel equals the sample mean and carries no spatial
+    information, which forces the network to also learn from the channels that remain.
+    """
+
+    def __init__(self, channel_indices, prob=0.5):
+        self.channel_indices = list(channel_indices)
+        self.prob = float(prob)
+
+    def __call__(self, protein, label):
+        if self.channel_indices and torch.rand(1).item() < self.prob:
+            protein = protein.clone()
+            protein[self.channel_indices] = 0.0
+        return protein, label
+
