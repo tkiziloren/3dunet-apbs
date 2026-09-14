@@ -530,6 +530,7 @@ def main():
         num_workers=num_workers,
         worker_init_fn=worker_init_fn,
         generator=train_generator,
+        drop_last=bool(config["training"].get("drop_last", False)),
     )
     validation_loader = DataLoader(
         validation_dataset,
