@@ -16,6 +16,7 @@ from models.ConvNeXt3DV2 import ConvNeXt3DV2
 from models.LiteratureModels3D import (
     KalasantyUNet3D,
     PUResNetV1Like3D,
+    PUResNetV1Faithful3D,
     PUResNetV2DenseLike3D,
     SwinSiteLike3D,
 )
@@ -83,6 +84,7 @@ MODEL_DICT = {
     "ResNet3D5L": ResNet3D5L,
     "ResNet3D6L": ResNet3D6L,
     "PUResNetV1Like3D": PUResNetV1Like3D,
+    "PUResNetV1Faithful3D": PUResNetV1Faithful3D,
     "PUResNetV2DenseLike3D": PUResNetV2DenseLike3D,
     "KalasantyUNet3D": KalasantyUNet3D,
     "SwinSiteLike3D": SwinSiteLike3D,

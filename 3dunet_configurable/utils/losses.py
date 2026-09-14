@@ -228,3 +228,18 @@ def flatten(tensor):
     transposed = tensor.permute(axis_order)
     # Flatten: (C, N, D, H, W) -> (C, N * D * H * W)
     return transposed.contiguous().view(C, -1)
+
+
+class SoftDiceLoss(nn.Module):
+    """Pure soft Dice on sigmoid(logits), as in PUResNet/Kalasanty training (no BCE term)."""
+
+    def __init__(self, smooth=1.0):
+        super().__init__()
+        self.smooth = smooth
+
+    def forward(self, inputs, targets):
+        probs = torch.sigmoid(inputs.to(torch.float32)).reshape(-1)
+        targets = targets.to(torch.float32).reshape(-1)
+        intersection = (probs * targets).sum()
+        return 1 - (2.0 * intersection + self.smooth) / (probs.sum() + targets.sum() + self.smooth)
+

@@ -341,3 +341,65 @@ class SwinSiteLike3D(nn.Module):
         x = self.dec2(x, e2)
         x = self.dec1(x, e1)
         return self.final_conv(x)
+
+
+class PUResNetV1Faithful3D(nn.Module):
+    """Faithful port of PUResNet v1 (Kandel et al. 2021, Keras ResNet.py).
+
+    Biased convolutions, Keras BatchNorm constants (eps 1e-3, momentum 0.99), nearest upsampling, a projection
+    shortcut in every conv/up block, and the Keras wiring quirk: the last identity block of stages 2/4/5/6 feeds
+    only the skip connection while the next stage continues from the previous block. Layer names mirror Keras so
+    released weights can be imported 1:1. Returns logits (Keras applies sigmoid in the last layer).
+    13,840,903 parameters for 18 input channels and base_features=18. ``dropout`` is accepted and ignored.
+    """
+
+    def __init__(self, in_channels=18, out_channels=1, base_features=18, dropout=0.0):
+        super().__init__()
+        f = base_features
+        self.L = nn.ModuleDict()
+
+        def block(name, cin, cout, stride=1, shortcut=False):
+            for suffix, k, ci, s in (("2a", 1, cin, stride), ("2b", 3, cout, 1), ("2c", 1, cout, 1)):
+                self.L[f"res{name}_branch{suffix}"] = nn.Conv3d(ci, cout, k, stride=s, padding=k // 2)
+                self.L[f"bn{name}_branch{suffix}"] = nn.BatchNorm3d(cout, eps=1e-3, momentum=0.01)
+            if shortcut:
+                self.L[f"res{name}_branch1"] = nn.Conv3d(cin, cout, 1, stride=stride)
+                self.L[f"bn{name}_branch1"] = nn.BatchNorm3d(cout, eps=1e-3, momentum=0.01)
+
+        block("2a", in_channels, f, 1, True); block("2b", f, f); block("2c", f, f)
+        block("4a", f, 2 * f, 2, True); block("4b", 2 * f, 2 * f); block("4f", 2 * f, 2 * f)
+        block("5a", 2 * f, 4 * f, 2, True); block("5b", 4 * f, 4 * f); block("5c", 4 * f, 4 * f)
+        block("6a", 4 * f, 8 * f, 3, True); block("6b", 8 * f, 8 * f); block("6c", 8 * f, 8 * f)
+        block("7a", 8 * f, 16 * f, 3, True); block("7b", 16 * f, 16 * f)
+        block("8a", 16 * f, 16 * f, 1, True); block("8b", 16 * f, 16 * f)
+        block("9a", 24 * f, 8 * f, 1, True); block("9b", 8 * f, 8 * f)
+        block("10a", 12 * f, 4 * f, 1, True); block("10b", 4 * f, 4 * f)
+        block("11a", 6 * f, 2 * f, 1, True); block("11b", 2 * f, 2 * f)
+        self.L["pocket"] = nn.Conv3d(3 * f, out_channels, 1)
+
+    def _cbr(self, name, x, relu=True):
+        x = self.L[f"bn{name}"](self.L[f"res{name}"](x))
+        return F.relu(x) if relu else x
+
+    def _block(self, name, x, shortcut=False, up=1):
+        if up > 1:
+            x = F.interpolate(x, scale_factor=up, mode="nearest")
+        y = self._cbr(f"{name}_branch2a", x)
+        y = self._cbr(f"{name}_branch2b", y)
+        y = self._cbr(f"{name}_branch2c", y, relu=False)
+        s = self._cbr(f"{name}_branch1", x, relu=False) if shortcut else x
+        return F.relu(y + s)
+
+    def forward(self, x):
+        b = self._block
+        x = b("2a", x, True); x = b("2b", x); x1 = b("2c", x)
+        x = b("4a", x, True); x = b("4b", x); x2 = b("4f", x)
+        x = b("5a", x, True); x = b("5b", x); x3 = b("5c", x)
+        x = b("6a", x, True); x = b("6b", x); x4 = b("6c", x)
+        x = b("7a", x, True); x = b("7b", x)
+        x = torch.cat([b("8b", b("8a", x, True, up=3)), x4], 1)
+        x = torch.cat([b("9b", b("9a", x, True, up=3)), x3], 1)
+        x = torch.cat([b("10b", b("10a", x, True, up=2)), x2], 1)
+        x = torch.cat([b("11b", b("11a", x, True, up=2)), x1], 1)
+        return self.L["pocket"](x)
+

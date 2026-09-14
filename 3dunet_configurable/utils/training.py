@@ -6,7 +6,7 @@ import torch.optim as optim
 from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
 from torchmetrics.classification import F1Score, Precision, Recall, ConfusionMatrix
 
-from .losses import BCEDiceLoss, BCEFocalTverskyLoss
+from .losses import BCEDiceLoss, BCEFocalTverskyLoss, SoftDiceLoss
 
 
 def set_reproducibility(seed):
@@ -124,6 +124,8 @@ def get_loss_function(loss_config, device):
             smooth=loss_config.get("smooth", 1.0),
             pos_weight=torch.tensor([loss_config.get("pos_weight", 1.0)]).to(device),
         )
+    elif loss_type == "DiceLoss":
+        return SoftDiceLoss(smooth=loss_config.get("smooth", 1.0))
     elif loss_type == "CrossEntropyLoss":
         return torch.nn.CrossEntropyLoss()
     elif loss_type == "MSELoss":
