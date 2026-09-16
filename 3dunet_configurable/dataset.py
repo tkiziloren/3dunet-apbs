@@ -85,10 +85,15 @@ for _prefix in ('electrostatic_grid_v1_ligand_proximal_chains_7A',
 # PARSE + PROPKA with nonlinear Poisson-Boltzmann at 0.15 M (v3b), and a signed log1p transform of the v2 potential
 # (sign(phi) * log1p(|phi|) / 6). All are pre-scaled by the cache builder to roughly [-1.2, 1.2].
 for _name in ('electrostatic_grid_v2scr_full_protein_full_signed150',
+              'electrostatic_grid_v2flip_full_protein_full_signed150',
+              'electrostatic_grid_v2type_full_protein_full_signed150',
               'electrostatic_grid_v3a_full_protein_full_signed150',
               'electrostatic_grid_v3b_full_protein_full_signed150',
               'electrostatic_grid_v2_full_protein_signed_log1p'):
     FEATURE_RANGES[_name] = (-1.5, 1.5)
+
+# Classical prior: P2Rank per-residue ligandability probability voxelised onto the grid.
+FEATURE_RANGES['p2rank_prior'] = (0.0, 1.0)
 METRIC_MASK_FALLBACK_GROUPS = ("auxiliary", "label", "labels", "masks")
 
 def normalize_feature(feature_array, feature_name, normalization_overrides=None):
