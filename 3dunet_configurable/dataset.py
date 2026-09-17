@@ -87,6 +87,7 @@ for _prefix in ('electrostatic_grid_v1_ligand_proximal_chains_7A',
 for _name in ('electrostatic_grid_v2scr_full_protein_full_signed150',
               'electrostatic_grid_v2flip_full_protein_full_signed150',
               'electrostatic_grid_v2type_full_protein_full_signed150',
+              'electrostatic_grid_v2unif_full_protein_full_signed150',
               'electrostatic_grid_v3a_full_protein_full_signed150',
               'electrostatic_grid_v3b_full_protein_full_signed150',
               'electrostatic_grid_v2_full_protein_signed_log1p'):
