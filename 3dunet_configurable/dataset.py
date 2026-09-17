@@ -170,6 +170,9 @@ class ProteinLigandDatasetWithH5(Dataset):
         config = load_config(config_path)
         self.feature_names = config.get("features", ["electrostatic_grid", "shape"])
         self.label_name = config.get("label", "binding_site")
+        # Optional binary dilation of the target (in voxels, 6-connectivity). Used for the 1 A grid, where cavity
+        # labels fragment into pieces without one voxel of dilation.
+        self.label_dilation = int(config.get("label_dilation_voxels", 0) or 0)
         self.feature_normalization = config.get("feature_normalization", {})
         self.samples = self._load_samples()
         print(f"Loaded {len(self.samples)} samples")
@@ -208,6 +211,12 @@ class ProteinLigandDatasetWithH5(Dataset):
                 pocket_label = torch.tensor(h5f[self.label_name][:], dtype=torch.float32)
             else:
                 raise KeyError(f"Label '{self.label_name}' not found in H5 file {h5_filepath}")
+
+        if self.label_dilation > 0:
+            from scipy import ndimage
+            dilated = ndimage.binary_dilation(pocket_label.numpy() > 0, structure=ndimage.generate_binary_structure(3, 1),
+                                              iterations=self.label_dilation)
+            pocket_label = torch.from_numpy(dilated.astype(np.float32))
 
         # Transform varsa uygula
         if self.transform:
