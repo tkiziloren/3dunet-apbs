@@ -554,6 +554,15 @@ def main():
         device=device,
         logger=logger,
     )
+    init_weights = config.get("init_weights")
+    if init_weights:
+        # Optional warm start (e.g. physics pre-training): load a state dict, tolerate missing/unexpected keys.
+        state = torch.load(init_weights, map_location=device)
+        if isinstance(state, dict) and "state_dict" in state:
+            state = state["state_dict"]
+        state = {key.removeprefix("module."): value for key, value in state.items()}
+        missing, unexpected = model.load_state_dict(state, strict=False)
+        logger.info("Initialised weights from %s (missing %d, unexpected %d keys)", init_weights, len(missing), len(unexpected))
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
